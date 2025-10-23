@@ -1,0 +1,3 @@
+{
+  "session-start": "./hooks/session-start.sh"
+}
