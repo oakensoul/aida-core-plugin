@@ -1,0 +1,11 @@
+{
+  "name": "aida-core",
+  "description": "Core AIDA functionality - memory, knowledge, and context management",
+  "version": "0.1.0",
+  "author": {
+    "name": "oakensoul",
+    "email": "oakensoul@users.noreply.github.com"
+  },
+  "tags": ["core", "memory", "knowledge", "essential"],
+  "repository": "https://github.com/oakensoul/aida-core-plugin"
+}
