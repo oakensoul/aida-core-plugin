@@ -1,0 +1,59 @@
+---
+name: user-context
+description: User environment facts and tool locations (auto-triggered)
+---
+
+# User Context
+
+Reference this skill when you need to know about the user's system setup, tools, and environment.
+
+## Quick Reference (Most Commonly Needed)
+
+- **Git Name/Email**: {{ git_user_name | default('Not configured') }} <{{ git_user_email | default('Not configured') }}>
+- **GitHub Username**: {{ github_username | default('Not detected') }}
+- **Projects Directory**: `{{ projects_directory | default('Not detected') }}`
+- **Username**: {{ username }}
+- **Home**: `{{ home_directory }}`
+
+## System Environment (For Commands & Scripts)
+
+- **OS**: {{ os_type }} {{ os_version }}
+- **Architecture**: {{ architecture }}
+- **Shell**: {{ shell }}
+- **Hostname**: {{ hostname }}
+
+## Available Tools
+
+{% if python_path -%}
+- **Python**: `{{ python_path }}` {{ python_version }}
+{% endif -%}
+{% if git_path -%}
+- **Git**: `{{ git_path }}` {{ git_version }}
+{% endif -%}
+{% if node_path -%}
+- **Node**: `{{ node_path }}` {{ node_version }}
+{% endif -%}
+{% if docker_path -%}
+- **Docker**: `{{ docker_path }}`
+{% endif -%}
+{% if not (python_path or git_path or node_path or docker_path) -%}
+- No common tools detected
+{% endif %}
+
+## Version Managers (If Using)
+
+- No version managers detected
+
+## Important Paths (For File Operations)
+
+- **SSH Keys**: `{{ ssh_keys_path | default('~/.ssh') }}`
+- **Config Directory**: `{{ config_path | default('~/.config') }}`
+
+---
+*Auto-detected by AIDA install.py on {{ timestamp }}*
+
+## Activation
+
+This skill is automatically triggered to provide environment context for all operations.
+Claude should reference the "Quick Reference" section first for most common needs, then dive
+into specific sections only when needed for particular tasks.

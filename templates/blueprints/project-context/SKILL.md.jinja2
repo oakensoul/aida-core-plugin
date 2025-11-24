@@ -1,0 +1,241 @@
+---
+name: project-context
+description: Auto-triggered skill for project-specific facts, structure, and conventions
+---
+
+# Project Context: {{ project_name }}
+
+This skill provides factual information about {{ project_name }}'s structure,
+tooling, and conventions. All information here is either auto-detected or
+explicitly configured for this project.
+
+## Project Facts
+
+**Project Name:** {{ project_name }}
+
+**Project Type:** {{ project_type | default("Unknown") }}
+
+**Primary Language(s):** {{ languages | default("Unknown") }}
+
+**Version Control:** {{ vcs | default("None") }}{% if vcs == "git" %}
+{% if has_gitignore %}- .gitignore: ✓{% endif %}
+{% if uses_worktrees %}- **Worktree workflow:** {{ uses_worktrees }}{% endif %}
+{% if branching_model %}- **Branching model:** {{ branching_model }}{% endif %}
+{% endif %}
+
+## Project Structure
+
+### Source Code Organization
+{% if src_directories | default([]) %}
+**Source directories:** {{ src_directories | join(", ") }}
+{% else %}
+**Source organization:** Flat structure (no src/ directory)
+{% endif %}
+
+**Code organization pattern:** {{ code_organization | default("Follow existing pattern") }}
+
+### Documentation
+{% if has_docs_directory %}
+**Documentation directory:** `{{ docs_directory }}`
+{% else %}
+**Documentation:** {% if docs_directory_intent %}{{ docs_directory_intent }}{% else %}README.md only{% endif %}
+{% endif %}
+
+{% if has_readme %}
+**README:** `{{ readme_file }}` ({{ readme_length }} chars - {{ documentation_level | default("Standard") }})
+{% else %}
+**README:** Not found - consider creating one
+{% endif %}
+
+{% if has_changelog %}
+**Changelog:** {{ changelog_files | join(", ") }}
+{% elif changelog_intent %}
+**Changelog:** {{ changelog_intent }}
+{% else %}
+**Changelog:** None (changes tracked in git commits)
+{% endif %}
+
+{% if has_contributing %}
+**Contributing guide:** Present
+{% endif %}
+
+{% if has_license %}
+**License:** `{{ license_file }}`
+{% else %}
+**License:** None detected
+{% endif %}
+
+### Testing
+{% if has_tests %}
+**Test directories:** {{ test_directories | join(", ") }}
+
+**Testing approach:** {{ testing_approach | default("Unit tests for critical paths") }}
+{% elif testing_framework_intent %}
+**Testing framework:** {{ testing_framework_intent }}
+
+**Tests:** Not yet set up
+{% else %}
+**Testing:** No automated tests planned
+{% endif %}
+
+### Tools & Infrastructure
+
+**Build/Package Management:**
+{%- if has_package_json %} package.json (Node/npm){% endif %}
+{%- if has_requirements_txt %} requirements.txt (Python/pip){% endif %}
+{%- if has_pyproject_toml %} pyproject.toml (Python){% endif %}
+{%- if has_gemfile %} Gemfile (Ruby){% endif %}
+{%- if has_go_mod %} go.mod (Go){% endif %}
+{%- if has_cargo_toml %} Cargo.toml (Rust){% endif %}
+{%- if not (has_package_json or has_requirements_txt or has_pyproject_toml or has_gemfile or has_go_mod or has_cargo_toml) %} None detected{% endif %}
+
+**Development Tools:** {{ tools | default("None detected") }}
+
+### Docker
+{% if uses_docker %}
+**Docker:**
+- Dockerfile: {% if has_dockerfile %}✓{% else %}✗{% endif %}
+- docker-compose: {% if has_docker_compose %}✓{% else %}{% if docker_compose_intent %}{{ docker_compose_intent }}{% else %}✗{% endif %}{% endif %}
+{% else %}
+**Docker:** Not used
+{% endif %}
+
+### CI/CD
+{% if has_ci_cd %}
+**CI/CD:**
+{%- if has_github_actions %} GitHub Actions{% endif %}
+{%- if has_gitlab_ci %} GitLab CI{% endif %}
+{% elif ci_cd_intent %}
+**CI/CD:** {{ ci_cd_intent }}
+{% else %}
+**CI/CD:** Manual testing and deployment
+{% endif %}
+
+### Issue Tracking
+{% if issue_tracking %}
+**Issue Tracking System:** {{ issue_tracking }}
+
+{% if "GitHub Projects" in issue_tracking and github_project_config %}
+**GitHub Projects Configuration:**
+{{ github_project_config }}
+
+**MCP Integration:** ✅ GitHub MCP (official)
+
+Claude should:
+- Reference issues using #issue-number format
+- Update project board status when working on issues via MCP
+- Link commits to issues automatically
+- Include "Fixes #123" or "Closes #123" in commit messages
+- Use GitHub MCP for automated project board updates
+- Suggest issue labels and milestones
+
+{% elif "GitHub Issues" in issue_tracking %}
+**MCP Integration:** ✅ GitHub MCP (official)
+
+Claude should:
+- Reference issues using #issue-number format
+- Include "Fixes #123" or "Closes #123" in commit messages
+- Suggest issue labels and milestones
+- Use GitHub MCP for issue management
+
+{% elif "JIRA" in issue_tracking and jira_config %}
+**JIRA Configuration:**
+{{ jira_config }}
+
+**MCP Integration:** ✅ Atlassian MCP (JIRA + Confluence)
+**MCP Endpoint:** https://mcp.atlassian.com/v1/sse
+
+Claude should:
+- Reference issues using PROJ-123 format
+- Include JIRA issue keys in commit messages
+- Suggest issue status transitions
+- Use Atlassian MCP for automated issue updates
+
+{% if uses_confluence and confluence_config %}
+**Confluence Integration:**
+{{ confluence_config }}
+
+Claude should:
+- Suggest Confluence documentation for:
+  * Architecture decisions and diagrams
+  * API documentation and guides
+  * User guides and tutorials
+  * Team processes and workflows
+  * Meeting notes and RFCs
+- Suggest local documentation (in repo) for:
+  * README and setup instructions
+  * Code-level documentation
+  * Developer guides
+  * API reference (technical)
+- Use Confluence MCP to create/update pages
+- Link JIRA issues to relevant Confluence pages
+- Keep project space updated with latest documentation
+{% endif %}
+
+{% elif issue_tracking and "Other" not in issue_tracking and issue_tracking != "None - informal tracking only" %}
+**MCP Integration:** ❌ Not supported (manual issue tracking only)
+
+Claude should:
+- Ask about issue tracking when working on features
+- Suggest linking work to issues in commit messages
+- Note: No automated MCP integration available
+{% endif %}
+{% else %}
+**Issue Tracking:** None configured
+{% endif %}
+
+## Project Conventions
+
+{% if project_conventions %}
+{{ project_conventions }}
+{% else %}
+No specific conventions documented. Follow general best practices for {{ languages | default("this tech stack") }}.
+{% endif %}
+
+## API Documentation
+
+{% if api_docs_intent %}
+**API documentation style:** {{ api_docs_intent }}
+{% elif project_type in ["Web application (backend)", "Library or framework", "CLI tool or utility"] %}
+**API documentation:** Inline docstrings/comments
+{% endif %}
+
+## Guidelines for Claude
+
+When working in this project:
+
+**Code Structure:**
+- Place new files following the "{{ code_organization | default("existing") }}" organization pattern
+- {% if src_directories %}Use {{ src_directories | join(" or ") }} for source code{% else %}Follow flat project structure{% endif %}
+- {% if test_directories %}Put tests in {{ test_directories | join(" or ") }}{% elif testing_framework_intent %}Create tests directory when adding first test{% endif %}
+
+**Documentation:**
+- {% if has_docs_directory %}Add documentation files to {{ docs_directory }}{% elif docs_directory_intent %}{{ docs_directory_intent }}{% else %}Update README.md with new documentation{% endif %}
+- {% if has_changelog %}Update {{ changelog_files[0] }} for significant changes{% elif changelog_intent %}Update changelog when making releases{% endif %}
+- {% if api_docs_intent %}Document APIs using {{ api_docs_intent }}{% endif %}
+
+**Testing:**
+- {% if testing_approach %}Follow {{ testing_approach }} approach{% elif testing_framework_intent %}Use {{ testing_framework_intent }} for tests{% endif %}
+- {% if has_tests %}Maintain test coverage for new features{% endif %}
+
+**Conventions:**
+{% if project_conventions %}
+- Follow project-specific conventions documented above
+{% else %}
+- Follow language/framework best practices
+{% endif %}
+
+**Quality:**
+{% if coding_standards %}
+- Maintain {{ coding_standards }} standards
+{% endif %}
+{% if has_ci_cd or ci_cd_intent %}
+- Ensure CI/CD checks pass before committing
+{% endif %}
+
+---
+*Auto-generated by AIDA configure for {{ project_name }}*
+
+*Detected facts: {{ timestamp | default("unknown") }}*
+
+*This skill is automatically activated when working in {{ project_name }}*

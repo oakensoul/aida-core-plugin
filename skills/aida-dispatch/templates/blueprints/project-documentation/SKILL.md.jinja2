@@ -1,0 +1,169 @@
+---
+name: project-documentation
+description: Auto-triggered skill for maintaining project documentation standards
+---
+
+# Project Documentation: {{ project_name }}
+
+This skill ensures appropriate documentation for {{ project_name }}.
+
+## Documentation Standards
+
+**Documentation Level:** {{ documentation_level }}
+
+{% if documentation_level == "Minimal - README and inline comments" %}
+### Minimal Documentation Approach
+
+Claude should:
+- Keep README.md concise but informative
+- Write inline comments for complex logic only
+- Document public APIs and interfaces
+- Add brief docstrings for functions
+- Focus on "why" not "what" in comments
+- Keep documentation co-located with code
+{% elif documentation_level == "Standard - README, API docs, inline comments" %}
+### Standard Documentation Approach
+
+Claude should:
+- Maintain comprehensive README.md with:
+  - Installation instructions
+  - Usage examples
+  - Configuration options
+  - Common troubleshooting
+- Write docstrings for all public functions/classes
+- Document API endpoints with request/response examples
+- Add inline comments for non-obvious code
+- Keep a CHANGELOG.md for version tracking
+- Document architectural decisions when they impact usage
+{% elif "Comprehensive" in documentation_level %}
+### Comprehensive Documentation Approach
+
+Claude should:
+- Maintain multiple documentation files:
+  - README.md (overview)
+  - docs/architecture.md (system design)
+  - docs/api.md (API documentation)
+  - docs/guides/ (how-to guides)
+  - CONTRIBUTING.md (contributor guide)
+  - CHANGELOG.md (version history)
+- Write detailed docstrings with examples
+- Document all public APIs thoroughly
+- Create architecture diagrams when helpful
+- Maintain up-to-date examples
+- Document decision rationale in ADRs (Architecture Decision Records)
+- Include troubleshooting guides
+{% elif "Extensive" in documentation_level %}
+### Extensive Documentation-First Approach
+
+Claude should:
+- Follow documentation-first development:
+  - Document features before implementing
+  - Write user guides alongside code
+  - Maintain comprehensive API reference
+- Provide multiple documentation formats:
+  - Markdown docs for developers
+  - Generated API docs (e.g., Sphinx, JSDoc)
+  - User guides for end users
+  - Integration guides for partners
+- Document everything:
+  - All functions, classes, modules
+  - Configuration options
+  - Environment variables
+  - Deployment procedures
+  - Testing procedures
+  - Monitoring and debugging
+- Maintain documentation infrastructure:
+  - Documentation site/wiki
+  - Auto-generated docs from code
+  - Version-specific documentation
+  - Search functionality
+{% endif %}
+
+## Documentation Maintenance
+
+**Project Type:** {{ project_type }}
+
+{% if "Web application" in project_type %}
+### Web Application Documentation
+
+- Document API endpoints (request/response formats)
+- Maintain environment variable documentation
+- Document database schema and migrations
+- Provide deployment instructions
+- Document authentication/authorization flow
+{% elif "CLI tool" in project_type or "utility" in project_type %}
+### CLI Tool Documentation
+
+- Provide detailed command reference
+- Include usage examples for common tasks
+- Document all flags and options
+- Provide installation instructions for multiple platforms
+- Include troubleshooting section
+{% elif "Library" in project_type or "framework" in project_type %}
+### Library/Framework Documentation
+
+- Write comprehensive API reference
+- Provide getting started guide
+- Include multiple usage examples
+- Document extension points and customization
+- Maintain migration guides between versions
+- Provide best practices and patterns
+{% elif "Data science" in project_type or "ML" in project_type %}
+### Data Science/ML Documentation
+
+- Document data sources and preprocessing
+- Explain model architecture and choices
+- Provide training instructions and hyperparameters
+- Document evaluation metrics
+- Include reproducibility instructions
+- Document dependencies and environment setup
+{% elif "Mobile application" in project_type %}
+### Mobile Application Documentation
+
+- Document build and deployment process
+- Provide platform-specific instructions (iOS/Android)
+- Document app architecture patterns
+- Include screenshots in documentation
+- Document API integrations
+- Provide testing guidelines
+{% elif "Monorepo" in project_type %}
+### Monorepo Documentation
+
+- Maintain root README with project structure
+- Document each package/module separately
+- Provide workspace setup instructions
+- Document inter-package dependencies
+- Maintain consistent documentation format across packages
+{% endif %}
+
+## When to Update Documentation
+
+Claude should suggest documentation updates when:
+- Adding new features or APIs
+- Changing existing behavior
+- Fixing bugs that affect usage
+- Adding configuration options
+- Changing dependencies or requirements
+- Modifying deployment procedures
+- Adding or changing environment variables
+
+## Activation
+
+This skill is automatically triggered when:
+- Writing new code
+- Modifying existing functionality
+- Creating pull requests
+- User requests documentation
+
+## Guidelines
+
+- Keep documentation accurate and up-to-date
+- Write documentation for your target audience
+- Use clear, concise language
+- Include examples where helpful
+- Link to related documentation
+- Consider documentation in code reviews
+
+---
+*Generated by AIDA configure for {{ project_name }}*
+*Last configured: {{ timestamp | default("unknown") }}*

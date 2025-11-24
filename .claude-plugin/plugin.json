@@ -1,6 +1,6 @@
 {
   "name": "aida-core",
-  "description": "Core AIDA functionality - memory, knowledge, and context management",
+  "description": "Smart configuration with auto-detection, GitHub integration, and context management",
   "version": "0.2.0",
   "author": {
     "name": "oakensoul",
