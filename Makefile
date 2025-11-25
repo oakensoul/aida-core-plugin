@@ -5,7 +5,8 @@ PLUGIN_PATH := $(shell pwd)
 PLUGIN_NAME := aida-core
 
 .PHONY: help dev-mode-enable dev-mode-disable dev-mode test lint lint-py lint-yaml lint-md lint-frontmatter lint-fix install clean \
-        docker-build docker-build-base docker-build-all docker-shell-% docker-clean docker-clean-all
+        docker-build docker-build-base docker-build-all docker-shell-% docker-clean docker-clean-all \
+        docker-test-% docker-test-all
 
 help: ## Show this help message
 	@echo "AIDA Core Plugin - Available targets:"
@@ -71,6 +72,12 @@ docker-build-all: docker-build-base ## Build all Docker test environments
 
 docker-build-%: docker-build-base ## Build specific environment (e.g., docker-build-php)
 	cd test-environments && docker-compose build $*
+
+docker-test-%: ## Run automated tests in specific environment (e.g., docker-test-php)
+	cd test-environments && $(MAKE) test-$*
+
+docker-test-all: ## Run automated tests in all Docker environments
+	cd test-environments && $(MAKE) test-all
 
 docker-shell-%: ## Enter a Docker test environment (e.g., docker-shell-php)
 	cd test-environments && docker-compose run --build --rm $*

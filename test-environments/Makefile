@@ -1,4 +1,7 @@
-.PHONY: help build build-base build-all clean clean-all shell-% up down
+.PHONY: help build build-base build-all clean clean-all shell-% up down test-% test-all
+
+# Test result directory
+TEST_RESULTS_DIR := $(CURDIR)/test-results
 
 help:
 	@echo "AIDA Test Environments"
@@ -12,7 +15,15 @@ help:
 	@echo "  build-python   - Build Python environment"
 	@echo "  build-monorepo - Build monorepo environment"
 	@echo ""
-	@echo "Shell Commands (auto-rebuild before entering):"
+	@echo "Test Commands (automated):"
+	@echo "  test-aida      - Run tests in AIDA environment"
+	@echo "  test-php       - Run tests in PHP environment"
+	@echo "  test-nodejs    - Run tests in Node.js environment"
+	@echo "  test-python    - Run tests in Python environment"
+	@echo "  test-monorepo  - Run tests in monorepo environment"
+	@echo "  test-all       - Run tests in all environments"
+	@echo ""
+	@echo "Shell Commands (interactive, auto-rebuild):"
 	@echo "  shell-aida     - Enter AIDA environment"
 	@echo "  shell-php      - Enter PHP environment"
 	@echo "  shell-nodejs   - Enter Node.js environment"
@@ -27,7 +38,8 @@ help:
 	@echo ""
 	@echo "Quick Start:"
 	@echo "  make build-all      # Build everything"
-	@echo "  make shell-php      # Enter PHP environment"
+	@echo "  make test-all       # Run all automated tests"
+	@echo "  make shell-php      # Enter PHP environment (interactive)"
 
 build-base:
 	docker-compose build base
@@ -52,3 +64,32 @@ clean:
 
 clean-all:
 	docker-compose down -v --rmi all
+
+# Automated test targets
+test-%: build-%
+	@mkdir -p $(TEST_RESULTS_DIR)
+	@echo "Running tests in $* environment..."
+	docker-compose run --rm \
+		-e TEST_RESULT_FILE=/mnt/test-results/$*-result.json \
+		-v $(TEST_RESULTS_DIR):/mnt/test-results \
+		$* /usr/local/aida-test/scripts/run-tests.sh
+	@echo "Results saved to $(TEST_RESULTS_DIR)/$*-result.json"
+
+test-all: build-all
+	@mkdir -p $(TEST_RESULTS_DIR)
+	@echo "Running tests in all environments..."
+	@for env in aida php nodejs python monorepo; do \
+		echo ""; \
+		echo "========================================"; \
+		echo "Testing $$env environment"; \
+		echo "========================================"; \
+		docker-compose run --rm \
+			-e TEST_RESULT_FILE=/mnt/test-results/$$env-result.json \
+			-v $(TEST_RESULTS_DIR):/mnt/test-results \
+			$$env /usr/local/aida-test/scripts/run-tests.sh || true; \
+	done
+	@echo ""
+	@echo "========================================"
+	@echo "All test results saved to $(TEST_RESULTS_DIR)/"
+	@echo "========================================"
+	@ls -la $(TEST_RESULTS_DIR)/
