@@ -1,13 +1,13 @@
 ---
 type: command
 name: aida
-description: AIDA command dispatcher - routes to aida-dispatch skill (status, doctor, config, upgrade, feedback, bug, feature-request, help)
-version: 0.2.0
+description: AIDA command dispatcher - routes to aida-dispatch skill for configuration, diagnostics, feedback, and extension management (agent, command, skill, plugin)
+version: 0.3.0
 tags:
   - core
 args: ""
 allowed-tools: "*"
-argument-hint: "[command]"
+argument-hint: "[command] [subcommand] [options]"
 ---
 
 # AIDA Command Dispatcher
@@ -40,14 +40,47 @@ The `aida-dispatch` skill will handle all routing, script execution, and user in
 
 When you invoke the `aida-dispatch` skill, it handles these commands:
 
-- **config** - Use the aida dispatcher to guide the user through AIDA configuration setup
-- **status** - Use the aida dispatcher to display current AIDA installation and configuration status
-- **doctor** - Use the aida dispatcher to run diagnostics and display health check results
-- **upgrade** - Use the aida dispatcher to check for and install AIDA updates
-- **feedback** - Use the aida dispatcher to collect and submit general feedback
-- **bug** - Use the aida dispatcher to collect and submit a bug report
-- **feature-request** - Use the aida dispatcher to collect and submit a feature request
-- **help** - Use the aida dispatcher to show help message (default if no command given)
+### Configuration & Diagnostics
+
+- **config** - Guide user through AIDA configuration setup
+- **status** - Display current AIDA installation and configuration status
+- **doctor** - Run diagnostics and display health check results
+- **upgrade** - Check for and install AIDA updates
+
+### Feedback & Support
+
+- **feedback** - Collect and submit general feedback
+- **bug** - Collect and submit a bug report
+- **feature-request** - Collect and submit a feature request
+- **help** - Show help message (default if no command given)
+
+### Extension Management
+
+- **agent** - Manage AIDA agents
+  - `create "description"` - Create new agent from description
+  - `validate [name|--all]` - Validate agent(s) against schema
+  - `version <name> [major|minor|patch]` - Bump agent version
+  - `list [--location user|project|all]` - List agents
+
+- **command** - Manage AIDA commands
+  - `create "description"` - Create new command from description
+  - `validate [name|--all]` - Validate command(s) against schema
+  - `version <name> [major|minor|patch]` - Bump command version
+  - `list [--location user|project|all]` - List commands
+
+- **skill** - Manage AIDA skills
+  - `create "description"` - Create new skill from description
+  - `validate [name|--all]` - Validate skill(s) against schema
+  - `version <name> [major|minor|patch]` - Bump skill version
+  - `list [--location user|project|all]` - List skills
+
+- **plugin** - Manage Claude Code plugins
+  - `create "description"` - Create new plugin with directory structure
+  - `validate [name|--all]` - Validate plugin(s) against schema
+  - `version <name> [major|minor|patch]` - Bump plugin version
+  - `list [--location user|project|all]` - List plugins
+  - `add <type> "description"` - Add agent/command/skill to plugin
+  - `remove <type> <name>` - Remove component from plugin
 
 ## Examples
 
@@ -68,4 +101,27 @@ When you invoke the `aida-dispatch` skill, it handles these commands:
 /aida feedback     # Submit general feedback about AIDA
 /aida bug          # Report a bug with structured information
 /aida feature-request  # Request a new feature
+
+# Extension Management - Agents
+/aida agent create "handles database migrations"
+/aida agent validate my-agent
+/aida agent validate --all
+/aida agent version my-agent patch
+/aida agent list
+
+# Extension Management - Commands
+/aida command create "runs project tests"
+/aida command validate --all
+/aida command list --location project
+
+# Extension Management - Skills
+/aida skill create "manages API integrations"
+/aida skill validate --all
+/aida skill version my-skill minor
+
+# Extension Management - Plugins
+/aida plugin create "my-awesome-plugin"
+/aida plugin add agent "handles authentication"
+/aida plugin validate my-plugin
+/aida plugin list
 ```

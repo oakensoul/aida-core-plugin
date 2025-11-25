@@ -1,8 +1,8 @@
 ---
 type: skill
 name: aida-dispatch
-description: This skill should be used when the user invokes /aida commands (status, doctor, config, upgrade, feedback, bug, feature-request, help) to route them to appropriate action handlers with context awareness and progressive workflow execution.
-version: 0.2.0
+description: This skill routes /aida commands to appropriate handlers - configuration, diagnostics, feedback, and extension management (agent, command, skill, plugin operations).
+version: 0.3.0
 tags:
   - core
   - dispatcher
@@ -11,7 +11,8 @@ tags:
 
 # AIDA Dispatch
 
-Routes `/aida` commands to appropriate action handlers, managing AIDA's configuration, diagnostics, and feedback systems.
+Routes `/aida` commands to appropriate action handlers, managing AIDA's configuration,
+diagnostics, feedback systems, and extension management (agents, commands, skills, plugins).
 
 ## Activation
 
@@ -57,6 +58,32 @@ For `help` or no arguments:
 - Display the help text inline (see Help Text section below)
 - No additional files need to be loaded
 
+### Extension Management Commands
+
+For `agent`, `command`, `skill`, or `plugin` commands:
+
+- **Invoke the `claude-code-management` skill** to handle these operations
+- Pass the full command arguments to the skill
+- The skill handles create, validate, version, list, and plugin-specific operations
+
+**Process:**
+
+1. Parse the command to extract:
+   - Component type: `agent`, `command`, `skill`, or `plugin`
+   - Operation: `create`, `validate`, `version`, `list`, `add`, `remove`
+   - Arguments: name, description, options
+
+2. Invoke `claude-code-management` skill with the parsed context
+
+**Examples:**
+
+```text
+/aida agent create "description"     → claude-code-management skill
+/aida command validate --all         → claude-code-management skill
+/aida skill version my-skill patch   → claude-code-management skill
+/aida plugin list                    → claude-code-management skill
+```
+
 ## Path Resolution
 
 **Base Directory:** Provided when skill loads via `<command-message>` tags containing the skill base directory.
@@ -101,6 +128,12 @@ When displaying help (for `help` command or no arguments), show:
 - `/aida bug` - Report a bug in AIDA
 - `/aida feature-request` - Request a new AIDA feature
 
+### Extension Management
+- `/aida agent [create|validate|version|list]` - Manage agents
+- `/aida command [create|validate|version|list]` - Manage commands
+- `/aida skill [create|validate|version|list]` - Manage skills
+- `/aida plugin [create|validate|version|list|add|remove]` - Manage plugins
+
 ### Help
 - `/aida help` or `/aida` - Show this help message
 
@@ -109,6 +142,7 @@ When displaying help (for `help` command or no arguments), show:
 If you haven't configured AIDA yet: `/aida config`
 To check if AIDA is working: `/aida status`
 If you encounter issues: `/aida doctor`
+To create an agent: `/aida agent create "description"`
 ```
 
 ## Resources
