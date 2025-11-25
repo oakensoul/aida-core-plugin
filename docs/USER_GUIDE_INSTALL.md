@@ -1,8 +1,15 @@
+---
+type: guide
+title: "Installation Guide"
+audience: users
+---
+
 # AIDA Installation Guide
 
-**Complete walkthrough for installing and setting up AIDA Core Plugin**
+Complete walkthrough for installing and setting up AIDA Core Plugin
 
-This guide walks you through installing AIDA for the first time, from prerequisites to verification.
+This guide walks you through installing AIDA for the first time, from
+prerequisites to verification.
 
 ## Table of Contents
 
@@ -37,6 +44,7 @@ python3 --version
 ```
 
 **If you need to install/upgrade Python:**
+
 - macOS: `brew install python3` or download from [python.org](https://www.python.org/downloads/)
 - Linux: `sudo apt install python3` (Debian/Ubuntu) or `sudo yum install python3` (RHEL/CentOS)
 - Windows (WSL): `sudo apt install python3`
@@ -53,11 +61,13 @@ gh --version
 ```
 
 **If you need to install gh:**
+
 - macOS: `brew install gh`
 - Linux: See [cli.github.com](https://cli.github.com/)
 - Windows (WSL): [cli.github.com](https://cli.github.com/)
 
 **Authenticate gh:**
+
 ```bash
 gh auth login
 # Follow the prompts
@@ -82,7 +92,8 @@ Open Claude Code and install the plugin:
 ```
 
 **Expected output:**
-```
+
+```text
 Installing plugin from oakensoul/aida-core-plugin...
 ✓ Downloaded plugin files
 ✓ Verified plugin structure
@@ -104,7 +115,7 @@ Launch the installation wizard:
 
 #### 2.1 Welcome & Requirements Check
 
-```
+```text
 ╔══════════════════════════════════════════════════════════╗
 ║                                                          ║
 ║   Welcome to AIDA - Agentic Intelligence Digital        ║
@@ -121,6 +132,7 @@ Checking requirements...
 ```
 
 **If requirements fail:**
+
 - Python not found: See [Prerequisites - Python](#2-python-38)
 - gh not found: See [Prerequisites - GitHub CLI](#3-github-cli)
 
@@ -128,7 +140,7 @@ Checking requirements...
 
 If you've run `/aida install` before:
 
-```
+```text
 ⚠ Personal skills already exist at:
   ~/.claude/skills/personal-preferences/
   ~/.claude/skills/work-patterns/
@@ -139,6 +151,7 @@ Do you want to reinstall? This will overwrite your existing preferences.
 ```
 
 **Choices:**
+
 - `N` (default): Exit and keep existing installation
 - `y`: Overwrite with new preferences (current skills will be backed up)
 
@@ -148,7 +161,7 @@ Do you want to reinstall? This will overwrite your existing preferences.
 
 AIDA will ask 5 questions to customize your experience:
 
-```
+```text
 Let's learn about your coding preferences and work patterns.
 This takes about 2 minutes.
 
@@ -163,7 +176,7 @@ See [Questionnaire Deep Dive](#questionnaire-deep-dive) below for detailed expla
 
 After the questionnaire:
 
-```
+```text
 Creating your personal skills...
 
 ✓ Created ~/.claude/skills/personal-preferences/SKILL.md
@@ -175,7 +188,7 @@ Creating your personal skills...
 
 #### 2.5 Success Message
 
-```
+```text
 ╔══════════════════════════════════════════════════════════╗
 ║                                                          ║
 ║   ✓ AIDA Installation Complete!                         ║
@@ -211,7 +224,7 @@ The installation questionnaire asks 5 questions that shape how AIDA works for yo
 
 ### Question 1: Coding Standards
 
-```
+```text
 What coding standards and style guides do you follow?
 
 Examples: PEP 8, Airbnb JavaScript, PSR-12 PHP, custom team conventions
@@ -222,12 +235,14 @@ Your answer: _
 **Purpose**: Ensures Claude generates code matching your standards
 
 **Good answers:**
+
 - "PEP 8 for Python, Airbnb style for JavaScript"
 - "Google style guides with custom team modifications"
 - "Standard Go formatting, ESLint Recommended config"
 - "PSR-12 for PHP, PHPUnit for tests"
 
 **Bad answers:**
+
 - "Whatever works" (too vague)
 - Leaving blank (no context for AIDA)
 
@@ -235,7 +250,7 @@ Your answer: _
 
 ### Question 2: Work Hours and Patterns
 
-```
+```text
 What are your typical working hours and patterns?
 
 Choose one:
@@ -253,6 +268,7 @@ Your choice [2]: _
 **Default**: Option 2 (Flexible hours with core overlap)
 
 **Considerations:**
+
 - **Option 1**: Traditional schedule, prefer structured days
 - **Option 2**: Flexible but have team overlap times
 - **Option 3**: Fully async, work whenever
@@ -263,7 +279,7 @@ Your choice [2]: _
 
 ### Question 3: Communication Style
 
-```
+```text
 What communication style do you prefer from AIDA?
 
 Choose one:
@@ -281,6 +297,7 @@ Your choice [5]: _
 **Default**: Option 5 (Balanced)
 
 **Choose based on preference:**
+
 - **Option 1**: Busy, want quick answers
 - **Option 2**: Learning, want explanations
 - **Option 3**: Enjoy friendly interactions
@@ -291,7 +308,7 @@ Your choice [5]: _
 
 ### Question 4: Primary Development Tools
 
-```
+```text
 What are your primary development tools and technologies?
 
 Examples: Python, Git, VS Code, Docker
@@ -302,12 +319,14 @@ Your answer: _
 **Purpose**: Ensures Claude suggests familiar tools
 
 **Good answers:**
+
 - "Python, Django, PostgreSQL, Docker, GitHub Actions"
 - "React, TypeScript, Next.js, Tailwind, Vercel"
 - "Go, gRPC, Kubernetes, Prometheus"
 - "PHP, Laravel, MySQL, Redis, AWS"
 
 **Include:**
+
 - Languages (Python, JavaScript, Go, etc.)
 - Frameworks (Django, React, Laravel, etc.)
 - Editors (VS Code, Vim, IntelliJ, etc.)
@@ -318,7 +337,7 @@ Your answer: _
 
 ### Question 5: Decision Tracking Detail
 
-```
+```text
 How detailed should AIDA's decision tracking be?
 
 Choose one:
@@ -335,6 +354,7 @@ Your choice [2]: _
 **Default**: Option 2 (Moderate)
 
 **Choose based on needs:**
+
 - **Option 1**: Small projects, don't need much history
 - **Option 2**: Typical projects, important decisions only
 - **Option 3**: Complex projects, lots of choices
@@ -348,7 +368,7 @@ After installation, AIDA creates these files and directories:
 
 ### Directory Structure
 
-```
+```text
 ~/.claude/
 ├── skills/
 │   ├── personal-preferences/
@@ -473,7 +493,7 @@ After installation, verify everything works:
 
 **Expected output:**
 
-```
+```text
 AIDA Status
 
 Installation: ✓ Installed
@@ -517,7 +537,7 @@ ls -la ~/.claude/skills/work-patterns/
 
 **Expected output:**
 
-```
+```text
 AIDA - Agentic Intelligence Digital Assistant
 
 Available commands:
@@ -537,7 +557,7 @@ For detailed help: /aida command info [name]
 
 **Expected output:**
 
-```
+```text
 Running AIDA health check...
 
 Requirements:
@@ -569,6 +589,7 @@ All checks passed! ✓
 **Cause**: Python < 3.8 installed
 
 **Solution**:
+
 ```bash
 # Check version
 python3 --version
@@ -588,6 +609,7 @@ sudo apt update && sudo apt upgrade python3
 **Cause**: GitHub CLI not installed
 
 **Solution**:
+
 ```bash
 # Install gh (macOS)
 brew install gh
@@ -607,6 +629,7 @@ gh auth login
 **Cause**: Insufficient permissions on Claude directory
 
 **Solution**:
+
 ```bash
 # Check permissions
 ls -la ~/.claude/
@@ -639,11 +662,13 @@ Press Enter without typing to use the default value shown in `[brackets]`.
 #### Skills Don't Appear in `/aida skill list`
 
 **Possible causes:**
+
 1. Installation didn't complete
 2. Syntax errors in SKILL.md
 3. Wrong directory permissions
 
 **Solution**:
+
 ```bash
 # Run health check
 /aida doctor
@@ -659,6 +684,7 @@ Press Enter without typing to use the default value shown in `[brackets]`.
 **Possible cause**: Plugin not enabled
 
 **Solution**:
+
 ```bash
 # Check plugin status
 /plugin list

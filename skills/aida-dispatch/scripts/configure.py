@@ -40,39 +40,20 @@ import logging
 import traceback
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Any, Optional
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+from typing import Dict, Any
 
 # Import utilities from the foundation module
 from utils import (
-    check_python_version,
     get_claude_dir,
-    get_aida_skills_dir,
     ensure_directory,
-    read_json,
-    write_json,
     write_yaml,
-    read_file,
-    file_exists,
-    directory_exists,
     load_questionnaire,
-    filter_questions,
-    questions_to_dict,
     detect_languages,
     detect_tools,
     detect_project_type,
     detect_testing_approach,
     render_skill_directory,
     safe_json_load,
-    MAX_JSON_SIZE,
-    MAX_JSON_DEPTH,
-    VersionError,
     FileOperationError,
     ConfigurationError,
     InstallationError,
@@ -84,6 +65,13 @@ try:
     HAS_YAML = True
 except ImportError:
     HAS_YAML = False
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 
 # Constants
@@ -894,7 +882,7 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
         )
         files_created.append(str(project_context_output / "SKILL.md"))
 
-        message = f"Project configuration complete! Created project-context skill in .claude/skills/"
+        message = "Project configuration complete! Created project-context skill in .claude/skills/"
 
         return {
             "success": True,

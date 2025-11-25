@@ -1,11 +1,13 @@
 ---
+type: command
 name: aida
 description: AIDA command dispatcher - routes to aida-dispatch skill (status, doctor, config, upgrade, feedback, bug, feature-request, help)
-args:
-  
-allowed-tools: *
+version: 0.2.0
+tags:
+  - core
+args: ""
+allowed-tools: "*"
 argument-hint: config [global|project]
-
 ---
 
 # AIDA Command Dispatcher
@@ -14,7 +16,7 @@ Unified command interface for all AIDA functionality.
 
 ## Usage
 
-```
+```bash
 /aida [action] [arguments]
 ```
 
@@ -27,7 +29,8 @@ Unified command interface for all AIDA functionality.
    - If any other command → Invoke `aida-dispatch` skill to handle it
 
 2. **Invoke the skill:**
-   ```
+
+   ```text
    Use Skill tool with command: aida-dispatch
    ```
 

@@ -1,14 +1,18 @@
+---
+type: adr
+title: "ADR-002: Python for Installation Scripts"
+status: accepted
+date: "2025-11-01"
+deciders:
+  - "@oakensoul"
+---
+
 # ADR-002: Python for Installation Scripts
-
-**Status**: Accepted
-
-**Date**: 2025-11-01
-
-**Deciders**: @oakensoul
 
 ## Context
 
 AIDA needs installation and configuration scripts that run outside of Claude conversations. These scripts need to:
+
 - Check system requirements
 - Run interactive questionnaires
 - Create directory structures
@@ -17,6 +21,7 @@ AIDA needs installation and configuration scripts that run outside of Claude con
 - Handle errors gracefully
 
 Several language choices are available:
+
 1. **Bash/Shell**: Native to Unix systems
 2. **Python**: Cross-platform scripting
 3. **JavaScript/Node.js**: Claude Code's runtime
@@ -24,6 +29,7 @@ Several language choices are available:
 5. **Rust**: Compiled, safe
 
 The choice affects:
+
 - Cross-platform compatibility
 - Development speed
 - Dependency management
@@ -38,35 +44,41 @@ We will use **Python 3.8+** for all AIDA installation and utility scripts.
 
 ### Why Python?
 
-**1. Cross-Platform Compatibility**
+#### 1. Cross-Platform Compatibility
+
 - Works on macOS, Linux, and WSL (Windows)
 - Same code runs everywhere
 - Standard library handles OS differences
 - No platform-specific compilation
 
-**2. Developer Ecosystem**
+#### 2. Developer Ecosystem
+
 - Rich standard library (json, pathlib, shutil, etc.)
 - Excellent third-party packages (Jinja2, PyYAML)
 - Well-documented
 - Large community
 
-**3. Likely Already Installed**
+#### 3. Likely Already Installed
+
 - Most developers have Python installed
 - Often pre-installed on macOS and Linux
 - Common dependency for dev tools
 
-**4. Development Speed**
+#### 4. Development Speed
+
 - Fast iteration
 - Clear, readable code
 - Excellent for scripting tasks
 - Good error handling
 
-**5. Template Rendering**
+#### 5. Template Rendering
+
 - Jinja2 is industry-standard
 - Powerful and flexible
 - Used by many tools (Ansible, Salt, Flask)
 
-**6. JSON Manipulation**
+#### 6. JSON Manipulation
+
 - Native JSON support
 - Easy to read/write/merge JSON files
 - Perfect for settings.json management
@@ -74,6 +86,7 @@ We will use **Python 3.8+** for all AIDA installation and utility scripts.
 ### Why Not Bash?
 
 **Against**:
+
 - Not cross-platform (different on macOS vs Linux vs WSL)
 - Limited data structures
 - Error handling difficult
@@ -85,6 +98,7 @@ We will use **Python 3.8+** for all AIDA installation and utility scripts.
 ### Why Not JavaScript/Node.js?
 
 **Against**:
+
 - Requires Node.js installation
 - Larger runtime
 - Less common for system scripts
@@ -96,12 +110,14 @@ We will use **Python 3.8+** for all AIDA installation and utility scripts.
 ### Why Not Go?
 
 **Against**:
+
 - Requires compilation step
 - Binary distribution complexity
 - Versioning and updates harder
 - Steeper learning curve for contributors
 
 **Pros**:
+
 - Single binary (no dependencies)
 - Fast execution
 
@@ -110,6 +126,7 @@ We will use **Python 3.8+** for all AIDA installation and utility scripts.
 ### Why Not Rust?
 
 **Against**:
+
 - Long compilation times
 - Steep learning curve
 - Overkill for scripting tasks
@@ -146,16 +163,19 @@ We will use **Python 3.8+** for all AIDA installation and utility scripts.
 ### Mitigation Strategies
 
 **Python Dependency**:
+
 - Check for Python 3.8+ at install time
 - Clear error message if not found
 - Installation guide includes Python setup
 
 **Version Conflicts**:
+
 - Specify minimum version (3.8)
 - Test on multiple Python versions
 - Use only widely-supported features
 
 **Distribution**:
+
 - Ship as source code (no compilation needed)
 - Claude Code plugin system handles distribution
 - Dependencies minimal (Jinja2, PyYAML only)
@@ -167,6 +187,7 @@ We will use **Python 3.8+** for all AIDA installation and utility scripts.
 **Minimum**: Python 3.8
 
 **Rationale**:
+
 - Released October 2019 (widely adopted)
 - Assignment expressions (`:=`)
 - f-string improvements
@@ -174,6 +195,7 @@ We will use **Python 3.8+** for all AIDA installation and utility scripts.
 - Long-term support still active
 
 **Check**:
+
 ```python
 import sys
 
@@ -185,16 +207,19 @@ if sys.version_info < MIN_VERSION:
 ### Dependency Management
 
 **Core Dependencies**:
+
 - `Jinja2` - Template rendering
 - `PyYAML` - Questionnaire definitions
 
 **requirements.txt**:
-```
+
+```text
 jinja2>=3.0.0
 pyyaml>=6.0
 ```
 
 **Installation**:
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -203,7 +228,7 @@ Or bundled with plugin.
 
 ### Script Organization
 
-```
+```text
 scripts/
 ├── install.py              # Main installation script
 ├── configure.py            # Project configuration (planned)
@@ -220,14 +245,16 @@ scripts/
 ```
 
 **Module Design**:
+
 - utils/ is a proper Python package
-- Clean API via __init__.py
+- Clean API via **init**.py
 - Type hints where helpful
 - Comprehensive docstrings
 
 ### Error Handling
 
 **Custom Exceptions**:
+
 ```python
 class AidaError(Exception):
     """Base exception for all AIDA errors"""
@@ -240,6 +267,7 @@ class InstallationError(AidaError):
 ```
 
 **User-Friendly Messages**:
+
 ```python
 try:
     check_python_version()
@@ -254,6 +282,7 @@ except VersionError as e:
 ### Cross-Platform Considerations
 
 **Path Handling**:
+
 ```python
 from pathlib import Path
 
@@ -264,10 +293,12 @@ claude_dir = Path.home() / ".claude"
 ```
 
 **Line Endings**:
+
 - Write files with platform-appropriate line endings
 - Python's open() handles this automatically
 
 **File Permissions**:
+
 - Check and set appropriately
 - Use os.chmod() when needed
 
@@ -278,10 +309,12 @@ claude_dir = Path.home() / ".claude"
 **Approach**: Use bash where possible, fall back to Python for complex tasks
 
 **Pros**:
+
 - Minimal dependencies for simple operations
 - Fast for basic tasks
 
 **Cons**:
+
 - Complexity of maintaining two languages
 - Inconsistent behavior
 - Hard to test and debug
@@ -293,10 +326,12 @@ claude_dir = Path.home() / ".claude"
 **Approach**: Use JavaScript since Claude Code uses Node.js
 
 **Pros**:
+
 - Same runtime as Claude Code
 - No additional installation
 
 **Cons**:
+
 - Assumes Node.js installed (not guaranteed)
 - Less suitable for system scripting
 - More verbose for file operations
@@ -309,11 +344,13 @@ claude_dir = Path.home() / ".claude"
 **Approach**: Distribute as single Go binary
 
 **Pros**:
+
 - No runtime dependencies
 - Fast execution
 - Single file distribution
 
 **Cons**:
+
 - Must compile for each platform
 - Updates require new binary
 - Build complexity
@@ -332,11 +369,13 @@ claude_dir = Path.home() / ".claude"
 ### Potential Future Changes
 
 **If Python becomes a problem**:
+
 - Could rewrite in Go (single binary)
 - Could use Node.js (leverage Claude Code runtime)
 - Could use shell scripts (Unix-only)
 
 **When to consider rewriting**:
+
 - Python installation becomes common blocker
 - Performance becomes issue (unlikely)
 - Distribution complexity too high
@@ -346,11 +385,13 @@ claude_dir = Path.home() / ".claude"
 ### Python Version Evolution
 
 **When to bump minimum version**:
+
 - Major Python version EOL (e.g., 3.8 EOL in 2024)
 - Need features from newer version
 - Widely adopted new version
 
 **Process**:
+
 - Announce in advance
 - Update documentation
 - Provide migration guide
@@ -395,6 +436,7 @@ def test_full_installation(tmp_path):
 ### Cross-Platform Tests
 
 Run tests on:
+
 - macOS (GitHub Actions)
 - Ubuntu Linux (GitHub Actions)
 - Windows WSL (manual testing initially)

@@ -11,7 +11,6 @@ Exit codes:
 """
 
 import sys
-import os
 from pathlib import Path
 import json
 

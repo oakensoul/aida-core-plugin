@@ -1,6 +1,12 @@
 ---
+type: skill
 name: aida-dispatch
 description: This skill should be used when the user invokes /aida commands (status, doctor, config, upgrade, feedback, bug, feature-request, help) to route them to appropriate action handlers with context awareness and progressive workflow execution.
+version: 0.2.0
+tags:
+  - core
+  - dispatcher
+  - commands
 ---
 
 # AIDA Dispatch
@@ -10,6 +16,7 @@ Routes `/aida` commands to appropriate action handlers, managing AIDA's configur
 ## Activation
 
 This skill activates when:
+
 - User invokes `/aida` command with any action
 - AIDA functionality is needed (configuration, status checks, diagnostics)
 - Command routing and execution orchestration is required
@@ -19,12 +26,16 @@ This skill activates when:
 When this skill activates, check the `<command-args>` tag to determine which action to route:
 
 ### Diagnostic Commands
+
 For `status`, `doctor`, or `upgrade` commands:
+
 - Read `references/diagnostics.md` for execution workflow
 - These are non-interactive commands that execute Python scripts directly
 
 ### Configuration Commands
+
 For `config` command:
+
 - Read `references/config.md` for YAML-based configuration workflow
 - This is an interactive command with:
   - Dynamic menu generation based on installation state
@@ -33,12 +44,16 @@ For `config` command:
   - Automatic skill generation from YAML config
 
 ### Feedback Commands
+
 For `feedback`, `bug`, or `feature-request` commands:
+
 - Read `references/feedback.md` for feedback collection workflow
 - These are interactive commands that collect and submit user input
 
 ### Help Command
+
 For `help` or no arguments:
+
 - Display the help text inline (see Help Text section below)
 - No additional files need to be loaded
 
@@ -47,7 +62,8 @@ For `help` or no arguments:
 **Base Directory:** Provided when skill loads via `<command-message>` tags containing the skill base directory.
 
 **Script Execution:** Construct full paths from base directory:
-```
+
+```text
 {base_directory}/scripts/status.py
 {base_directory}/scripts/doctor.py
 {base_directory}/scripts/upgrade.py
@@ -58,7 +74,8 @@ For `help` or no arguments:
 ```
 
 **Reference Loading:** Reference files are located in `references/` subdirectory:
-```
+
+```text
 {base_directory}/references/diagnostics.md
 {base_directory}/references/config.md
 {base_directory}/references/feedback.md
@@ -97,7 +114,9 @@ If you encounter issues: `/aida doctor`
 ## Resources
 
 ### scripts/
+
 Executable Python scripts for AIDA operations:
+
 - **status.py** - Display current installation and configuration state
 - **doctor.py** - Run health checks and diagnostics
 - **upgrade.py** - Check for and install updates
@@ -108,7 +127,9 @@ Executable Python scripts for AIDA operations:
 - **utils/** - Shared utilities (paths, files, version, questionnaire, etc.)
 
 ### references/
+
 Detailed workflow guides loaded as needed:
+
 - **diagnostics.md** - Workflow for status/doctor/upgrade commands
 - **config.md** - YAML-based configuration flow with auto-detection
 - **feedback.md** - Feedback collection and submission workflow

@@ -1,3 +1,9 @@
+---
+type: reference
+title: "Diagnostics Actions"
+description: "Handles /aida status, /aida doctor, and /aida upgrade commands"
+---
+
 # Diagnostics Actions
 
 Handles `/aida status`, `/aida doctor`, and `/aida upgrade` commands.
@@ -7,21 +13,27 @@ Handles `/aida status`, `/aida doctor`, and `/aida upgrade` commands.
 These are non-interactive commands - just run the script and display output.
 
 ### /aida status
+
 ```bash
 python3 {base_directory}/scripts/status.py
 ```
+
 Display the output directly to the user.
 
 ### /aida doctor
+
 ```bash
 python3 {base_directory}/scripts/doctor.py
 ```
+
 Display the diagnostic results and any recommendations.
 
 ### /aida upgrade
+
 ```bash
 python3 {base_directory}/scripts/upgrade.py
 ```
+
 Display upgrade information and follow any instructions provided.
 
 ---
@@ -40,21 +52,24 @@ Display upgrade information and follow any instructions provided.
 
 ### Level 2: Error Handling
 
-**If script fails (non-zero exit code):**
+#### If script fails (non-zero exit code)
+
 - Display the error message
 - Suggest next steps:
   - For `status` errors: Try `/aida doctor`
   - For `doctor` errors: Check Python version, file permissions
   - For `upgrade` errors: Check network connectivity, permissions
 
-**If script succeeds:**
+#### If script succeeds
+
 - Display output as-is
 - No additional formatting needed (scripts format their own output)
 
 ### Level 3: Output Examples
 
 **Status output:**
-```
+
+```text
 AIDA Status
 ========================================
 ✓ Global Installation: /path/to/.claude
@@ -63,7 +78,8 @@ AIDA Status
 ```
 
 **Doctor output:**
-```
+
+```text
 Running AIDA Diagnostics...
 ========================================
 ✓ Python version: 3.11.0
@@ -73,7 +89,8 @@ Running AIDA Diagnostics...
 ```
 
 **Upgrade output:**
-```
+
+```text
 Checking for AIDA updates...
 ========================================
 Current version: 0.2.0

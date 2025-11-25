@@ -1,6 +1,13 @@
+---
+type: documentation
+title: "Development Guide"
+description: "For contributors and developers working on AIDA"
+audience: contributors
+---
+
 # AIDA Core Plugin - Development Guide
 
-**For contributors and developers working on AIDA**
+## For contributors and developers working on AIDA
 
 This guide covers development setup, code organization, testing, and contribution workflow.
 
@@ -26,6 +33,7 @@ This guide covers development setup, code organization, testing, and contributio
 - **Claude Code**: For testing the plugin
 
 **Check versions**:
+
 ```bash
 python3 --version  # 3.8+
 git --version
@@ -75,7 +83,7 @@ python scripts/install.py
 
 ## Repository Structure
 
-```
+```text
 packages/aida-core-plugin/
 ├── .claude-plugin/               # Plugin metadata (planned)
 │   └── plugin.json
@@ -127,19 +135,23 @@ packages/aida-core-plugin/
 ### Key Directories
 
 **scripts/**: Main Python code
+
 - Entry points (install.py, feedback.py)
 - Utils module (shared functionality)
 
 **templates/**: Jinja2 templates and YAML questionnaires
+
 - blueprints/: Skill generation templates
 - questionnaires/: Question definitions
 
 **tests/**: Test suite
+
 - Unit tests for utils module
 - Integration tests for scripts
 - End-to-end tests (planned)
 
 **docs/**: Comprehensive documentation
+
 - User guides
 - Architecture documentation
 - API reference
@@ -174,7 +186,7 @@ git push origin feature/your-feature-name
 
 Follow conventional commits format:
 
-```
+```text
 type(scope): short description
 
 Longer description if needed.
@@ -183,6 +195,7 @@ Fixes #123
 ```
 
 **Types**:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation only
@@ -192,7 +205,8 @@ Fixes #123
 - `chore`: Maintenance tasks
 
 **Examples**:
-```
+
+```text
 feat(questionnaire): add multiline question type
 fix(install): handle existing directory gracefully
 docs(api): document template_renderer functions
@@ -307,6 +321,7 @@ def test_full_installation(tmp_path, monkeypatch):
 ### Test Coverage
 
 Aim for:
+
 - **Utils module**: > 90% coverage
 - **Scripts**: > 80% coverage
 - **Integration tests**: Major workflows covered
@@ -320,6 +335,7 @@ Follow **PEP 8** with these specifics:
 **Line Length**: 100 characters (slightly relaxed from 79)
 
 **Imports**:
+
 ```python
 # Standard library
 import sys
@@ -336,6 +352,7 @@ from .paths import get_claude_dir
 ```
 
 **Type Hints**:
+
 ```python
 def render_template(
     template_path: Path,
@@ -346,6 +363,7 @@ def render_template(
 ```
 
 **Docstrings** (Google style):
+
 ```python
 def ensure_directory(path: Path) -> Path:
     """Create directory if it doesn't exist.
@@ -403,6 +421,7 @@ mypy --strict scripts/utils/
 ### Adding a New Utility Function
 
 **1. Add to appropriate utils/ module**:
+
 ```python
 # scripts/utils/paths.py
 def get_aida_plugin_dir() -> Path:
@@ -415,6 +434,7 @@ def get_aida_plugin_dir() -> Path:
 ```
 
 **2. Export in \_\_init\_\_.py**:
+
 ```python
 # scripts/utils/__init__.py
 from .paths import (
@@ -431,6 +451,7 @@ __all__ = [
 ```
 
 **3. Add tests**:
+
 ```python
 # tests/test_paths.py
 def test_get_aida_plugin_dir():
@@ -439,25 +460,14 @@ def test_get_aida_plugin_dir():
 ```
 
 **4. Update API documentation**:
-```markdown
-<!-- docs/API.md -->
-#### `get_aida_plugin_dir() -> Path`
 
-Get AIDA plugin directory.
-
-**Returns**: Path to `~/.claude/plugins/aida-core@aida/`
-
-**Example**:
-\`\`\`python
-plugin_dir = get_aida_plugin_dir()
-print(plugin_dir)
-# ~/.claude/plugins/aida-core@aida
-\`\`\`
-```
+Add the new function to docs/API.md with proper documentation including parameters,
+return values, and usage examples.
 
 ### Adding a New Command (Planned)
 
 **1. Create command markdown**:
+
 ```markdown
 <!-- commands/doctor.md -->
 ---
@@ -489,6 +499,7 @@ Shows checkmarks (✓) for passing checks, errors (✗) for failures.
 ```
 
 **2. Create Python script** (if needed):
+
 ```python
 # scripts/doctor.py
 from utils import (
@@ -526,6 +537,7 @@ if __name__ == "__main__":
 ```
 
 **3. Add to plugin.json**:
+
 ```json
 {
   "commands": [
@@ -541,6 +553,7 @@ if __name__ == "__main__":
 ### Adding a New Question to Questionnaire
 
 **Edit questionnaire YAML**:
+
 ```yaml
 # templates/questionnaires/install.yml
 questions:
@@ -560,6 +573,7 @@ questions:
 ```
 
 **Update template to use new variable**:
+
 ```jinja2
 <!-- templates/blueprints/personal-preferences/SKILL.md.jinja2 -->
 ## Preferred Editor
@@ -606,12 +620,14 @@ pytest -s
 ### Common Issues
 
 **Import errors**:
+
 ```python
 # Ensure PYTHONPATH includes scripts/
 export PYTHONPATH="${PYTHONPATH}:$(pwd)/scripts"
 ```
 
 **Template not found**:
+
 ```python
 # Check template paths are relative to script
 SCRIPT_DIR = Path(__file__).parent
@@ -623,6 +639,7 @@ TEMPLATE_DIR = SCRIPT_DIR.parent / "templates"
 ### Version Bumping
 
 **Update version in**:
+
 - `scripts/utils/__init__.py` (`__version__`)
 - `plugin.json` (planned)
 - `CHANGELOG.md`
@@ -657,13 +674,17 @@ See monorepo `scripts/publish.sh` for publishing to separate repositories.
 
 1. **Fork the repository** on GitHub
 2. **Clone your fork**:
+
    ```bash
    git clone git@github.com:YOUR-USERNAME/aida-development.git
    ```
+
 3. **Create a feature branch**:
+
    ```bash
    git checkout -b feature/your-feature
    ```
+
 4. **Make your changes** and add tests
 5. **Run tests**: `pytest`
 6. **Commit**: Follow commit conventions
@@ -673,6 +694,7 @@ See monorepo `scripts/publish.sh` for publishing to separate repositories.
 ### Pull Request Guidelines
 
 **Before submitting**:
+
 - ✅ All tests pass
 - ✅ Code formatted with Black
 - ✅ Linting passes (Flake8)
@@ -681,6 +703,7 @@ See monorepo `scripts/publish.sh` for publishing to separate repositories.
 - ✅ CHANGELOG.md updated (if applicable)
 
 **PR Description should include**:
+
 - What changed
 - Why it changed
 - How to test it

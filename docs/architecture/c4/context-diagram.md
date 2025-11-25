@@ -1,3 +1,9 @@
+---
+type: diagram
+title: "C4 Context Diagram - AIDA Core Plugin"
+diagram-type: c4-context
+---
+
 # C4 Context Diagram - AIDA Core Plugin
 
 **System Context**: How AIDA fits into the larger ecosystem
@@ -38,15 +44,20 @@ graph TB
 ### Actors
 
 #### Developer/User
-**Role**: Primary user of the system
 
-**Activities**:
+##### Role
+
+Primary user of the system
+
+##### Activities
+
 - Writes code using Claude Code
 - Runs `/aida` commands to configure context
 - Creates custom skills/commands/agents
 - Provides feedback via `/aida bug`
 
-**Goals**:
+##### Goals
+
 - Stop repeating project context to Claude
 - Have consistent coding standards applied
 - Quickly onboard to new projects
@@ -55,79 +66,122 @@ graph TB
 ### Systems
 
 #### Claude Code CLI
-**Type**: External system (host)
 
-**Description**: Anthropic's official CLI tool for Claude AI
+##### Type
 
-**Responsibilities**:
+External system (host)
+
+##### Description
+
+Anthropic's official CLI tool for Claude AI
+
+##### Responsibilities
+
 - Provides AI-powered coding assistance
 - Loads and executes plugins
 - Reads skills for context
 - Executes commands
 
-**Integration**: AIDA extends Claude Code via plugin system
+##### Integration
+
+AIDA extends Claude Code via plugin system
 
 #### AIDA Core Plugin
-**Type**: Our system (focus of this diagram)
 
-**Description**: Skills-first architecture plugin
+##### Type
 
-**Responsibilities**:
+Our system (focus of this diagram)
+
+##### Description
+
+Skills-first architecture plugin
+
+##### Responsibilities
+
 - Manages personal and project skills
 - Provides installation and configuration
 - Creates custom skills/commands/agents
 - Integrates feedback system
 
-**Key Features**:
+##### Key Features
+
 - 15 `/aida` commands
 - Interactive questionnaires
 - Template-based skill generation
 - Cross-platform support
 
 #### File System
-**Type**: External system (storage)
 
-**Description**: Local file system for skill storage
+##### Type
 
-**Locations**:
+External system (storage)
+
+##### Description
+
+Local file system for skill storage
+
+##### Locations
+
 - `~/.claude/` - Global configuration
 - `.claude/` - Project-specific configuration
 
-**Data Stored**:
+##### Data Stored
+
 - SKILL.md files
 - settings.json
 - Templates
 - Scripts
 
-**Rationale**: Local-first for privacy and offline support
+##### Rationale
+
+Local-first for privacy and offline support
 
 #### GitHub
-**Type**: External system (optional)
 
-**Description**: Issue tracking for user feedback
+##### Type
 
-**Integration**: Via `gh` CLI tool
+External system (optional)
 
-**Used For**:
+##### Description
+
+Issue tracking for user feedback
+
+##### Integration
+
+Via `gh` CLI tool
+
+##### Used For
+
 - Bug reports (`/aida bug`)
 - Feature requests (`/aida feature-request`)
 - General feedback (`/aida feedback`)
 
-**Data Sent**:
+##### Data Sent
+
 - Issue title and description
 - Environment information (opt-in)
 - User-provided context
 
 #### PKM System (Optional)
-**Type**: External system (optional)
 
-**Description**: Personal Knowledge Management tools
+##### Type
 
-**Examples**: Obsidian, Logseq, Notion, Foam
+External system (optional)
 
-**Integration**: Symlink `.pkm/` → PKM vault directory
+##### Description
 
-**Purpose**:
+Personal Knowledge Management tools
+
+##### Examples
+
+Obsidian, Logseq, Notion, Foam
+
+##### Integration
+
+Symlink `.pkm/` → PKM vault directory
+
+##### Purpose
+
 - Claude can reference detailed project notes
 - Single source of truth for documentation
 - Bi-directional sync (future)
@@ -135,36 +189,43 @@ graph TB
 ## Key Relationships
 
 ### User ↔ Claude Code
+
 - **Nature**: Primary interaction
 - **Protocol**: Command-line interface
 - **Frequency**: Continuous during development
 
 ### User ↔ AIDA
+
 - **Nature**: Configuration and management
 - **Protocol**: `/aida` commands
 - **Frequency**: Setup, then occasional updates
 
 ### Claude Code ↔ AIDA
+
 - **Nature**: Plugin loading and execution
 - **Protocol**: Claude Code Plugin API
 - **Frequency**: Every Claude Code session
 
 ### AIDA ↔ File System
+
 - **Nature**: Data persistence
 - **Protocol**: File I/O operations
 - **Frequency**: During install/configure, then read-only
 
 ### AIDA ↔ GitHub
+
 - **Nature**: Optional feedback submission
 - **Protocol**: `gh` CLI tool
 - **Frequency**: Ad-hoc when user reports issues
 
 ### AIDA ↔ PKM
+
 - **Nature**: Optional documentation link
 - **Protocol**: Filesystem symlink
 - **Frequency**: One-time setup, then read-only
 
 ### Claude Code ↔ File System
+
 - **Nature**: Skill loading
 - **Protocol**: File reading
 - **Frequency**: Every session startup
@@ -172,7 +233,8 @@ graph TB
 ## Use Cases
 
 ### Use Case 1: First-Time Setup
-```
+
+```text
 User → Claude Code: Start session
 Claude Code → AIDA: Load plugin
 User → AIDA: /aida install
@@ -184,7 +246,8 @@ AIDA → User: Success message
 ```
 
 ### Use Case 2: Project Configuration
-```
+
+```text
 User → AIDA: /aida configure
 AIDA → File System: Detect project files
 AIDA → User: Show detected info
@@ -196,7 +259,8 @@ AIDA → User: Success message
 ```
 
 ### Use Case 3: Bug Report
-```
+
+```text
 User → AIDA: /aida bug
 AIDA → User: Show issue template
 User → AIDA: Fill template
@@ -205,7 +269,8 @@ GitHub → User: Issue URL
 ```
 
 ### Use Case 4: Daily Usage
-```
+
+```text
 User → Claude Code: Start session
 Claude Code → File System: Load global skills
 Claude Code → File System: Load project skills (if in project)
@@ -217,10 +282,12 @@ Claude Code → User: Suggestions based on skills
 ## External Dependencies
 
 ### Required
+
 - **Python 3.8+**: For AIDA scripts
 - **Claude Code**: Host system
 
 ### Optional
+
 - **git**: For project detection
 - **gh CLI**: For feedback system
 - **PKM System**: For documentation integration
@@ -228,16 +295,19 @@ Claude Code → User: Suggestions based on skills
 ## Security Boundaries
 
 ### Trust Boundary 1: User ↔ File System
+
 - All data stays local
 - No network transmission of skills
 - Standard file permissions
 
 ### Trust Boundary 2: AIDA ↔ GitHub
+
 - User reviews before submission
 - No automatic data collection
 - Opt-in only
 
 ### Trust Boundary 3: Claude Code ↔ Skills
+
 - Skills are markdown (safe)
 - No code execution
 - Read-only access
@@ -245,11 +315,13 @@ Claude Code → User: Suggestions based on skills
 ## Scalability Considerations
 
 ### Current Scope (M1)
+
 - Single user
 - Local machine only
 - No cloud sync
 
 ### Future Scope
+
 - Team collaboration
 - Cloud sync (optional)
 - Plugin marketplace
@@ -257,10 +329,10 @@ Claude Code → User: Suggestions based on skills
 
 ## Privacy Considerations
 
-- **Data Location**: All local (`~/.claude/`, `.claude/`)
-- **Network**: Only `gh` CLI (opt-in)
-- **Telemetry**: None
-- **Analytics**: None
+- Data Location: All local (`~/.claude/`, `.claude/`)
+- Network: Only `gh` CLI (opt-in)
+- Telemetry: None
+- Analytics: None
 
 User has full control and ownership of all data.
 

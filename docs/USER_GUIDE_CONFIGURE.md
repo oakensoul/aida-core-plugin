@@ -1,10 +1,20 @@
+---
+type: guide
+title: "Configuration Guide"
+audience: users
+---
+
 # AIDA Configuration Guide
 
-**Complete walkthrough for configuring AIDA for your projects**
+Complete walkthrough for configuring AIDA for your projects
 
-This guide walks you through using the unified `/aida config` command (introduced in v0.2.0) to set up project-specific context, skills, and preferences.
+This guide walks you through using the unified `/aida config` command
+(introduced in v0.2.0) to set up project-specific context, skills, and
+preferences.
 
-**Note**: As of v0.2.0, AIDA uses a unified `/aida config` command (not separate install/configure commands) with smart auto-detection that reduces questions from 22 → 2!
+Note: As of v0.2.0, AIDA uses a unified `/aida config` command (not separate
+install/configure commands) with smart auto-detection that reduces questions
+from 22 → 2!
 
 ## Table of Contents
 
@@ -33,6 +43,7 @@ Before configuring a project, you should:
 Select "Set up AIDA globally" from the menu. This is optional but recommended.
 
 **Check if installed:**
+
 ```bash
 /aida status
 
@@ -55,17 +66,20 @@ cd /path/to/your-project/
 Run `/aida configure` when:
 
 ### First Time Setup
+
 - ✅ Starting work on a new project with AIDA
 - ✅ First time using AIDA on an existing project
 - ✅ Want Claude to understand project-specific context
 
 ### Updates
+
 - ✅ Project architecture has changed significantly
 - ✅ New conventions or patterns adopted
 - ✅ Team structure or testing approach changed
 - ✅ Documentation requirements updated
 
 ### Don't Reconfigure For
+
 - ❌ Minor code changes
 - ❌ Adding new features (unless changing architecture)
 - ❌ Bug fixes
@@ -89,14 +103,15 @@ Ensure you're at the project root (where `package.json`, `pyproject.toml`, `.git
 
 #### 2.1 Installation Check
 
-```
+```text
 Checking AIDA installation...
 ✓ Personal skills found
 ✓ Ready to configure project
 ```
 
 **If check fails:**
-```
+
+```text
 ✗ AIDA not installed
 
 Run /aida install first to set up personal preferences.
@@ -108,7 +123,7 @@ Solution: Run `/aida install` first (see [Installation Guide](USER_GUIDE_INSTALL
 
 If you've already configured this project:
 
-```
+```text
 ⚠ Project already configured at:
   .claude/skills/project-context/
   .claude/skills/project-documentation/
@@ -119,6 +134,7 @@ Do you want to reconfigure? This will overwrite existing project skills.
 ```
 
 **Choices:**
+
 - `N` (default): Keep existing configuration
 - `y`: Reconfigure (existing skills will be backed up)
 
@@ -128,7 +144,7 @@ Do you want to reconfigure? This will overwrite existing project skills.
 
 AIDA automatically detects project details:
 
-```
+```text
 Detecting project...
 
 ✓ Git repository: yes
@@ -142,6 +158,7 @@ Root directory: /Users/me/projects/my-awesome-app
 ```
 
 **Detection includes:**
+
 - Git repository status
 - Primary language(s)
 - Frameworks and libraries
@@ -156,7 +173,7 @@ See [Project Detection](#project-detection) for details.
 
 AIDA asks 5 questions about your project:
 
-```
+```text
 Let's configure AIDA for this project.
 This takes about 2 minutes.
 
@@ -171,7 +188,7 @@ See [Questionnaire Deep Dive](#questionnaire-deep-dive) for detailed explanation
 
 After the questionnaire, you can optionally link your Personal Knowledge Management system:
 
-```
+```text
 PKM Integration (Optional)
 ───────────────────────────────────────────────────────────
 
@@ -185,7 +202,7 @@ See [PKM Integration](#pkm-integration) for details.
 
 #### 2.6 Skill Creation
 
-```
+```text
 Creating project skills...
 
 ✓ Created .claude/skills/project-context/SKILL.md
@@ -197,7 +214,7 @@ Creating project skills...
 
 #### 2.7 Success Message
 
-```
+```text
 ╔══════════════════════════════════════════════════════════╗
 ║                                                          ║
 ║   ✓ Project Configuration Complete!                     ║
@@ -229,7 +246,7 @@ The configuration questionnaire asks 5 questions about your project.
 
 ### Question 1: Project Type
 
-```
+```text
 What type of project is this?
 
 Choose one:
@@ -250,6 +267,7 @@ Your choice: _
 **Purpose**: Provides high-level project context
 
 **Common choices:**
+
 - **Option 1**: React, Vue, Angular apps
 - **Option 2**: REST APIs, GraphQL servers
 - **Option 3**: Next.js, Django, Rails full-stack apps
@@ -262,7 +280,7 @@ Your choice: _
 
 ### Question 2: Team Collaboration Style
 
-```
+```text
 What is your team collaboration style for this project?
 
 Choose one:
@@ -280,6 +298,7 @@ Your choice [1]: _
 **Default**: Option 1 (Solo project)
 
 **Choose based on:**
+
 - **Option 1**: Personal projects, experiments
 - **Option 2**: Startup, small company team
 - **Option 3**: Established company, defined process
@@ -290,7 +309,7 @@ Your choice [1]: _
 
 ### Question 3: Testing Approach
 
-```
+```text
 What is your testing approach for this project?
 
 Choose one:
@@ -309,6 +328,7 @@ Your choice [2]: _
 **Default**: Option 2 (Unit tests for critical paths)
 
 **Choose based on:**
+
 - **Option 1**: Quick prototypes, POCs
 - **Option 2**: Standard approach for most projects
 - **Option 3**: High-quality production code
@@ -320,7 +340,7 @@ Your choice [2]: _
 
 ### Question 4: Documentation Level
 
-```
+```text
 How much documentation should this project maintain?
 
 Choose one:
@@ -337,6 +357,7 @@ Your choice [2]: _
 **Default**: Option 2 (Standard)
 
 **Choose based on:**
+
 - **Option 1**: Internal tools, simple projects
 - **Option 2**: Most projects
 - **Option 3**: User-facing products, libraries
@@ -346,7 +367,7 @@ Your choice [2]: _
 
 ### Question 5: Project-Specific Conventions
 
-```
+```text
 Are there any project-specific conventions or patterns to follow?
 
 Examples:
@@ -366,6 +387,7 @@ _
 **Optional**: Can leave blank
 
 **Good examples:**
+
 - "Repository pattern for data access"
 - "Use feature flags for all UI changes"
 - "API responses must include request IDs"
@@ -373,6 +395,7 @@ _
 - "All components must have Storybook stories"
 
 **Bad examples:**
+
 - "Write good code" (too vague)
 - Listing basic conventions already in coding standards
 
@@ -387,6 +410,7 @@ AIDA automatically detects project characteristics to provide smart defaults.
 #### Language Detection
 
 **Looks for:**
+
 - `package.json` → JavaScript/TypeScript
 - `pyproject.toml`, `setup.py`, `requirements.txt` → Python
 - `Cargo.toml` → Rust
@@ -400,11 +424,13 @@ AIDA automatically detects project characteristics to provide smart defaults.
 #### Framework Detection
 
 **JavaScript/TypeScript:**
+
 - React, Vue, Angular, Svelte (from dependencies)
 - Next.js, Gatsby, Remix (from config files)
 - Express, Fastify, NestJS (from dependencies)
 
 **Python:**
+
 - Django (manage.py, settings.py)
 - Flask (app.py patterns)
 - FastAPI (from dependencies)
@@ -414,15 +440,18 @@ AIDA automatically detects project characteristics to provide smart defaults.
 #### Tool Detection
 
 **Build tools:**
+
 - Webpack, Vite, Parcel (config files)
 - Babel, ESBuild, SWC (config files)
 
 **Testing:**
+
 - Jest, Vitest, Mocha (config files)
 - PyTest, unittest (test directories)
 - Go testing (test files)
 
 **CI/CD:**
+
 - GitHub Actions (`.github/workflows/`)
 - GitLab CI (`.gitlab-ci.yml`)
 - CircleCI (`.circleci/config.yml`)
@@ -431,7 +460,7 @@ AIDA automatically detects project characteristics to provide smart defaults.
 
 Detection isn't perfect. You can manually specify in Question 5 (conventions):
 
-```
+```text
 Your answer:
 Project uses custom build system (Make + shell scripts)
 Testing via custom test runner in /tests
@@ -443,7 +472,7 @@ After configuration, AIDA creates project-specific files:
 
 ### Directory Structure
 
-```
+```text
 your-project/
 ├── .claude/
 │   ├── skills/
@@ -577,6 +606,7 @@ AIDA can integrate with Personal Knowledge Management systems.
 If you maintain project documentation in Obsidian, Notion, Logseq, or similar tools, AIDA can create a symlink to your notes.
 
 **Benefits:**
+
 - Claude can reference your detailed notes
 - Keep single source of truth
 - Documentation stays in your PKM system
@@ -585,7 +615,7 @@ If you maintain project documentation in Obsidian, Notion, Logseq, or similar to
 
 During configuration:
 
-```
+```text
 Create a .pkm/ symlink in this project? [y/N]: y
 
 Where is your PKM vault or project notes directory?
@@ -596,7 +626,7 @@ Path: ~/Obsidian/Projects/my-awesome-app
 
 **Result:**
 
-```
+```text
 your-project/
 ├── .pkm/  → ~/Obsidian/Projects/my-awesome-app
 │   ├── Architecture.md
@@ -643,7 +673,7 @@ After configuration, verify everything works:
 
 **Expected output:**
 
-```
+```text
 AIDA Status
 
 Installation: ✓ Installed
@@ -672,7 +702,7 @@ Detected:
 
 **Expected output:**
 
-```
+```text
 Global Skills:
   • personal-preferences
   • work-patterns
@@ -695,7 +725,7 @@ Shows full content of the project context skill.
 
 Ask Claude a project-specific question:
 
-```
+```text
 You: What testing framework should I use for this feature?
 
 Claude: Based on your project configuration, you should use Jest
@@ -713,7 +743,7 @@ AIDA supports configuration for multiple projects simultaneously.
 
 Each project has its own `.claude/` directory:
 
-```
+```text
 ~/projects/
 ├── project-a/
 │   └── .claude/
@@ -750,7 +780,7 @@ No need to reconfigure or restart Claude Code!
 
 Your personal preferences apply to all projects:
 
-```
+```text
 ~/.claude/skills/
 ├── personal-preferences/   ← Active in ALL projects
 └── work-patterns/          ← Active in ALL projects
@@ -786,6 +816,7 @@ Each project has appropriate context automatically!
 **Cause**: `/aida install` hasn't been run
 
 **Solution**:
+
 ```bash
 /aida install
 # Complete installation first
@@ -798,6 +829,7 @@ cd your-project/
 **Cause**: Project detection works best with git repos
 
 **Solution**:
+
 ```bash
 git init
 # OR run from a different directory
@@ -811,6 +843,7 @@ Configuration will work, but detection may be limited.
 **Cause**: Cannot write to project directory
 
 **Solution**:
+
 ```bash
 # Check permissions
 ls -la .claude/
@@ -829,7 +862,8 @@ ls -la .
 **Not critical**: Detection is just for context. Manual specification in Question 5 overrides.
 
 **Example**:
-```
+
+```text
 Your answer (Question 5):
 Actually uses Python with Flask (not detected correctly)
 ```
@@ -843,11 +877,13 @@ Actually uses Python with Flask (not detected correctly)
 #### Symlink Creation Failed
 
 **Possible causes:**
+
 1. Invalid path provided
 2. Target directory doesn't exist
 3. Permission issues
 
 **Solution**:
+
 ```bash
 # Verify path exists
 ls ~/path/to/pkm/directory
@@ -862,6 +898,7 @@ ls -la .pkm
 #### Claude Can't Read PKM Notes
 
 **Check:**
+
 1. Symlink exists: `ls -la .pkm`
 2. Target exists: `ls ~/.pkm/../`
 3. Readable: `cat .pkm/some-note.md`
@@ -878,12 +915,14 @@ ls -la .pkm
 ### When to Configure
 
 **DO configure:**
+
 - ✅ Starting new project with AIDA
 - ✅ First time on existing project
 - ✅ Architecture changed significantly
 - ✅ Team or process changed
 
 **DON'T reconfigure:**
+
 - ❌ Minor refactorings
 - ❌ Adding new features (unless pattern changes)
 - ❌ Dependency updates
@@ -892,25 +931,30 @@ ls -la .pkm
 ### Answering Questions
 
 **Be specific:**
+
 - ✅ "Repository pattern with interfaces, services in /domain"
 - ❌ "Clean code"
 
 **Reference existing docs:**
+
 - ✅ "See architecture.md in /docs for details"
 - ❌ Repeating entire architecture
 
 **Update when needed:**
+
 - ✅ Reconfigure when conventions change
 - ❌ Leave outdated conventions
 
 ### Managing Multiple Projects
 
 **Consistent structure:**
+
 - Use same skill names across projects
 - Follow similar documentation patterns
 - Makes switching contexts easier
 
 **Project-specific only:**
+
 - Keep project skills focused on THIS project
 - Don't duplicate personal preferences
 - Personal preferences live in `~/.claude/skills/`
@@ -918,11 +962,13 @@ ls -la .pkm
 ### PKM Integration
 
 **Keep it focused:**
+
 - Link project-specific notes only
 - Don't link your entire vault
 - Too much information can be overwhelming
 
 **Structure helps:**
+
 - Organize PKM notes clearly
 - Use consistent naming
 - Link to most relevant notes
@@ -930,16 +976,19 @@ ls -la .pkm
 ### Maintenance
 
 **Periodic review:**
+
 - Check configuration quarterly
 - Update if project evolved
 - Remove outdated conventions
 
 **Version control:**
+
 - **DO** commit `.claude/skills/` to git
 - **DO** commit `.claude/settings.json`
 - **DON'T** commit `.pkm/` symlink (add to `.gitignore`)
 
 **Team sharing:**
+
 - Share project skills with team
 - Everyone gets same context
 - Commit to repository

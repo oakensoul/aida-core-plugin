@@ -1,12 +1,18 @@
-# ADR-003: Jinja2 for Template Rendering
+---
+type: adr
+title: "ADR-003: Jinja2 for Template Rendering"
+status: accepted
+date: "2025-11-01"
+deciders:
+  - "@oakensoul"
+---
 
-**Status**: Accepted
-**Date**: 2025-11-01
-**Deciders**: @oakensoul
+# ADR-003: Jinja2 for Template Rendering
 
 ## Context
 
 AIDA needs to generate skill files from templates, incorporating user responses from questionnaires. Templates must support:
+
 - Variable substitution
 - Conditional content
 - Loops and iteration
@@ -20,21 +26,24 @@ Use **Jinja2** for all template rendering.
 
 ## Rationale
 
-**Why Jinja2?**
+### Why Jinja2?
+
 - Industry standard (Ansible, Flask, Salt use it)
 - Powerful: variables, conditionals, loops, filters, includes
 - Well-documented and mature
 - Great error messages
 - Widely known by developers
 
-**Advantages**:
+### Advantages
+
 - `{{ variable }}` syntax is clear and familiar
 - `{% if %}` conditionals for optional content
 - `{% for %}` loops for repeated elements
 - Filters: `{{ name | title }}`
 - Template inheritance and includes
 
-**Example**:
+### Example
+
 ```jinja2
 ---
 name: {{ skill_name }}
@@ -50,12 +59,14 @@ name: {{ skill_name }}
 
 ## Consequences
 
-**Positive**:
+### Positive
+
 - ✅ Powerful templating with minimal learning curve
 - ✅ Great documentation and community support
 - ✅ Easy to debug with clear error messages
 
-**Negative**:
+### Negative
+
 - ❌ Adds Python dependency (acceptable given ADR-002)
 - ❌ Learning curve for template syntax (minimal)
 

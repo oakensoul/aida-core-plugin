@@ -1,10 +1,17 @@
+---
+type: documentation
+title: "Command Examples"
+description: "Real-world examples of using AIDA commands in different scenarios"
+audience: users
+---
+
 # AIDA Command Examples
 
 Real-world examples of using AIDA commands in different scenarios.
 
 ## Scenario 1: New Developer Setup
 
-**Sarah is a new developer setting up AIDA for the first time**
+### Sarah is a new developer setting up AIDA for the first time
 
 ```bash
 # Day 1: Check if AIDA is working
@@ -38,7 +45,7 @@ Real-world examples of using AIDA commands in different scenarios.
 
 ## Scenario 2: Starting a New Project
 
-**Alex is starting a new Python CLI project with AIDA**
+### Alex is starting a new Python CLI project with AIDA
 
 ```bash
 # Create project directory
@@ -75,7 +82,7 @@ git init
 
 ## Scenario 3: Updating Preferences
 
-**Jordan changed jobs and needs to update settings**
+### Jordan changed jobs and needs to update settings
 
 ```bash
 # Check current settings
@@ -103,7 +110,7 @@ git init
 
 ## Scenario 4: Working with Multiple Projects
 
-**Casey works on several projects with different configurations**
+### Casey works on several projects with different configurations
 
 ```bash
 # Project 1: Django web app
@@ -140,7 +147,7 @@ cd ~/work/django-project
 
 ## Scenario 5: Troubleshooting Issues
 
-**Morgan is having issues with AIDA**
+### Morgan is having issues with AIDA
 
 ```bash
 # Something seems wrong
@@ -175,7 +182,7 @@ gh auth login
 
 ## Scenario 6: Viewing Project Configuration
 
-**Taylor wants to see what AIDA knows about their project**
+### Taylor wants to see what AIDA knows about their project
 
 ```bash
 cd ~/my-monorepo
@@ -204,7 +211,7 @@ cd ~/my-monorepo
 
 ## Scenario 7: Reporting a Bug
 
-**Sam found a bug in AIDA**
+### Sam found a bug in AIDA
 
 ```bash
 # Report the bug with automatic environment info
@@ -234,7 +241,7 @@ cd ~/my-monorepo
 
 ## Scenario 8: Checking for Updates
 
-**Riley wants to know if there's a new version**
+### Riley wants to know if there's a new version
 
 ```bash
 # Check for updates
@@ -265,7 +272,7 @@ cd ~/my-monorepo
 
 ## Scenario 9: Fresh Project with Auto-Detection
 
-**Jordan creates a new project and AIDA detects everything automatically**
+### Jordan creates a new project and AIDA detects everything automatically
 
 ```bash
 # Create a typical Python project structure
@@ -308,7 +315,7 @@ cat .claude/aida-project-context.yml
 
 ## Scenario 10: Updating Project Configuration
 
-**Casey's project evolved and needs config update**
+### Casey's project evolved and needs config update
 
 ```bash
 # Project now has tests and CI/CD
@@ -339,6 +346,7 @@ ls -d tests .github/workflows
 ## Quick Reference
 
 ### First-Time User Journey
+
 ```bash
 /aida config              # Set up globally (2-3 questions)
 /aida status              # Verify installation
@@ -349,6 +357,7 @@ cd ~/my-project
 ```
 
 ### Daily Usage
+
 ```bash
 /aida status              # Quick status check
 /aida doctor              # If something seems wrong
@@ -358,6 +367,7 @@ cd ~/my-project
 ```
 
 ### Maintenance
+
 ```bash
 /aida upgrade             # Check for updates
 /aida doctor              # Verify health after upgrade
@@ -377,6 +387,7 @@ cd ~/my-project
 ---
 
 For more details, see:
+
 - [README.md](../README.md) - Overview and quick start
 - [USER_GUIDE_INSTALL.md](USER_GUIDE_INSTALL.md) - Installation guide
 - [USER_GUIDE_CONFIGURE.md](USER_GUIDE_CONFIGURE.md) - Configuration guide

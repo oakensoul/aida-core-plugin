@@ -6,8 +6,6 @@ including JSON manipulation and template file operations.
 
 import json
 import os
-import sys
-import tempfile
 import time
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -71,17 +69,17 @@ def read_file(path: Path, encoding: str = "utf-8", max_size: int = MAX_FILE_SIZE
     except FileNotFoundError as e:
         raise FileOperationError(
             f"File not found: {path}",
-            f"Verify the file path is correct."
+            "Verify the file path is correct."
         ) from e
     except PermissionError as e:
         raise FileOperationError(
             f"Permission denied reading file: {path}",
-            f"Check file permissions or run with appropriate access."
+            "Check file permissions or run with appropriate access."
         ) from e
     except UnicodeDecodeError as e:
         raise FileOperationError(
             f"Failed to decode file (encoding: {encoding}): {path}",
-            f"Try a different encoding or verify the file is text format."
+            "Try a different encoding or verify the file is text format."
         ) from e
     except OSError as e:
         raise FileOperationError(
@@ -155,7 +153,7 @@ def write_file(path: Path, content: str, encoding: str = "utf-8",
     except PermissionError as e:
         raise FileOperationError(
             f"Permission denied writing file: {path}",
-            f"Check file permissions or run with appropriate access."
+            "Check file permissions or run with appropriate access."
         ) from e
     except OSError as e:
         raise FileOperationError(
@@ -225,7 +223,7 @@ def write_json(path: Path, data: Dict[str, Any], indent: int = 2,
     except TypeError as e:
         raise ConfigurationError(
             f"Cannot serialize data to JSON: {e}",
-            f"Ensure all data types are JSON-serializable (str, int, float, bool, list, dict, None)."
+            "Ensure all data types are JSON-serializable (str, int, float, bool, list, dict, None)."
         ) from e
     except FileOperationError:
         # Re-raise file operation errors as-is
@@ -260,7 +258,7 @@ def write_yaml(path: Path, data: Dict[str, Any], create_parents: bool = True) ->
     except yaml.YAMLError as e:
         raise ConfigurationError(
             f"Cannot serialize data to YAML: {e}",
-            f"Ensure all data types are YAML-serializable."
+            "Ensure all data types are YAML-serializable."
         ) from e
     except FileOperationError:
         # Re-raise file operation errors as-is

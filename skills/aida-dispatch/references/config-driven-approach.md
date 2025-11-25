@@ -1,3 +1,9 @@
+---
+type: reference
+title: "Config-Driven Configuration Approach"
+description: "Detect facts, save to config file with nulls, ask about gaps, and update"
+---
+
 # Config-Driven Configuration Approach
 
 ## Overview
@@ -11,7 +17,7 @@ Instead of complex conditional logic, use a simple **detect → save → ask abo
 
 ## Flow Diagram
 
-```
+```text
 /aida config
     ↓
 ┌─────────────────────────┐
@@ -48,14 +54,16 @@ Instead of complex conditional logic, use a simple **detect → save → ask abo
 
 ### Location Options
 
-**Option A: Project-specific file**
-```
+#### Option A: Project-specific file
+
+```text
 .claude/
   aida.yml          # Global settings (existing)
   project.yml       # THIS project's config (new)
 ```
 
-**Option B: Nested in aida.yml**
+#### Option B: Nested in aida.yml
+
 ```yaml
 # .claude/aida.yml
 version: "0.2.0"

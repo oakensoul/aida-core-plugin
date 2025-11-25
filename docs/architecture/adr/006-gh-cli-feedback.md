@@ -1,17 +1,24 @@
-# ADR-006: GitHub CLI for Feedback System
+---
+type: adr
+title: "ADR-006: GitHub CLI for Feedback System"
+status: accepted
+date: "2025-11-01"
+deciders:
+  - "@oakensoul"
+---
 
-**Status**: Accepted
-**Date**: 2025-11-01
-**Deciders**: @oakensoul
+# ADR-006: GitHub CLI for Feedback System
 
 ## Context
 
 AIDA needs a feedback mechanism for users to:
+
 - Report bugs
 - Request features
 - Provide general feedback
 
 Options for implementation:
+
 1. GitHub CLI (`gh`) to create issues
 2. Direct GitHub API calls
 3. Web form submission
@@ -24,14 +31,15 @@ Considerations: ease of use, authentication, privacy, maintenance.
 
 Use **GitHub CLI (`gh`)** to create GitHub issues for all feedback.
 
-Commands:
+### Commands
+
 - `/aida bug` - Bug reports
 - `/aida feature-request` - Feature requests
 - `/aida feedback` - General feedback
 
 ## Rationale
 
-**Why gh CLI?**
+### Why gh CLI?
 
 1. **Official Tool**: Maintained by GitHub, well-supported
 2. **Authentication**: Uses existing `gh auth` - no tokens to manage
@@ -40,8 +48,9 @@ Commands:
 5. **No Server**: No infrastructure needed
 6. **Transparent**: Users can see exactly what's submitted
 
-**Process**:
-```
+### Process
+
+```text
 /aida bug
   ↓
 Collect environment info (Python version, OS, etc.)
@@ -57,7 +66,8 @@ gh issue create --title "..." --body "..."
 GitHub issue created
 ```
 
-**Benefits**:
+### Benefits
+
 - No AIDA server infrastructure
 - GitHub's issue tracker (labels, search, discussion)
 - Public or private repository option
@@ -66,20 +76,23 @@ GitHub issue created
 
 ## Consequences
 
-**Positive**:
+### Positive
+
 - ✅ Zero infrastructure cost
 - ✅ Leverages GitHub's excellent issue system
 - ✅ User controls submission (reviews first)
 - ✅ No auth tokens to manage
 - ✅ Simple Python implementation
 
-**Negative**:
+### Negative
+
 - ❌ Requires `gh` CLI installed
 - ❌ Requires GitHub authentication
 - ❌ Only works with GitHub (not GitLab, etc.)
 - ❌ Requires internet connection
 
-**Mitigation**:
+### Mitigation
+
 - Check for `gh` CLI in `/aida doctor`
 - Provide installation instructions
 - Fallback: Manual issue creation instructions
@@ -148,7 +161,8 @@ def get_environment_info() -> dict:
 ### Templates
 
 **Bug Report Template**:
-```markdown
+
+```text
 ## Bug Description
 
 [User describes the bug here]
@@ -176,7 +190,8 @@ def get_environment_info() -> dict:
 ```
 
 **Feature Request Template**:
-```markdown
+
+```text
 ## Problem
 
 [What problem does this solve?]
@@ -202,7 +217,8 @@ def get_environment_info() -> dict:
 
 **Pros**: No external dependency
 
-**Cons**:
+#### Cons
+
 - Token management complexity
 - Security concerns (token storage)
 - Rate limiting
@@ -216,7 +232,8 @@ def get_environment_info() -> dict:
 
 **Pros**: No CLI dependency
 
-**Cons**:
+#### Cons
+
 - Requires web server
 - Infrastructure cost
 - Auth complexity
@@ -230,7 +247,8 @@ def get_environment_info() -> dict:
 
 **Pros**: Universal, no special tools
 
-**Cons**:
+#### Cons
+
 - Email setup complexity
 - Spam filtering issues
 - No tracking system
@@ -242,7 +260,7 @@ def get_environment_info() -> dict:
 
 If `gh` not available:
 
-```
+```text
 ❌ gh CLI not found
 
 To report this bug, please:
@@ -259,6 +277,7 @@ https://github.com/oakensoul/aida-core-plugin/issues/new
 ### Plugin System for Feedback
 
 Could make feedback system extensible:
+
 ```python
 # Default: GitHub via gh
 feedback_backend = GithubFeedback()
@@ -275,6 +294,7 @@ For M1: GitHub only is sufficient.
 ### Anonymous Feedback
 
 Currently requires GitHub account. Could add:
+
 - Anonymous feedback endpoint
 - Public Google Form
 - Email option

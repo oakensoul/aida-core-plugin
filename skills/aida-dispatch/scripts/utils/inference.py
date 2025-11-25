@@ -5,9 +5,8 @@ user preferences, tools, and patterns automatically. This reduces the
 number of questions AIDA needs to ask during installation.
 """
 
-import re
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Any
+from typing import Dict, Optional, Set, Any
 
 from .files import file_exists, read_file, FileOperationError
 

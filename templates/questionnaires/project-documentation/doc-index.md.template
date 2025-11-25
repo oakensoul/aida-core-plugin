@@ -1,8 +1,15 @@
 ---
+type: reference
+name: documentation-index
+description: Project documentation index and navigation guide
+version: 0.2.0
+tags:
+  - documentation
+  - index
+  - reference
 created: {{ CREATED_DATE }}
 modified: {{ CREATED_DATE }}
 project: {{ PROJECT_NAME }}
-type: documentation-index
 ---
 
 # Documentation Index

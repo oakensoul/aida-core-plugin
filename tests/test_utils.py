@@ -38,8 +38,6 @@ from utils import (
     file_exists,
     directory_exists,
     # Questionnaire system
-    run_questionnaire,
-    # Template rendering
     render_template,
     render_filename,
     render_skill_directory,

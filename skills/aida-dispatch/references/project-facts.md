@@ -1,3 +1,9 @@
+---
+type: reference
+title: "Project Configuration Facts"
+description: "All facts AIDA needs for project configuration, categorized by detection method"
+---
+
 # Project Configuration Facts
 
 This document defines all facts AIDA needs for project configuration, categorized by detection method.
@@ -5,6 +11,7 @@ This document defines all facts AIDA needs for project configuration, categorize
 ## Auto-Detectable Facts (No Questions Needed)
 
 ### File System Facts
+
 - ✅ **Project name** - from directory name
 - ✅ **Project root** - from context
 - ✅ **Has README** - check for README.md/README.rst/README.txt
@@ -17,26 +24,31 @@ This document defines all facts AIDA needs for project configuration, categorize
 - ✅ **Docs directory** - check for docs/, doc/, documentation/
 
 ### Version Control Facts
+
 - ✅ **Is git repo** - check for .git/
 - ✅ **Main branch name** - git symbolic-ref refs/remotes/origin/HEAD
 - ✅ **Uses worktrees** - detect from git config / .bare/ structure
 - ✅ **Remote URL** - git remote get-url origin
 
 ### Language & Tools Facts
+
 - ✅ **Primary language** - analyze file extensions
 - ✅ **All languages** - analyze all file extensions
 - ✅ **Package manager** - package.json, requirements.txt, Gemfile, go.mod, Cargo.toml, composer.json
 - ✅ **Build tools** - Makefile, CMakeLists.txt, build.gradle, etc.
 
 ### Testing Facts
-- ✅ **Has tests** - check for test/, tests/, spec/, __tests__/
+
+- ✅ **Has tests** - check for test/, tests/, spec/, **tests**/
 - ✅ **Testing framework** - pytest.ini, jest.config.js, .rspec, etc.
 
 ### CI/CD Facts
+
 - ✅ **Has CI/CD** - check for .github/workflows/, .gitlab-ci.yml, .circleci/, etc.
 - ✅ **CI system** - which CI files exist
 
 ### Repository Facts
+
 - ✅ **GitHub repo** - if remote URL contains github.com
 - ✅ **GitLab repo** - if remote URL contains gitlab
 - ✅ **Organization/Owner** - parse from remote URL
@@ -45,6 +57,7 @@ This document defines all facts AIDA needs for project configuration, categorize
 ## Inferrable Facts (Can Guess, May Ask for Confirmation)
 
 ### Project Classification
+
 - 🔍 **Project type** - infer from structure/files
   - Web app (backend) - has server framework files
   - Web app (frontend) - has React/Vue/Angular
@@ -73,6 +86,7 @@ This document defines all facts AIDA needs for project configuration, categorize
 ## Facts We Must Ask (Cannot Detect)
 
 ### Preferences & Intentions
+
 - ❓ **Branching model** - GitHub Flow vs Git Flow vs Trunk-based
   - Skip if: solo project with no specific workflow
 
@@ -87,6 +101,7 @@ This document defines all facts AIDA needs for project configuration, categorize
   - Skip if: not a library or backend API
 
 ### Integration Configuration (Only if Using)
+
 - ❓ **GitHub Project board** - only if issue_tracking = "GitHub Projects"
   - Need: org/user, project name
 
@@ -97,6 +112,7 @@ This document defines all facts AIDA needs for project configuration, categorize
   - Need: space names/keys
 
 ### Setup Offers (Only if Missing)
+
 - ❓ **Create missing files** - only if they don't exist
   - README, LICENSE, .gitignore, CHANGELOG, CONTRIBUTING
   - Docker files
@@ -106,23 +122,28 @@ This document defines all facts AIDA needs for project configuration, categorize
 ## Configuration Strategy
 
 ### Phase 1: Detection
+
 1. Detect all auto-detectable facts
 2. Infer all inferrable facts
 3. Build confidence scores for inferences
 
 ### Phase 2: Smart Questions
+
 Only ask about:
+
 1. **Missing critical facts** we couldn't detect or infer
 2. **Low-confidence inferences** that need confirmation
 3. **User preferences** we can't know (branching model, conventions)
 4. **Integration details** for systems they're using
 
 Never ask about:
+
 - Facts we already detected (don't ask "do you have a README?" if we see one)
 - Things that don't apply (don't ask about JIRA if using GitHub)
 - Optional details unless relevant
 
 ### Phase 3: Minimal Friction
+
 - If we detected everything important, ask 0-3 questions
 - If project is simple/solo, ask 0-1 questions
 - If complex/team project, ask 3-8 questions max
@@ -131,20 +152,26 @@ Never ask about:
 ## Example Question Counts
 
 ### Simple Solo Project (Personal script)
-**Detected:** Git repo, Python, no tests, no CI, README only
-**Questions:** 0-1
+
+- **Detected:** Git repo, Python, no tests, no CI, README only
+- **Questions:** 0-1
+
 - Maybe ask about branching model preference (or skip if solo)
 
 ### Standard GitHub Project
-**Detected:** Git, GitHub remote, has tests, has CI, good docs
-**Questions:** 2-3
+
+- **Detected:** Git, GitHub remote, has tests, has CI, good docs
+- **Questions:** 2-3
+
 - Branching model preference
 - GitHub Project board? (if using)
 - Project conventions (optional)
 
 ### Complex Team Project
-**Detected:** Git, JIRA in commits, multiple languages, extensive tests
-**Questions:** 5-8
+
+- **Detected:** Git, JIRA in commits, multiple languages, extensive tests
+- **Questions:** 5-8
+
 - Branching model
 - JIRA project key/URL
 - Confluence spaces?

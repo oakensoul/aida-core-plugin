@@ -7,7 +7,6 @@ progress tracking.
 
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-import sys
 
 try:
     import yaml

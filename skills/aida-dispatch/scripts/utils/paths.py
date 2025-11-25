@@ -143,8 +143,8 @@ def ensure_directory(path: Path, permissions: int = 0o755) -> Path:
     except PermissionError as e:
         raise PathError(
             f"Permission denied when creating directory: {expanded_path}",
-            f"Check that you have write permissions to the parent directory.\n"
-            f"You may need to run with elevated permissions or change ownership."
+            "Check that you have write permissions to the parent directory.\n"
+            "You may need to run with elevated permissions or change ownership."
         ) from e
 
     except OSError as e:
@@ -219,7 +219,7 @@ def resolve_path(
     if must_exist and not resolved.exists():
         raise PathError(
             f"Path does not exist: {resolved}",
-            f"Verify the path is correct and accessible."
+            "Verify the path is correct and accessible."
         )
 
     return resolved

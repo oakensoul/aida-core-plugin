@@ -1,3 +1,9 @@
+---
+type: diagram
+title: "C4 Container Diagram - AIDA Core Plugin"
+diagram-type: c4-container
+---
+
 # C4 Container Diagram - AIDA Core Plugin
 
 **Container Level**: Internal structure of AIDA and its major components
@@ -97,104 +103,137 @@ graph TB
 
 ### Commands Container
 
-**Type**: Markdown files
+#### Type
 
-**Technology**: Claude Code command system
+Markdown files
 
-**Location**: `.claude-plugin/commands/` (planned)
+#### Technology
 
-**Responsibilities**:
+Claude Code command system
+
+#### Location
+
+`.claude-plugin/commands/` (planned)
+
+#### Responsibilities
+
 - Define `/aida` command interface
 - Provide user-facing documentation
 - Delegate to Python scripts
 
-**Contents**:
+#### Contents
+
 - 15 command markdown files
 - Each defines usage, arguments, examples
 
-**Interactions**:
+#### Interactions
+
 - User invokes commands
 - Commands call Python scripts
 - Claude Code loads and parses
 
 ### Skills Container
 
-**Type**: Markdown files with YAML frontmatter
+#### Type
 
-**Technology**: Claude Code skill system
+Markdown files with YAML frontmatter
 
-**Location**:
+#### Technology
+
+Claude Code skill system
+
+#### Location
+
 - `~/.claude/skills/` (global)
 - `.claude/skills/` (project)
 
-**Responsibilities**:
+#### Responsibilities
+
 - Provide context to Claude
 - Auto-load without user invocation
 - Persist knowledge across sessions
 
-**Contents**:
+#### Contents
+
 - Personal skills (preferences, patterns)
 - Project skills (context, documentation)
 - AIDA core skill (management knowledge)
 
-**Interactions**:
+#### Interactions
+
 - Claude Code reads at startup
 - AIDA creates/updates during install/configure
 - User can manually edit
 
 ### Install Script
 
-**Type**: Python script
+#### Type
 
-**File**: `scripts/install.py`
+Python script
 
-**Responsibilities**:
+#### File
+
+`scripts/install.py`
+
+#### Responsibilities
+
 - Global AIDA setup (run once)
 - Python version check
 - Interactive questionnaire
 - Personal skill creation
 - Settings.json management
 
-**Dependencies**:
+#### Dependencies
+
 - utils.version
 - utils.paths
 - utils.files
 - utils.questionnaire
 - utils.template_renderer
 
-**Entry Points**:
+#### Entry Points
+
 - `/aida install` command
 - Direct invocation: `python install.py`
 
-**Outputs**:
+#### Outputs
+
 - `~/.claude/skills/personal-preferences/`
 - `~/.claude/skills/work-patterns/`
 - `~/.claude/settings.json` (updated)
 
 ### Configure Script (Planned)
 
-**Type**: Python script
+#### Type
 
-**File**: `scripts/configure.py` (planned M2)
+Python script
 
-**Responsibilities**:
+#### File
+
+`scripts/configure.py` (planned M2)
+
+#### Responsibilities
+
 - Project-specific setup
 - Project detection (language, framework)
 - Interactive questionnaire
 - Project skill creation
 - PKM symlink setup
 
-**Dependencies**:
+#### Dependencies
+
 - utils.paths
 - utils.files
 - utils.questionnaire
 - utils.inference
 - utils.template_renderer
 
-**Entry Points**:
+#### Entry Points
+
 - `/aida configure` command
 
-**Outputs**:
+#### Outputs
+
 - `.claude/skills/project-context/`
 - `.claude/skills/project-documentation/`
 - `.claude/settings.json`
@@ -202,45 +241,61 @@ graph TB
 
 ### Feedback Script
 
-**Type**: Python script
+#### Type
 
-**File**: `scripts/feedback.py`
+Python script
 
-**Responsibilities**:
+#### File
+
+`scripts/feedback.py`
+
+#### Responsibilities
+
 - Create GitHub issues
 - Bug reports with template
 - Feature requests with template
 - General feedback
 
-**Dependencies**:
+#### Dependencies
+
 - utils.paths
 - utils.files
 - External: `gh` CLI
 
-**Entry Points**:
+#### Entry Points
+
 - `/aida bug` command
 - `/aida feature-request` command
 - `/aida feedback` command
 
-**Outputs**:
+#### Outputs
+
 - GitHub issues (via gh CLI)
 
 ### Utils Module
 
-**Type**: Python package
+#### Type
 
-**Location**: `scripts/utils/`
+Python package
 
-**Purpose**: Shared utilities for all AIDA scripts
+#### Location
+
+`scripts/utils/`
+
+#### Purpose
+
+Shared utilities for all AIDA scripts
 
 #### version.py
 
-**Responsibilities**:
+##### Responsibilities
+
 - Check Python version (>= 3.8)
 - Get current Python version
 - Format version strings
 
-**Key Functions**:
+##### Key Functions
+
 ```python
 check_python_version() -> None
 get_python_version() -> tuple
@@ -250,12 +305,14 @@ format_version(version: tuple) -> str
 
 #### paths.py
 
-**Responsibilities**:
+##### Responsibilities
+
 - Resolve standard paths (`~/.claude/`, `.claude/`)
 - Create directories
 - Path validation
 
-**Key Functions**:
+##### Key Functions
+
 ```python
 get_home_dir() -> Path
 get_claude_dir() -> Path
@@ -266,13 +323,15 @@ resolve_path(path: str) -> Path
 
 #### files.py
 
-**Responsibilities**:
+##### Responsibilities
+
 - Read/write text files
 - Read/write JSON files
 - Update JSON (merge)
 - File existence checks
 
-**Key Functions**:
+##### Key Functions
+
 ```python
 read_file(path: Path) -> str
 write_file(path: Path, content: str) -> None
@@ -283,14 +342,16 @@ update_json(path: Path, updates: dict) -> None
 
 #### questionnaire.py
 
-**Responsibilities**:
+##### Responsibilities
+
 - Load YAML questionnaire definitions
 - Display questions with formatting
 - Collect user responses
 - Validate answers
 - Handle defaults
 
-**Key Functions**:
+##### Key Functions
+
 ```python
 load_questionnaire(path: Path) -> dict
 run_questionnaire(template_path: Path) -> dict
@@ -300,14 +361,16 @@ questions_to_dict(responses: list) -> dict
 
 #### inference.py
 
-**Responsibilities**:
+##### Responsibilities
+
 - Detect project language
 - Detect frameworks
 - Detect tools and patterns
 - Infer project type
 - Smart defaults
 
-**Key Functions**:
+##### Key Functions
+
 ```python
 infer_preferences(project_path: Path) -> dict
 detect_languages(path: Path) -> list
@@ -318,13 +381,15 @@ detect_project_type(path: Path) -> str
 
 #### template_renderer.py
 
-**Responsibilities**:
+##### Responsibilities
+
 - Render Jinja2 templates
 - Render entire directories
 - Handle binary files
 - Template filename rendering
 
-**Key Functions**:
+##### Key Functions
+
 ```python
 render_template(template_path: Path, variables: dict) -> str
 render_filename(filename: str, variables: dict) -> str
@@ -334,11 +399,13 @@ is_template_file(path: Path) -> bool
 
 #### errors.py
 
-**Responsibilities**:
+##### Responsibilities
+
 - Define custom exceptions
 - Error hierarchy
 
-**Classes**:
+##### Classes
+
 ```python
 class AidaError(Exception)
 class VersionError(AidaError)
@@ -350,17 +417,23 @@ class InstallationError(AidaError)
 
 ### Templates Container
 
-**Type**: Files (Jinja2 .jinja2, YAML .yml)
+#### Type
 
-**Location**: `templates/`
+Files (Jinja2 .jinja2, YAML .yml)
 
-**Responsibilities**:
+#### Location
+
+`templates/`
+
+#### Responsibilities
+
 - Define skill templates
 - Define questionnaire questions
 - Provide blueprints for generation
 
-**Contents**:
-```
+#### Contents
+
+```text
 templates/
 ├── blueprints/
 │   ├── personal-preferences/
@@ -380,30 +453,42 @@ templates/
 
 ### Global Storage
 
-**Location**: `~/.claude/`
+#### Location
 
-**Technology**: File system
+`~/.claude/`
 
-**Contents**:
+#### Technology
+
+File system
+
+#### Contents
+
 - Personal skills (preferences, patterns)
 - Global settings.json
 - Plugin files
 
-**Access Pattern**:
+#### Access Pattern
+
 - Written during `/aida install`
 - Read at every Claude Code session
 
 ### Project Storage
 
-**Location**: `.claude/` (in each project)
+#### Location
 
-**Technology**: File system
+`.claude/` (in each project)
 
-**Contents**:
+#### Technology
+
+File system
+
+#### Contents
+
 - Project skills (context, documentation)
 - Project settings.json
 
-**Access Pattern**:
+#### Access Pattern
+
 - Written during `/aida configure`
 - Read when Claude Code starts in project directory
 
@@ -411,16 +496,22 @@ templates/
 
 ### GitHub API (via gh CLI)
 
-**Technology**: REST API via gh CLI tool
+#### Technology
 
-**Used For**:
+REST API via gh CLI tool
+
+#### Used For
+
 - Creating issues for bug reports
 - Creating issues for feature requests
 - Creating issues for feedback
 
-**Authentication**: User's gh CLI authentication
+#### Authentication
 
-**Data Sent**:
+User's gh CLI authentication
+
+#### Data Sent
+
 - Issue title
 - Issue body (template + user input)
 - Labels
@@ -431,11 +522,13 @@ templates/
 ### Synchronous
 
 **User ↔ Scripts**:
+
 - Interactive questionnaires
 - Immediate feedback
 - Error messages
 
 **Scripts ↔ File System**:
+
 - Read/write operations
 - Synchronous I/O
 
@@ -446,6 +539,7 @@ None in current design. All operations are synchronous for simplicity.
 ### Event-Driven
 
 **Claude Code Plugin Loading**:
+
 - Claude Code emits "plugin load" event
 - AIDA registers commands and skills
 
@@ -453,7 +547,7 @@ None in current design. All operations are synchronous for simplicity.
 
 ### Error Propagation
 
-```
+```text
 User Action
     ↓
 Commands/Scripts
@@ -468,16 +562,19 @@ Exit with appropriate code
 ### Error Recovery
 
 **Keyboard Interrupt (Ctrl+C)**:
+
 - Exit code 130
 - No partial state saved
 - Clean exit
 
 **Validation Errors**:
+
 - Show error message
 - Re-prompt for input
 - Continue questionnaire
 
 **File Operation Errors**:
+
 - Check permissions
 - Create directories if needed
 - Fail gracefully with message
@@ -504,16 +601,19 @@ Exit with appropriate code
 ## Performance Characteristics
 
 ### Install Script
+
 - **Duration**: ~10-30 seconds
 - **Bottlenecks**: User input (questionnaire)
 - **Optimization**: Lazy imports
 
 ### Configure Script
+
 - **Duration**: ~10-30 seconds
 - **Bottlenecks**: Project detection, user input
 - **Optimization**: Parallel file scanning
 
 ### Skill Loading
+
 - **Duration**: < 1 second
 - **Bottlenecks**: File I/O
 - **Claude Code**: Handles loading
@@ -521,16 +621,19 @@ Exit with appropriate code
 ## Deployment
 
 ### Installation
+
 ```bash
 /plugin install oakensoul/aida-core-plugin
 ```
 
 ### Updates
+
 ```bash
 /aida upgrade  # (planned)
 ```
 
 ### Dependencies
+
 - Python 3.8+
 - Jinja2
 - PyYAML

@@ -39,15 +39,8 @@ import platform
 import subprocess
 import shutil
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from datetime import datetime, timezone
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 # Import utilities from the foundation module
 from utils import (
@@ -60,13 +53,15 @@ from utils import (
     infer_preferences,
     safe_json_load,
     render_skill_directory,
-    MAX_JSON_SIZE,
-    MAX_JSON_DEPTH,
-    VersionError,
-    FileOperationError,
-    ConfigurationError,
     InstallationError,
 )
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 
 # Constants
@@ -319,7 +314,7 @@ plugins:
 
     # Track when skills were last updated
     content += "\nskills:\n"
-    content += f"  user-context:\n"
+    content += "  user-context:\n"
     content += f"    last_updated: \"{timestamp}\"\n"
 
     return content
@@ -481,7 +476,6 @@ def map_environment_to_template_vars(detected_data: Dict[str, Any]) -> Dict[str,
     env = detected_data.get('environment', {})
     tools = env.get('tools', {})
     paths = env.get('paths', {})
-    version_managers = env.get('version_managers', {})
 
     # Map to flat template variables (all strings for template validator)
     template_vars = {

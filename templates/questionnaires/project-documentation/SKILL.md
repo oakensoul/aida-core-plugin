@@ -1,4 +1,5 @@
 ---
+type: skill
 name: project-documentation
 description: Helps locate and navigate project documentation efficiently
 version: 0.1.0
@@ -12,7 +13,8 @@ tags:
 
 # Project Documentation Skill
 
-This skill provides an organized index of project documentation, making it easy to find relevant docs without searching through the entire codebase.
+This skill provides an organized index of project documentation, making it easy to find relevant docs without
+searching through the entire codebase.
 
 ## When to Use
 
@@ -27,7 +29,9 @@ This skill should be invoked when you need to:
 ## Supporting Files
 
 ### doc-index.md
+
 Comprehensive index of documentation locations:
+
 - README and getting started guides
 - Architecture and design documentation
 - API documentation and references
@@ -42,7 +46,8 @@ The index provides quick navigation to all project documentation without needing
 ## Examples
 
 ### Finding Architecture Documentation
-```
+
+```text
 User: "Where can I find the architecture documentation?"
 
 Claude: *Invokes project-documentation skill, reads doc-index.md*
@@ -50,7 +55,8 @@ Claude: *Invokes project-documentation skill, reads doc-index.md*
 ```
 
 ### Locating API Documentation
-```
+
+```text
 User: "How do I learn about the API endpoints?"
 
 Claude: *Invokes project-documentation skill, reads doc-index.md*
@@ -60,7 +66,8 @@ Claude: *Invokes project-documentation skill, reads doc-index.md*
 ```
 
 ### Getting Started Resources
-```
+
+```text
 User: "What documentation should a new contributor read?"
 
 Claude: *Invokes project-documentation skill, reads doc-index.md*
@@ -73,11 +80,13 @@ Claude: *Invokes project-documentation skill, reads doc-index.md*
 
 ## Progressive Disclosure
 
-Like all AIDA skills, this skill's SKILL.md is always available (small token footprint), but the doc-index.md is only loaded when Claude determines documentation navigation is needed.
+Like all AIDA skills, this skill's SKILL.md is always available (small token footprint), but the doc-index.md is only
+loaded when Claude determines documentation navigation is needed.
 
 ## Maintenance
 
 Update doc-index.md when:
+
 - New documentation is added
 - Documentation is moved or reorganized
 - Documentation is deprecated or removed
@@ -88,6 +97,7 @@ Keep the index current so team members can always find what they need.
 ## Future Enhancement
 
 This skill can be extended with:
+
 - `scripts/find-docs.py` - Programmatic documentation search
 - `scripts/validate-docs.py` - Check that documented files exist
 - Integration with documentation generators

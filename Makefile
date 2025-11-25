@@ -4,7 +4,7 @@
 PLUGIN_PATH := $(shell pwd)
 PLUGIN_NAME := aida-core
 
-.PHONY: help dev-mode-enable dev-mode-disable dev-mode test lint install clean
+.PHONY: help dev-mode-enable dev-mode-disable dev-mode test lint lint-py lint-yaml lint-md lint-frontmatter lint-fix install clean
 
 help: ## Show this help message
 	@echo "AIDA Core Plugin - Available targets:"
@@ -62,11 +62,25 @@ test-coverage: ## Run tests with coverage report
 	pytest tests/ -v --cov=skills/aida-dispatch/scripts --cov-report=term-missing
 
 # Linting
-lint: ## Run ruff linter
-	ruff check skills/ tests/
+lint: lint-py lint-yaml lint-md lint-frontmatter ## Run all linters (Python, YAML, Markdown, Frontmatter)
+
+lint-py: ## Run ruff linter on Python files
+	ruff check skills/ tests/ scripts/
+
+lint-yaml: ## Run yamllint on YAML files
+	yamllint -c .yamllint.yml .github/ skills/ templates/
+
+lint-md: ## Run markdownlint on Markdown files
+	markdownlint '**/*.md' --ignore node_modules
+
+lint-frontmatter: ## Validate frontmatter in SKILL.md files
+	python3 scripts/validate_frontmatter.py
 
 lint-fix: ## Run ruff linter with auto-fix
-	ruff check skills/ tests/ --fix
+	ruff check skills/ tests/ scripts/ --fix
+
+lint-fix-md: ## Run markdownlint with auto-fix
+	markdownlint '**/*.md' --ignore node_modules --fix
 
 # Dependencies
 install: ## Install Python dependencies

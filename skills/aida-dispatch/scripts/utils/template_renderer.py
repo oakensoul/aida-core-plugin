@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict
 
 from jinja2.sandbox import SandboxedEnvironment
-from jinja2 import Template, StrictUndefined, UndefinedError, select_autoescape
+from jinja2 import StrictUndefined, UndefinedError
 
 from .errors import FileOperationError
 from .files import read_file, write_file

@@ -1,8 +1,16 @@
+---
+type: documentation
+title: "Architecture"
+description: "System architecture and design decisions for AIDA"
+audience: developers
+---
+
 # AIDA Core Plugin - Architecture
 
-**System architecture and design decisions for AIDA**
+## System architecture and design decisions for AIDA
 
-This document provides a comprehensive overview of AIDA's architecture, components, data flows, and design decisions.
+This document provides a comprehensive overview of AIDA's architecture, components, data flows,
+and design decisions.
 
 ## Table of Contents
 
@@ -20,7 +28,8 @@ This document provides a comprehensive overview of AIDA's architecture, componen
 
 ## Overview
 
-AIDA (Agentic Intelligence Digital Assistant) is a Claude Code plugin that provides skills-first architecture for personal and project-specific context management.
+AIDA (Agentic Intelligence Digital Assistant) is a Claude Code plugin that provides skills-first
+architecture for personal and project-specific context management.
 
 ### Key Characteristics
 
@@ -46,6 +55,7 @@ AIDA (Agentic Intelligence Digital Assistant) is a Claude Code plugin that provi
 **Philosophy**: AIDA focuses on context and knowledge rather than task automation.
 
 **Rationale**:
+
 - Users need Claude to understand their preferences
 - Automation can be added later as workflows mature
 - Skills persist; automation scripts become outdated
@@ -55,6 +65,7 @@ AIDA (Agentic Intelligence Digital Assistant) is a Claude Code plugin that provi
 **Philosophy**: Interactive questionnaires with smart defaults
 
 **Rationale**:
+
 - Reduces decision fatigue
 - Provides guidance for new users
 - Validates input and catches errors
@@ -65,6 +76,7 @@ AIDA (Agentic Intelligence Digital Assistant) is a Claude Code plugin that provi
 **Philosophy**: Use Jinja2 templates for all generated content
 
 **Rationale**:
+
 - Separation of logic and content
 - Easy to customize and extend
 - Consistent formatting
@@ -75,6 +87,7 @@ AIDA (Agentic Intelligence Digital Assistant) is a Claude Code plugin that provi
 **Philosophy**: All data stored in `~/.claude/` and `.claude/`
 
 **Rationale**:
+
 - User privacy and control
 - No network dependencies (except feedback)
 - Works offline
@@ -85,6 +98,7 @@ AIDA (Agentic Intelligence Digital Assistant) is a Claude Code plugin that provi
 **Philosophy**: Start minimal, add features as needed
 
 **Rationale**:
+
 - Lower barrier to entry
 - Users only pay for what they use
 - Easier to understand and debug
@@ -96,7 +110,7 @@ See [C4 Diagrams](architecture/c4/) for visual representations.
 
 ### High-Level Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                    Claude Code                          │
 │                                                         │
@@ -144,17 +158,20 @@ See [C4 Diagrams](architecture/c4/) for visual representations.
 ### Component Layers
 
 #### Layer 1: Claude Code Interface
+
 - **Commands**: User-invoked `/aida` commands
 - **Skills**: Auto-loaded context (SKILL.md files)
 - **Agents**: Persona definitions
 
 #### Layer 2: Python Scripts
+
 - **install.py**: Global setup wizard
 - **configure.py**: Project setup wizard (planned)
 - **feedback.py**: GitHub issue creation
 - **utils/**: Shared utilities
 
 #### Layer 3: Utilities Module
+
 - **version.py**: Python version checking
 - **paths.py**: Path resolution and directories
 - **files.py**: File operations (JSON, text)
@@ -164,10 +181,12 @@ See [C4 Diagrams](architecture/c4/) for visual representations.
 - **errors.py**: Custom error classes
 
 #### Layer 4: Templates
+
 - **blueprints/**: Skill templates
 - **questionnaires/**: Question definitions
 
 #### Layer 5: File System
+
 - **~/.claude/**: Global configuration
 - **.claude/**: Project-specific configuration
 
@@ -179,7 +198,7 @@ See [C4 Component Diagrams](architecture/c4/component-diagrams.md) for details.
 
 The foundation for all AIDA scripts:
 
-```python
+```text
 # High-level structure
 utils/
 ├── __init__.py          # Public API
@@ -193,6 +212,7 @@ utils/
 ```
 
 **Key Functions**:
+
 - `check_python_version()`: Validates Python 3.8+
 - `get_claude_dir()`: Returns `~/.claude/` path
 - `run_questionnaire(template)`: Interactive Q&A
@@ -204,6 +224,7 @@ utils/
 **File**: `scripts/install.py`
 
 **Responsibilities**:
+
 1. Check Python version
 2. Detect existing installation
 3. Run installation questionnaire
@@ -211,7 +232,8 @@ utils/
 5. Update settings.json
 
 **Flow**:
-```
+
+```text
 main()
 ├── check_python_version()
 ├── is_already_installed()
@@ -231,6 +253,7 @@ main()
 **File**: `utils/questionnaire.py`
 
 **Responsibilities**:
+
 - Load YAML questionnaire definitions
 - Display questions with formatting
 - Validate answers
@@ -238,12 +261,14 @@ main()
 - Support multiple question types
 
 **Question Types**:
+
 - `text`: Free-form text input
 - `multiline`: Multi-line text (Ctrl+D to finish)
 - `choice`: Single selection from options
 - `confirm`: Yes/no (y/N)
 
 **Example**:
+
 ```yaml
 questions:
   - id: coding_standards
@@ -258,6 +283,7 @@ questions:
 **File**: `utils/template_renderer.py`
 
 **Responsibilities**:
+
 - Render Jinja2 templates
 - Handle file and directory templates
 - Support filename templating
@@ -265,12 +291,14 @@ questions:
 - Error handling
 
 **Key Features**:
+
 - Templates use `.jinja2` extension
 - Variables passed to all templates
 - Filenames can be templated: `{{skill_name}}.md.jinja2`
 - Binary files (images, etc.) copied as-is
 
 **Example**:
+
 ```jinja2
 ---
 name: {{ skill_name }}
@@ -287,12 +315,14 @@ description: {{ skill_description }}
 **File**: `scripts/feedback.py`
 
 **Responsibilities**:
+
 - Create GitHub issues via `gh` CLI
 - Templates for bugs, features, feedback
 - Auto-fill environment information
 - Validation and error handling
 
 **Templates**:
+
 - Bug report: System info, steps to reproduce
 - Feature request: Problem, solution, alternatives
 - General feedback: Open-ended
@@ -301,7 +331,7 @@ description: {{ skill_description }}
 
 ### Installation Flow
 
-```
+```text
 User
   │
   ├─> /aida install
@@ -358,7 +388,7 @@ Success!
 
 ### Configuration Flow
 
-```
+```text
 User
   │
   ├─> /aida configure
@@ -409,7 +439,7 @@ Success!
 
 ### Skill Loading Flow (Claude Code)
 
-```
+```text
 Claude Code Start
   │
   ▼
@@ -441,7 +471,7 @@ Skills Active
 
 ### Global Configuration
 
-```
+```text
 ~/.claude/
 ├── skills/                      # Personal skills (global)
 │   ├── personal-preferences/
@@ -483,7 +513,7 @@ Skills Active
 
 ### Project Configuration
 
-```
+```text
 your-project/
 ├── .claude/
 │   ├── skills/                 # Project-specific skills
@@ -508,6 +538,7 @@ AIDA is designed to be extensible. Users can add:
 **Create with**: `/aida skill create`
 
 **Structure**:
+
 ```markdown
 ---
 name: my-custom-skill
@@ -527,6 +558,7 @@ Content here...
 **Create with**: `/aida command create`
 
 **Structure**:
+
 ```markdown
 ---
 name: my-command
@@ -545,6 +577,7 @@ Instructions for Claude when user runs /my-command
 **Create with**: `/aida agent create`
 
 **Structure**:
+
 ```markdown
 ---
 name: my-agent
@@ -559,6 +592,7 @@ You are [persona description]...
 ### 4. Template Customization
 
 Users can modify templates in:
+
 - `templates/blueprints/` - Skill templates
 - `templates/questionnaires/` - Question sets
 
@@ -593,21 +627,25 @@ See [Architecture Decision Records](architecture/adr/) for detailed rationale.
 ### Key Decisions Summary
 
 #### Skills Over Memory
+
 - **Decision**: Focus on skills (context) over memory (state)
 - **Rationale**: Skills are persistent and sharable; memory requires maintenance
 - **Trade-off**: No auto-updating context (yet)
 
 #### Python for Scripts
+
 - **Decision**: Use Python 3.8+ for all scripts
 - **Rationale**: Cross-platform, rich ecosystem, Claude Code users likely have it
 - **Trade-off**: Adds Python dependency
 
 #### Jinja2 for Templates
+
 - **Decision**: Use Jinja2 template engine
 - **Rationale**: Powerful, well-known, handles edge cases
 - **Trade-off**: Learning curve for template syntax
 
 #### Local File Storage
+
 - **Decision**: Store all data in `~/.claude/` and `.claude/`
 - **Rationale**: Privacy, offline support, no infrastructure
 - **Trade-off**: No cloud sync (future feature)
@@ -617,11 +655,13 @@ See [Architecture Decision Records](architecture/adr/) for detailed rationale.
 ### Input Validation
 
 **Questionnaires**:
+
 - All input sanitized before file operations
 - Path traversal prevention
 - No code execution in templates
 
 **File Operations**:
+
 - Validate paths before read/write
 - Check permissions before operations
 - No arbitrary file deletion
@@ -629,22 +669,26 @@ See [Architecture Decision Records](architecture/adr/) for detailed rationale.
 ### Dependencies
 
 **Python Dependencies**:
+
 - Minimal dependencies (Jinja2, PyYAML only)
 - Pinned versions in requirements.txt
 - Regular security updates
 
 **External Commands**:
+
 - `gh` CLI - official GitHub tool
 - Input sanitized before shell execution
 
 ### Data Privacy
 
 **Local Storage**:
+
 - No network requests except `gh` CLI
 - No telemetry or analytics
 - User data never leaves machine
 
 **GitHub Feedback**:
+
 - Opt-in only (user runs `/aida bug`)
 - User reviews before submission
 - No automatic data collection
@@ -652,11 +696,13 @@ See [Architecture Decision Records](architecture/adr/) for detailed rationale.
 ### File Permissions
 
 **Installation**:
+
 - Respects user file permissions
 - No sudo/root required
 - Only writes to `~/.claude/` and `.claude/`
 
 **Skill Files**:
+
 - Readable only by user
 - Standard file permissions (644)
 
@@ -667,6 +713,7 @@ See [Architecture Decision Records](architecture/adr/) for detailed rationale.
 **Target**: < 30 seconds for `/aida install`
 
 **Optimizations**:
+
 - Lazy imports in Python
 - Minimal file operations
 - No network requests (except gh check)
@@ -674,6 +721,7 @@ See [Architecture Decision Records](architecture/adr/) for detailed rationale.
 ### Skill Loading
 
 **Claude Code**:
+
 - Skills loaded at startup
 - Cached in memory
 - No runtime overhead
@@ -681,6 +729,7 @@ See [Architecture Decision Records](architecture/adr/) for detailed rationale.
 ### Template Rendering
 
 **Performance**:
+
 - Templates rendered once at install/configure
 - Cached Jinja2 environment
 - No runtime template rendering
@@ -688,6 +737,7 @@ See [Architecture Decision Records](architecture/adr/) for detailed rationale.
 ### File System
 
 **Efficiency**:
+
 - Minimal file I/O
 - Batch operations where possible
 - No unnecessary scans

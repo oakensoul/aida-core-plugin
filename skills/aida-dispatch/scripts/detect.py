@@ -22,7 +22,6 @@ Exit codes:
 """
 
 import sys
-import os
 import json
 from pathlib import Path
 

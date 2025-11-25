@@ -1,10 +1,13 @@
+---
+type: adr
+title: "ADR-001: Skills-First Architecture"
+status: accepted
+date: "2025-11-01"
+deciders:
+  - "@oakensoul"
+---
+
 # ADR-001: Skills-First Architecture
-
-**Status**: Accepted
-
-**Date**: 2025-11-01
-
-**Deciders**: @oakensoul
 
 ## Context
 
@@ -16,6 +19,7 @@ AIDA needs a core architectural pattern that defines how it provides value to us
 4. **Hybrid**: Combine multiple approaches
 
 The architectural choice affects:
+
 - User mental model
 - Implementation complexity
 - Maintenance burden
@@ -27,6 +31,7 @@ The architectural choice affects:
 We will use a **Skills-First** architecture for AIDA M1 (Minimum Lovable Product).
 
 Skills are markdown files with YAML frontmatter that provide context to Claude. They are:
+
 - **Persistent**: Stored as files, version-controllable
 - **Explicit**: Users can read and edit them
 - **Shareable**: Can be shared with teams
@@ -36,37 +41,43 @@ Skills are markdown files with YAML frontmatter that provide context to Claude. 
 
 ### Why Skills-First?
 
-**1. Simplicity**
+#### 1. Simplicity
+
 - Skills are just markdown files
 - No database or complex state management
 - Easy to understand and debug
 - Low implementation complexity
 
-**2. Transparency**
+#### 2. Transparency
+
 - Users can see exactly what context Claude has
 - No "black box" behavior
 - Users can manually edit skills
 - Full control over content
 
-**3. Shareability**
+#### 3. Shareability
+
 - Skills can be committed to git
 - Teams can share project skills
 - Community can create and share skills
 - No special export/import needed
 
-**4. Privacy**
+#### 4. Privacy
+
 - Skills stay local (file system)
 - No network transmission required
 - No cloud storage needed
 - User owns their data
 
-**5. Maintainability**
+#### 5. Maintainability
+
 - Skills don't require updates unless project changes
 - No automatic sync issues
 - No stale data problems
 - User decides when to update
 
-**6. Progressive Enhancement**
+#### 6. Progressive Enhancement
+
 - Start with skills (simple)
 - Add memory later (complex)
 - Add automation later (workflows)
@@ -75,6 +86,7 @@ Skills are markdown files with YAML frontmatter that provide context to Claude. 
 ### Why Not Memory-First?
 
 **Against**:
+
 - Requires conversation tracking
 - State management complexity
 - Synchronization issues
@@ -83,6 +95,7 @@ Skills are markdown files with YAML frontmatter that provide context to Claude. 
 - Not lovable for M1
 
 **Could Add Later**:
+
 - Auto-updating skills from conversations
 - Decision tracking
 - Context summaries
@@ -90,6 +103,7 @@ Skills are markdown files with YAML frontmatter that provide context to Claude. 
 ### Why Not Automation-First?
 
 **Against**:
+
 - Higher complexity
 - More prone to breaking
 - Requires workflow design
@@ -99,6 +113,7 @@ Skills are markdown files with YAML frontmatter that provide context to Claude. 
 Users don't want automation primarily; they want Claude to remember their context.
 
 **Could Add Later**:
+
 - `/aida implement` workflow
 - `/start-day`, `/end-day` routines
 - GitHub integration automation
@@ -136,20 +151,24 @@ Users don't want automation primarily; they want Claude to remember their contex
 For negative consequences:
 
 **Manual Updates**:
+
 - Make `/aida configure` fast and easy
 - Provide smart defaults from inference
 - Future: Add auto-skill-update feature
 
 **No Memory**:
+
 - M2: Add decision tracking
 - M3: Add memory management skill
 - Future: Optional memory layer
 
 **No Automation**:
+
 - M4: Add workflow commands
 - Future: Workflow automation layer
 
 **User Effort**:
+
 - Questionnaire-driven setup (< 5 minutes)
 - Intelligent inference reduces questions
 - Pre-built templates for common scenarios
@@ -158,7 +177,7 @@ For negative consequences:
 
 ### Skill Structure
 
-```markdown
+```yaml
 ---
 name: skill-name
 description: What this skill provides
@@ -173,17 +192,20 @@ Markdown content that Claude reads as context.
 ### Skill Types
 
 **Personal Skills** (`~/.claude/skills/`):
+
 - `personal-preferences/` - Coding standards
 - `work-patterns/` - Work habits
 - `aida-core/` - AIDA management knowledge
 
 **Project Skills** (`.claude/skills/`):
+
 - `project-context/` - Architecture, stack
 - `project-documentation/` - Documentation standards
 
 ### Loading Mechanism
 
 Claude Code loads skills automatically:
+
 1. At startup, scan `~/.claude/skills/`
 2. If in project, scan `.claude/skills/`
 3. Parse frontmatter and content
@@ -198,11 +220,13 @@ No AIDA code runs at runtime - just skill loading.
 **Approach**: Store conversation history in SQLite database, auto-extract context
 
 **Pros**:
+
 - Automatic context building
 - No manual configuration
 - Remembers past conversations
 
 **Cons**:
+
 - Database complexity
 - Privacy concerns
 - State synchronization issues
@@ -216,10 +240,12 @@ No AIDA code runs at runtime - just skill loading.
 **Approach**: Focus on automating common tasks (commits, PRs, daily routines)
 
 **Pros**:
+
 - Tangible time savings
 - "Wow" factor from automation
 
 **Cons**:
+
 - Doesn't solve core context problem
 - Brittle (workflows break)
 - High implementation cost
@@ -232,10 +258,12 @@ No AIDA code runs at runtime - just skill loading.
 **Approach**: Combine skills (manual) and memory (automatic)
 
 **Pros**:
+
 - Best of both worlds
 - Flexible approach
 
 **Cons**:
+
 - Significantly more complex
 - Longer time to M1
 - Two systems to maintain
@@ -254,15 +282,18 @@ No AIDA code runs at runtime - just skill loading.
 Skills-First doesn't preclude adding other features later:
 
 **M5+ Memory Layer**:
+
 - Auto-updating skills from conversations
 - `memory/` directory alongside `skills/`
 - Opt-in memory tracking
 
 **M5+ Automation Layer**:
+
 - Workflow commands built on top of skills
 - Skills provide context, workflows automate
 
 **M6+ Team Collaboration**:
+
 - Shared skill libraries
 - Team-wide context
 - Cloud sync (optional)

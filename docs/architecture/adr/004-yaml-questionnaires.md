@@ -1,12 +1,18 @@
-# ADR-004: YAML for Questionnaire Definitions
+---
+type: adr
+title: "ADR-004: YAML for Questionnaire Definitions"
+status: accepted
+date: "2025-11-01"
+deciders:
+  - "@oakensoul"
+---
 
-**Status**: Accepted
-**Date**: 2025-11-01
-**Deciders**: @oakensoul
+# ADR-004: YAML for Questionnaire Definitions
 
 ## Context
 
 AIDA uses interactive questionnaires to configure personal and project skills. Questionnaire definitions need to be:
+
 - Easy to read and modify
 - Support multiple question types
 - Include help text and defaults
@@ -20,14 +26,16 @@ Use **YAML** for questionnaire definitions.
 
 ## Rationale
 
-**Why YAML?**
+### Why YAML?
+
 - Human-readable and writable
 - Comments supported
 - Multi-line strings are natural
 - Clean syntax without excess punctuation
 - Standard for configuration (Ansible, Docker Compose, Kubernetes)
 
-**Example**:
+### Example
+
 ```yaml
 questions:
   - id: coding_standards
@@ -46,7 +54,8 @@ questions:
     default: "Flexible with core hours"
 ```
 
-**Advantages**:
+### Advantages
+
 - Easy for non-programmers to edit
 - Multi-line text natural (help text, descriptions)
 - Comments for documentation
@@ -54,16 +63,20 @@ questions:
 
 ## Consequences
 
-**Positive**:
+### Positive
+
 - ✅ Easy to add new questions
 - ✅ Non-technical users can edit
 - ✅ Clean, readable format
 
-**Negative**:
+### Negative
+
 - ❌ YAML quirks (tabs, indentation sensitive)
 - ❌ Adds PyYAML dependency
 
-**Mitigation**: Validate YAML on load, provide clear error messages.
+### Mitigation
+
+Validate YAML on load, provide clear error messages.
 
 ## Alternatives Considered
 

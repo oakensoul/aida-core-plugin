@@ -12,21 +12,19 @@ Exit codes:
 """
 
 import sys
-import os
 import subprocess
 from pathlib import Path
-import json
 
 def check_python_version():
     """Check if Python 3.8+ is installed."""
     version = sys.version_info
-    print(f"Checking Python version...")
+    print("Checking Python version...")
     if version >= (3, 8):
         print(f"✓ Python version: {version.major}.{version.minor}.{version.micro} (>= 3.8 required)")
         return True
     else:
         print(f"✗ Python version: {version.major}.{version.minor}.{version.micro}")
-        print(f"  → Install Python 3.8+ from https://www.python.org/downloads/")
+        print("  → Install Python 3.8+ from https://www.python.org/downloads/")
         return False
 
 def check_directory(path, name, should_exist=True):
@@ -41,7 +39,7 @@ def check_directory(path, name, should_exist=True):
                 test_file.unlink()
                 print(f"✓ {name}: {path} (exists, writable)")
                 return True
-            except Exception as e:
+            except Exception:
                 print(f"✗ {name}: {path} (exists, not writable)")
                 print(f"  → Fix permissions: chmod u+w {path}")
                 return False
@@ -51,7 +49,7 @@ def check_directory(path, name, should_exist=True):
     else:
         if should_exist:
             print(f"✗ {name}: {path} (not found)")
-            print(f"  → Run /aida config to create")
+            print("  → Run /aida config to create")
             return False
         else:
             print(f"• {name}: Not configured (optional)")
@@ -68,11 +66,11 @@ def check_git():
             print(f"✓ {version}")
             return True
         else:
-            print(f"✗ Git: not working")
+            print("✗ Git: not working")
             return False
     except FileNotFoundError:
-        print(f"✗ Git: not found")
-        print(f"  → Install: https://git-scm.com/downloads")
+        print("✗ Git: not found")
+        print("  → Install: https://git-scm.com/downloads")
         return False
     except Exception as e:
         print(f"✗ Git: error checking ({e})")
@@ -92,17 +90,17 @@ def check_github_cli():
             auth_result = subprocess.run(['gh', 'auth', 'status'],
                                          capture_output=True, text=True, timeout=5)
             if auth_result.returncode == 0:
-                print(f"✓ GitHub CLI: authenticated")
+                print("✓ GitHub CLI: authenticated")
             else:
-                print(f"⚠ GitHub CLI: not authenticated")
-                print(f"  → Run: gh auth login")
+                print("⚠ GitHub CLI: not authenticated")
+                print("  → Run: gh auth login")
             return True
         else:
-            print(f"✗ GitHub CLI: not working")
+            print("✗ GitHub CLI: not working")
             return False
     except FileNotFoundError:
-        print(f"⚠ GitHub CLI: not found (optional for feedback)")
-        print(f"  → Install: brew install gh (macOS)")
+        print("⚠ GitHub CLI: not found (optional for feedback)")
+        print("  → Install: brew install gh (macOS)")
         return True  # Not required, just warning
     except Exception as e:
         print(f"⚠ GitHub CLI: error checking ({e})")
@@ -138,7 +136,7 @@ def validate_config_files():
     global_config = Path.home() / ".claude" / "config" / "settings.yaml"
     if global_config.exists():
         if validate_yaml_file(global_config, "Global config"):
-            print(f"✓ Global config: valid YAML")
+            print("✓ Global config: valid YAML")
         else:
             all_valid = False
 
@@ -146,12 +144,12 @@ def validate_config_files():
     project_config = Path.cwd() / ".claude" / "config" / "project-settings.yaml"
     if project_config.exists():
         if validate_yaml_file(project_config, "Project config"):
-            print(f"✓ Project config: valid YAML")
+            print("✓ Project config: valid YAML")
         else:
             all_valid = False
 
     if all_valid:
-        print(f"✓ Configuration files: valid")
+        print("✓ Configuration files: valid")
 
     return all_valid
 

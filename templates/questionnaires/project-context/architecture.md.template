@@ -1,8 +1,15 @@
 ---
+type: documentation
+name: project-architecture
+description: Project architecture overview and technical design documentation
+version: 0.2.0
+tags:
+  - architecture
+  - design
+  - technical
 created: {{ CREATED_DATE }}
 modified: {{ CREATED_DATE }}
 project: {{ PROJECT_NAME }}
-type: architecture
 ---
 
 # Project Architecture

@@ -1,8 +1,15 @@
 ---
+type: documentation
+name: project-context
+description: Project context, current focus, and recent decisions
+version: 0.2.0
+tags:
+  - context
+  - project
+  - decisions
 created: {{ CREATED_DATE }}
 modified: {{ CREATED_DATE }}
 project: {{ PROJECT_NAME }}
-type: project-context
 ---
 
 # Project Context

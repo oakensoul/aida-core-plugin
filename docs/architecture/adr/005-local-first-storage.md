@@ -1,18 +1,25 @@
-# ADR-005: Local-First Storage
+---
+type: adr
+title: "ADR-005: Local-First Storage"
+status: accepted
+date: "2025-11-01"
+deciders:
+  - "@oakensoul"
+---
 
-**Status**: Accepted
-**Date**: 2025-11-01
-**Deciders**: @oakensoul
+# ADR-005: Local-First Storage
 
 ## Context
 
 AIDA needs to persist user data including:
+
 - Personal preferences and work patterns
 - Project-specific context
 - Configuration settings
 - Generated skills
 
 Storage options:
+
 1. Local file system only
 2. Cloud storage with local cache
 3. Database (SQLite, PostgreSQL)
@@ -24,15 +31,18 @@ Considerations: privacy, offline support, simplicity, sync, backup.
 
 Store all AIDA data **locally in the file system** with no cloud storage or database in M1.
 
-**Locations**:
+### Locations
+
 - Global: `~/.claude/`
 - Project: `.claude/` (in project root)
 
-**Format**: Markdown files (skills), JSON (settings)
+### Format
+
+Markdown files (skills), JSON (settings)
 
 ## Rationale
 
-**Why Local-First?**
+### Why Local-First?
 
 1. **Privacy**: User data never leaves their machine
 2. **Offline**: Works without internet connection
@@ -42,7 +52,8 @@ Store all AIDA data **locally in the file system** with no cloud storage or data
 6. **Version Control**: Skills can be committed to git
 7. **Transparency**: Users can see and edit all files
 
-**File System Benefits**:
+### File System Benefits
+
 - No database setup or maintenance
 - Easy to debug and inspect
 - Natural for skills (markdown files)
@@ -50,7 +61,8 @@ Store all AIDA data **locally in the file system** with no cloud storage or data
 
 ## Consequences
 
-**Positive**:
+### Positive
+
 - ✅ Complete privacy - data never transmitted
 - ✅ Works offline always
 - ✅ Zero infrastructure cost
@@ -58,13 +70,15 @@ Store all AIDA data **locally in the file system** with no cloud storage or data
 - ✅ Git integration natural
 - ✅ Transparent to users
 
-**Negative**:
+### Negative
+
 - ❌ No cross-device sync
 - ❌ No collaborative editing
 - ❌ No cloud backup (user responsibility)
 - ❌ No version history (unless in git)
 
-**Mitigation**:
+### Mitigation
+
 - Document manual sync methods (git, rsync, cloud storage)
 - Future: Optional cloud sync as addon
 - For now: Simplicity trumps convenience
@@ -73,7 +87,7 @@ Store all AIDA data **locally in the file system** with no cloud storage or data
 
 ### Directory Structure
 
-```
+```text
 ~/.claude/                  # Global config
 ├── skills/
 │   ├── personal-preferences/
@@ -97,7 +111,8 @@ your-project/.claude/       # Project config
 ### Git Integration
 
 **Recommended** `.gitignore`:
-```
+
+```text
 # Global config (don't commit personal preferences)
 .claude/skills/personal-*
 .claude/skills/work-*
@@ -116,7 +131,8 @@ your-project/.claude/       # Project config
 
 **Pros**: Structured queries, transactions, indexing
 
-**Cons**:
+#### Cons
+
 - Binary format (not human-readable)
 - Harder to edit manually
 - Git-unfriendly
@@ -130,7 +146,8 @@ your-project/.claude/       # Project config
 
 **Pros**: Cross-device sync, automatic backup
 
-**Cons**:
+#### Cons
+
 - Privacy concerns
 - Requires internet
 - Infrastructure cost
@@ -146,7 +163,8 @@ your-project/.claude/       # Project config
 
 **Pros**: Best of both worlds when cloud enabled
 
-**Cons**:
+#### Cons
+
 - Significant complexity
 - Two codepaths to maintain
 - Sync conflict resolution
@@ -159,6 +177,7 @@ your-project/.claude/       # Project config
 ### M5+ Cloud Sync (Optional)
 
 Could add optional cloud sync while keeping local-first:
+
 - Default: Local only
 - Opt-in: Enable cloud sync
 - Mechanism: rsync, Dropbox, git, custom
@@ -166,6 +185,7 @@ Could add optional cloud sync while keeping local-first:
 ### M5+ Encryption
 
 Could add optional encryption:
+
 - Skills encrypted at rest
 - User-provided passphrase
 - Transparent to Claude Code
@@ -173,6 +193,7 @@ Could add optional encryption:
 ### M6+ Collaborative Features
 
 Could add team features:
+
 - Shared skill repositories
 - Collaborative editing
 - Approval workflows

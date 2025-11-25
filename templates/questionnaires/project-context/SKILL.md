@@ -1,4 +1,5 @@
 ---
+type: skill
 name: project-context
 description: Provides current project state, architecture overview, and structured metadata
 version: 0.1.0
@@ -12,7 +13,8 @@ tags:
 
 # Project Context Skill
 
-This skill provides comprehensive context about the current project, including its state, architecture, recent decisions, and structured metadata for programmatic access.
+This skill provides comprehensive context about the current project, including its state, architecture, recent decisions,
+and structured metadata for programmatic access.
 
 ## When to Use
 
@@ -29,7 +31,9 @@ The skill uses progressive disclosure - supporting files are only loaded when th
 ## Supporting Files
 
 ### context.md
+
 Current state of the project:
+
 - Project description and purpose
 - Current focus and active work
 - Recent decisions with rationale
@@ -37,7 +41,9 @@ Current state of the project:
 - Updated dynamically as the project evolves
 
 ### architecture.md
+
 Technical architecture overview:
+
 - Technology stack (languages, frameworks, tools)
 - Architecture patterns and principles
 - Key components and their relationships
@@ -45,7 +51,9 @@ Technical architecture overview:
 - Infrastructure and deployment notes
 
 ### metadata.json
+
 Structured data for programmatic access:
+
 - Project type and classification
 - Primary language and framework
 - Available commands (build, test, dev, lint, etc.)
@@ -56,7 +64,8 @@ Structured data for programmatic access:
 ## Examples
 
 ### Getting Project Overview
-```
+
+```text
 User: "What's this project about and what are we currently working on?"
 
 Claude: *Invokes project-context skill, reads context.md*
@@ -65,7 +74,8 @@ Recent decisions include [decisions]..."
 ```
 
 ### Understanding Architecture
-```
+
+```text
 User: "How is this application structured?"
 
 Claude: *Invokes project-context skill, reads architecture.md*
@@ -73,7 +83,8 @@ Claude: *Invokes project-context skill, reads architecture.md*
 ```
 
 ### Accessing Commands Programmatically
-```
+
+```text
 User: "How do I run the tests?"
 
 Claude: *Invokes project-context skill, reads metadata.json*
@@ -82,9 +93,11 @@ Claude: *Invokes project-context skill, reads metadata.json*
 
 ## Progressive Disclosure
 
-This skill's SKILL.md is always available (small token footprint), but supporting files (context.md, architecture.md, metadata.json) are only loaded when Claude determines the skill is relevant to the current conversation.
+This skill's SKILL.md is always available (small token footprint), but supporting files (context.md, architecture.md,
+metadata.json) are only loaded when Claude determines the skill is relevant to the current conversation.
 
 This ensures:
+
 - Efficient token usage across multiple projects
 - Context is available when needed
 - No token budget explosion
@@ -93,6 +106,7 @@ This ensures:
 ## Maintenance
 
 Team members should update these files as the project evolves:
+
 - **context.md** - Update current focus and decisions regularly
 - **architecture.md** - Update when architecture changes
 - **metadata.json** - Update when commands or tools change

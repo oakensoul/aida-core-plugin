@@ -1,10 +1,17 @@
+---
+type: diagram
+title: "C4 Component Diagram - AIDA Core Plugin"
+diagram-type: c4-component
+---
+
 # C4 Component Diagram - AIDA Core Plugin
 
 **Component Level**: Detailed view of Python scripts and utilities module
 
 ## Overview
 
-This diagram shows the internal components of AIDA's Python scripts and how they interact with the utilities module and external systems.
+This diagram shows the internal components of AIDA's Python scripts and how they interact with the
+utilities module and external systems.
 
 ## Install Script Components
 
@@ -93,9 +100,12 @@ graph TB
 
 #### main()
 
-**Responsibility**: Orchestrate installation process
+##### Responsibility
 
-**Pseudocode**:
+Orchestrate installation process
+
+##### Pseudocode
+
 ```python
 def main() -> int:
     try:
@@ -130,19 +140,24 @@ def main() -> int:
         return 1
 ```
 
-**Dependencies**:
+##### Dependencies
+
 - All utils modules
 - All other install.py functions
 
-**Error Handling**:
+##### Error Handling
+
 - Catches KeyboardInterrupt → Exit 130
 - Catches all exceptions → Error message + Exit 1
 
 #### is_already_installed()
 
-**Responsibility**: Check if personal skills already exist
+##### Responsibility
 
-**Algorithm**:
+Check if personal skills already exist
+
+##### Algorithm
+
 ```python
 def is_already_installed() -> bool:
     claude_dir = get_claude_dir()
@@ -152,13 +167,18 @@ def is_already_installed() -> bool:
     return personal_prefs.exists() and work_patterns.exists()
 ```
 
-**Returns**: True if both personal skills exist
+##### Returns
+
+True if both personal skills exist
 
 #### create_directory_structure()
 
-**Responsibility**: Create necessary directories
+##### Responsibility
 
-**Algorithm**:
+Create necessary directories
+
+##### Algorithm
+
 ```python
 def create_directory_structure() -> None:
     claude_dir = get_claude_dir()
@@ -169,13 +189,18 @@ def create_directory_structure() -> None:
     ensure_directory(claude_dir / "skills/aida-core")
 ```
 
-**Error Handling**: Raises FileOperationError if cannot create
+##### Error Handling
+
+Raises FileOperationError if cannot create
 
 #### render_personal_preferences()
 
-**Responsibility**: Generate personal preferences skill from template
+##### Responsibility
 
-**Algorithm**:
+Generate personal preferences skill from template
+
+##### Algorithm
+
 ```python
 def render_personal_preferences(responses: dict) -> None:
     template_dir = Path(__file__).parent.parent / "templates/blueprints/personal-preferences"
@@ -191,15 +216,19 @@ def render_personal_preferences(responses: dict) -> None:
     render_skill_directory(template_dir, output_dir, variables)
 ```
 
-**Dependencies**:
+##### Dependencies
+
 - template_renderer.py
 - paths.py
 
 #### update_settings_json()
 
-**Responsibility**: Enable aida-core-plugin in settings.json
+##### Responsibility
 
-**Algorithm**:
+Enable aida-core-plugin in settings.json
+
+##### Algorithm
+
 ```python
 def update_settings_json() -> None:
     claude_dir = get_claude_dir()
@@ -214,7 +243,8 @@ def update_settings_json() -> None:
     update_json(settings_path, updates)
 ```
 
-**Behavior**:
+##### Behavior
+
 - Creates settings.json if doesn't exist
 - Merges updates (doesn't overwrite existing)
 - Preserves other settings
@@ -296,9 +326,11 @@ graph TB
 
 ### version.py
 
-**Purpose**: Python version validation
+#### Purpose
 
-**Components**:
+Python version validation
+
+#### Components
 
 ```python
 MIN_PYTHON_VERSION = (3, 8)
@@ -316,13 +348,17 @@ def format_version(version: tuple) -> str:
     """Format as 'X.Y.Z'"""
 ```
 
-**Dependencies**: None (uses sys.version_info)
+#### Dependencies
+
+None (uses sys.version_info)
 
 ### paths.py
 
-**Purpose**: Path resolution and directory management
+#### Purpose
 
-**Components**:
+Path resolution and directory management
+
+#### Components
 
 ```python
 def get_home_dir() -> Path:
@@ -347,13 +383,17 @@ def get_relative_path(path: Path, base: Path) -> Path:
     """Get path relative to base"""
 ```
 
-**Dependencies**: pathlib, os
+#### Dependencies
+
+pathlib, os
 
 ### files.py
 
-**Purpose**: File I/O operations
+#### Purpose
 
-**Components**:
+File I/O operations
+
+#### Components
 
 ```python
 def read_file(path: Path) -> str:
@@ -381,13 +421,17 @@ def directory_exists(path: Path) -> bool:
     """Check if directory exists"""
 ```
 
-**Dependencies**: json, pathlib, errors.py
+#### Dependencies
+
+json, pathlib, errors.py
 
 ### questionnaire.py
 
-**Purpose**: Interactive user prompts
+#### Purpose
 
-**Components**:
+Interactive user prompts
+
+#### Components
 
 ```python
 def load_questionnaire(path: Path) -> dict:
@@ -410,9 +454,12 @@ def _ask_confirm_question(q: dict) -> bool
 def _display_help(help_text: str) -> None
 ```
 
-**Dependencies**: yaml, files.py
+#### Dependencies
 
-**Question Types**:
+yaml, files.py
+
+#### Question Types
+
 - `text`: Single-line input
 - `multiline`: Multi-line (Ctrl+D)
 - `choice`: Select from options
@@ -420,9 +467,11 @@ def _display_help(help_text: str) -> None
 
 ### inference.py
 
-**Purpose**: Smart project detection
+#### Purpose
 
-**Components**:
+Smart project detection
+
+#### Components
 
 ```python
 def infer_preferences(project_path: Path) -> dict:
@@ -444,19 +493,24 @@ def detect_project_type(path: Path) -> str:
     """Infer project category"""
 ```
 
-**Detection Methods**:
+#### Detection Methods
+
 - File extension analysis (`.py`, `.js`, etc.)
 - Config file detection (`package.json`, `pyproject.toml`)
 - Directory structure patterns (`src/`, `tests/`)
 - Dependency analysis (from package files)
 
-**Dependencies**: files.py, paths.py
+#### Dependencies
+
+files.py, paths.py
 
 ### template_renderer.py
 
-**Purpose**: Jinja2 template rendering
+#### Purpose
 
-**Components**:
+Jinja2 template rendering
+
+#### Components
 
 ```python
 def render_template(template_path: Path, variables: dict) -> str:
@@ -482,9 +536,12 @@ def get_output_filename(template_name: str) -> str:
     """Remove .jinja2 extension"""
 ```
 
-**Dependencies**: jinja2, files.py
+#### Dependencies
 
-**Template Features**:
+jinja2, files.py
+
+#### Template Features
+
 - Variable substitution: `{{ variable }}`
 - Conditionals: `{% if condition %}`
 - Loops: `{% for item in items %}`
@@ -492,9 +549,11 @@ def get_output_filename(template_name: str) -> str:
 
 ### errors.py
 
-**Purpose**: Custom exception hierarchy
+#### Purpose
 
-**Components**:
+Custom exception hierarchy
+
+#### Components
 
 ```python
 class AidaError(Exception):
@@ -516,7 +575,8 @@ class InstallationError(AidaError):
     """Installation failed"""
 ```
 
-**Usage**:
+#### Usage
+
 ```python
 if sys.version_info < (3, 8):
     raise VersionError("Python 3.8+ required")
@@ -527,6 +587,7 @@ if sys.version_info < (3, 8):
 ### Call Patterns
 
 #### Synchronous Calls
+
 All communication is synchronous function calls.
 
 ```python
@@ -537,13 +598,14 @@ update_json(settings_path, updates)
 ```
 
 #### No Asynchronous Operations
+
 Simplicity over performance for M1.
 
 ### Data Flow
 
 #### Installation Data Flow
 
-```
+```text
 install.yml (YAML)
     ↓ load_questionnaire()
 Question Definitions (dict)
@@ -559,7 +621,7 @@ Rendered SKILL.md (str)
 
 #### Configuration Data Flow (Planned)
 
-```
+```text
 Project Directory
     ↓ infer_preferences()
 Detected Info (dict)
@@ -575,7 +637,7 @@ Project Skills
 
 ## Error Flow
 
-```
+```text
 Low-Level Error (OSError, JSONDecodeError, etc.)
     ↓ caught by utils
 Custom AIDA Exception (FileOperationError, etc.)
@@ -591,7 +653,7 @@ Exit with code 1
 
 ### Dependency Graph
 
-```
+```text
 install.py
     ├─→ version.py (no dependencies)
     ├─→ paths.py (depends on: errors.py)
@@ -617,6 +679,7 @@ feedback.py
 ### No Circular Dependencies
 
 Enforced by design:
+
 - errors.py has no dependencies
 - version.py has no AIDA dependencies
 - Higher-level modules depend on lower-level only
@@ -674,6 +737,7 @@ cat ~/.claude/settings.json
 ---
 
 **See Also**:
+
 - [Context Diagram](context-diagram.md) - System context
 - [Container Diagram](container-diagram.md) - High-level containers
 - [ARCHITECTURE.md](../ARCHITECTURE.md) - Architecture overview
