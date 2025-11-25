@@ -1,0 +1,17 @@
+{
+  "name": "aida-test-nodejs-project",
+  "version": "1.0.0",
+  "description": "Sample Node.js project for AIDA testing",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  },
+  "keywords": ["aida", "test"],
+  "author": "AIDA Test",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.0.0"
+  }
+}

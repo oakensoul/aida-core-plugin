@@ -4,7 +4,8 @@
 PLUGIN_PATH := $(shell pwd)
 PLUGIN_NAME := aida-core
 
-.PHONY: help dev-mode-enable dev-mode-disable dev-mode test lint lint-py lint-yaml lint-md lint-frontmatter lint-fix install clean
+.PHONY: help dev-mode-enable dev-mode-disable dev-mode test lint lint-py lint-yaml lint-md lint-frontmatter lint-fix install clean \
+        docker-build docker-build-base docker-build-all docker-shell-% docker-clean docker-clean-all
 
 help: ## Show this help message
 	@echo "AIDA Core Plugin - Available targets:"
@@ -60,6 +61,25 @@ test: ## Run pytest tests
 
 test-coverage: ## Run tests with coverage report
 	pytest tests/ -v --cov=skills/aida-dispatch/scripts --cov-report=term-missing
+
+# Docker Test Environments
+docker-build-base: ## Build base Docker test image (required first)
+	cd test-environments && docker-compose build base
+
+docker-build-all: docker-build-base ## Build all Docker test environments
+	cd test-environments && docker-compose build
+
+docker-build-%: docker-build-base ## Build specific environment (e.g., docker-build-php)
+	cd test-environments && docker-compose build $*
+
+docker-shell-%: ## Enter a Docker test environment (e.g., docker-shell-php)
+	cd test-environments && docker-compose run --build --rm $*
+
+docker-clean: ## Stop containers and remove volumes
+	cd test-environments && docker-compose down -v
+
+docker-clean-all: ## Remove containers, volumes, and images
+	cd test-environments && docker-compose down -v --rmi all
 
 # Linting
 lint: lint-py lint-yaml lint-md lint-frontmatter ## Run all linters (Python, YAML, Markdown, Frontmatter)
