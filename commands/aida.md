@@ -7,7 +7,7 @@ tags:
   - core
 args: ""
 allowed-tools: "*"
-argument-hint: config [global|project]
+argument-hint: "[command]"
 ---
 
 # AIDA Command Dispatcher
@@ -52,9 +52,20 @@ When you invoke the `aida-dispatch` skill, it handles these commands:
 ## Examples
 
 ```bash
+# Help & Status
 /aida              # Show help via aida-dispatch skill
 /aida help         # Show help via aida-dispatch skill
-/aida status       # Check status via aida-dispatch skill
-/aida config       # Configure AIDA via aida-dispatch skill
-/aida doctor       # Run diagnostics via aida-dispatch skill
+/aida status       # Check installation and configuration status
+
+# Configuration
+/aida config       # Configure AIDA (dynamic menu based on current state)
+
+# Diagnostics & Maintenance
+/aida doctor       # Run health checks and diagnostics
+/aida upgrade      # Check for and install AIDA updates
+
+# Feedback & Support
+/aida feedback     # Submit general feedback about AIDA
+/aida bug          # Report a bug with structured information
+/aida feature-request  # Request a new feature
 ```

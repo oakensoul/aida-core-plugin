@@ -50,6 +50,7 @@ from .files import (
     copy_template,
     file_exists,
     directory_exists,
+    atomic_write,
 )
 
 # Questionnaire system
@@ -122,6 +123,7 @@ __all__ = [
     "copy_template",
     "file_exists",
     "directory_exists",
+    "atomic_write",
     # Questionnaire system
     "run_questionnaire",
     "load_questionnaire",

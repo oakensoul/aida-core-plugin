@@ -404,6 +404,59 @@ def copy_template(template_path: Path, destination: Path,
     write_file(destination, content)
 
 
+def atomic_write(filepath: Path, content: str) -> None:
+    """Write file atomically to prevent corruption.
+
+    Uses a temporary file and atomic rename to ensure the target file
+    is never left in a partially written state.
+
+    This is a convenience function that wraps write_file() for API compatibility.
+    For additional options (encoding, parent creation), use write_file() directly.
+
+    Args:
+        filepath: Destination file path
+        content: Content to write
+
+    Raises:
+        IOError: If write operation fails
+
+    Security:
+        - Prevents race conditions during concurrent writes
+        - Ensures file is never partially written
+        - Uses atomic os.replace() on POSIX systems
+
+    Example:
+        >>> atomic_write(Path("config.txt"), "content")
+    """
+    import tempfile
+
+    # Ensure parent directory exists
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+
+    # Write to temporary file in same directory (same filesystem)
+    with tempfile.NamedTemporaryFile(
+        mode='w',
+        dir=filepath.parent,
+        delete=False,
+        encoding='utf-8'
+    ) as tmp:
+        tmp.write(content)
+        tmp.flush()
+        os.fsync(tmp.fileno())  # Force write to disk
+        tmp_path = tmp.name
+
+    # Atomic rename (replaces existing file if present)
+    try:
+        os.replace(tmp_path, filepath)
+    except Exception:
+        # Clean up temp file on failure
+        try:
+            os.unlink(tmp_path)
+        except Exception:
+            pass
+        raise
+
+
 def file_exists(path: Path) -> bool:
     """Check if a file exists.
 

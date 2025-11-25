@@ -937,10 +937,9 @@ class TestIntegration(unittest.TestCase):
 class TestSecurity(unittest.TestCase):
     """Test security features and validation."""
 
-    @unittest.skip("install_v2 module not migrated")
     def test_safe_json_load_size_limit(self):
         """Test that oversized JSON payloads are rejected."""
-        from install_v2 import safe_json_load, MAX_JSON_SIZE
+        from utils.json_utils import safe_json_load, MAX_JSON_SIZE
         import json
 
         # Create JSON that exceeds size limit
@@ -951,10 +950,9 @@ class TestSecurity(unittest.TestCase):
 
         self.assertIn("too large", str(cm.exception))
 
-    @unittest.skip("install_v2 module not migrated")
     def test_safe_json_load_depth_limit(self):
         """Test that deeply nested JSON is rejected."""
-        from install_v2 import safe_json_load, MAX_JSON_DEPTH
+        from utils.json_utils import safe_json_load, MAX_JSON_DEPTH
         import json
 
         # Create deeply nested JSON (more than MAX_JSON_DEPTH levels)
@@ -971,10 +969,9 @@ class TestSecurity(unittest.TestCase):
 
         self.assertIn("too deep", str(cm.exception))
 
-    @unittest.skip("install_v2 module not migrated")
     def test_safe_json_load_valid(self):
         """Test that valid JSON is accepted."""
-        from install_v2 import safe_json_load
+        from utils.json_utils import safe_json_load
         import json
 
         valid_data = {"coding_standards": "PEP 8", "tools": ["Python", "Git"]}
@@ -1041,10 +1038,9 @@ class TestSecurity(unittest.TestCase):
         self.assertFalse(valid)
         self.assertIn("too long", error)
 
-    @unittest.skip("install_v2 module not migrated")
     def test_atomic_write(self):
         """Test atomic file write functionality."""
-        from install_v2 import atomic_write
+        from utils.files import atomic_write
 
         with tempfile.TemporaryDirectory() as tmpdir:
             test_file = Path(tmpdir) / "test.txt"
