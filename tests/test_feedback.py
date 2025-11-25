@@ -10,8 +10,8 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 import subprocess
 
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
+# Add scripts directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent / "skills" / "aida-dispatch" / "scripts"))
 
 import feedback
 
@@ -250,9 +250,11 @@ class TestSubmitFeatureRequest(unittest.TestCase):
 class TestCreateGitHubIssue(unittest.TestCase):
     """Test create_github_issue() function."""
 
+    @patch('builtins.input', return_value='yes')
+    @patch('feedback.check_rate_limit', return_value=True)
     @patch('feedback.check_gh_cli', return_value=True)
     @patch('subprocess.run')
-    def test_create_issue_success(self, mock_run, mock_check):
+    def test_create_issue_success(self, mock_run, mock_check, mock_rate, mock_input):
         """Test successful GitHub issue creation."""
         mock_run.return_value = MagicMock(
             returncode=0,
@@ -262,14 +264,14 @@ class TestCreateGitHubIssue(unittest.TestCase):
 
         result = feedback.create_github_issue(
             title='Test Issue',
-            body='Test body',
+            body='Test body for the GitHub issue creation test',
             labels=['test']
         )
 
         self.assertEqual(result, 0)
-        mock_run.assert_called_once()
+        self.assertEqual(mock_run.call_count, 2)  # auth check + issue create
 
-        # Verify subprocess call
+        # Verify subprocess call (last call is the issue creation)
         call_args = mock_run.call_args[0][0]
         self.assertEqual(call_args[0], 'gh')
         self.assertEqual(call_args[1], 'issue')
