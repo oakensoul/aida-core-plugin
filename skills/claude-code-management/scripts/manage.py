@@ -3,6 +3,7 @@
 
 This script provides a unified entry point for managing Claude Code artifacts:
 - Extensions: agents, commands, skills, plugins
+- Hooks: lifecycle automation (settings.json)
 - Configuration: CLAUDE.md files
 
 It dispatches to the appropriate operations module based on context.
@@ -11,6 +12,10 @@ Usage:
     # Extension operations
     python manage.py --get-questions --context='{"type": "agent", "operation": "create", ...}'
     python manage.py --execute --context='{"type": "agent", "operation": "create", ...}'
+
+    # Hook operations
+    python manage.py --get-questions --context='{"target": "hook", "operation": "add", ...}'
+    python manage.py --execute --context='{"target": "hook", "operation": "list", ...}'
 
     # CLAUDE.md operations
     python manage.py --get-questions --context='{"target": "claude", "operation": "create", ...}'
@@ -46,6 +51,27 @@ sys.path.insert(0, str(SCRIPT_DIR))
 from operations.utils import safe_json_load  # noqa: E402
 from operations import extensions  # noqa: E402
 from operations import claude_md  # noqa: E402
+from operations import hooks  # noqa: E402
+
+
+def is_hook_operation(context: Dict[str, Any]) -> bool:
+    """Determine if this is a hook operation.
+
+    Args:
+        context: Operation context
+
+    Returns:
+        True if this is a hook operation
+    """
+    # Explicit target
+    if context.get("target") == "hook":
+        return True
+
+    # Type is hook
+    if context.get("type") == "hook":
+        return True
+
+    return False
 
 
 def is_claude_md_operation(context: Dict[str, Any]) -> bool:
@@ -63,7 +89,7 @@ def is_claude_md_operation(context: Dict[str, Any]) -> bool:
 
     # Has scope (CLAUDE.md specific)
     if "scope" in context and context.get("type") not in [
-        "agent", "command", "skill", "plugin"
+        "agent", "command", "skill", "plugin", "hook"
     ]:
         return True
 
@@ -83,7 +109,9 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Questions result dictionary
     """
-    if is_claude_md_operation(context):
+    if is_hook_operation(context):
+        return hooks.get_questions(context)
+    elif is_claude_md_operation(context):
         return claude_md.get_questions(context)
     else:
         return extensions.get_questions(context)
@@ -99,7 +127,9 @@ def execute(context: Dict[str, Any], responses: Dict[str, Any]) -> Dict[str, Any
     Returns:
         Execution result dictionary
     """
-    if is_claude_md_operation(context):
+    if is_hook_operation(context):
+        return hooks.execute(context, responses, TEMPLATES_DIR)
+    elif is_claude_md_operation(context):
         return claude_md.execute(context, responses, TEMPLATES_DIR)
     else:
         return extensions.execute(context, responses, TEMPLATES_DIR)

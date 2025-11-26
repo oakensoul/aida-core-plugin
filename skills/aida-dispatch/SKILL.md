@@ -60,16 +60,17 @@ For `help` or no arguments:
 
 ### Extension Management Commands
 
-For `agent`, `command`, `skill`, or `plugin` commands:
+For `agent`, `command`, `skill`, `plugin`, or `hook` commands:
 
 - **Invoke the `claude-code-management` skill** to handle these operations
 - Pass the full command arguments to the skill
 - The skill handles create, validate, version, list, and plugin-specific operations
+- For hooks: handles list, add, remove, validate (hooks are settings.json config, not files)
 
 **Process:**
 
 1. Parse the command to extract:
-   - Component type: `agent`, `command`, `skill`, or `plugin`
+   - Component type: `agent`, `command`, `skill`, `plugin`, or `hook`
    - Operation: `create`, `validate`, `version`, `list`, `add`, `remove`
    - Arguments: name, description, options
 
@@ -82,6 +83,9 @@ For `agent`, `command`, `skill`, or `plugin` commands:
 /aida command validate --all         → claude-code-management skill
 /aida skill version my-skill patch   → claude-code-management skill
 /aida plugin list                    → claude-code-management skill
+/aida hook list                      → claude-code-management skill
+/aida hook add "auto-format"         → claude-code-management skill
+/aida hook remove my-hook            → claude-code-management skill
 ```
 
 ### Memento Commands
@@ -191,6 +195,7 @@ When displaying help (for `help` command or no arguments), show:
 - `/aida command [create|validate|version|list]` - Manage commands
 - `/aida skill [create|validate|version|list]` - Manage skills
 - `/aida plugin [create|validate|version|list|add|remove]` - Manage plugins
+- `/aida hook [list|add|remove|validate]` - Manage hooks (settings.json)
 
 ### Session Persistence
 - `/aida memento create "description"` - Save current work context
@@ -219,6 +224,8 @@ If you encounter issues: `/aida doctor`
 To create an agent: `/aida agent create "description"`
 To save work context: `/aida memento create "description"`
 To optimize your CLAUDE.md: `/aida claude optimize`
+To list hooks: `/aida hook list`
+To add a hook: `/aida hook add "auto-format on write"`
 ```
 
 ## Resources

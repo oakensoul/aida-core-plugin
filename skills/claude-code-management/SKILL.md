@@ -1,13 +1,14 @@
 ---
 type: skill
 name: claude-code-management
-description: Unified management for Claude Code artifacts - extensions (agents, commands, skills, plugins) and configuration files (CLAUDE.md) using templates and a two-phase API.
-version: 0.3.0
+description: Unified management for Claude Code artifacts - extensions (agents, commands, skills, plugins, hooks) and configuration files (CLAUDE.md) using templates and a two-phase API.
+version: 0.4.0
 tags:
   - core
   - management
   - extensions
   - configuration
+  - hooks
 ---
 
 # Claude Code Management
@@ -15,6 +16,7 @@ tags:
 Unified management interface for Claude Code artifacts:
 
 - **Extensions**: agents, commands, skills, plugins
+- **Hooks**: lifecycle automation (settings.json configuration)
 - **Configuration**: CLAUDE.md files
 
 ## Activation
@@ -25,8 +27,9 @@ This skill activates when:
 - User invokes `/aida command [create|validate|version|list]`
 - User invokes `/aida skill [create|validate|version|list]`
 - User invokes `/aida plugin [create|validate|version|list|add|remove]`
+- User invokes `/aida hook [list|add|remove|validate]`
 - User invokes `/aida claude [create|optimize|validate|list]`
-- Extension or configuration management is needed
+- Extension, hook, or configuration management is needed
 
 ## Extension Operations
 
@@ -34,9 +37,11 @@ This skill activates when:
 
 Parse the command to determine:
 
-1. **Component type**: `agent`, `command`, `skill`, or `plugin`
+1. **Component type**: `agent`, `command`, `skill`, `plugin`, or `hook`
 2. **Operation**: `create`, `validate`, `version`, `list`, `add`, `remove`
 3. **Arguments**: name, description, options
+
+**Note:** Hooks use different operations (see Hook Operations section).
 
 ### Create Operations
 
@@ -292,6 +297,110 @@ Return a JSON object with this exact structure:
 }
 ```
 
+## Hook Operations
+
+Hooks are different from other extensions - they're JSON configuration in settings.json,
+not separate files. Operations are simpler and more focused.
+
+### Understanding Hooks
+
+Hooks are lifecycle automation that execute shell commands at specific events:
+
+- **PreToolUse** / **PostToolUse** - Before/after tool execution
+- **SessionStart** / **SessionEnd** - Session lifecycle
+- **UserPromptSubmit** - When user submits prompt
+- **Notification** / **Stop** - Response lifecycle
+
+Hooks live in `settings.json` files:
+
+- User: `~/.claude/settings.json`
+- Project: `./.claude/settings.json`
+- Project local: `./.claude/settings.local.json`
+
+### List Operations
+
+For `list` operations:
+
+**Script invocation:**
+
+```bash
+python {base_directory}/scripts/manage.py --execute \
+  --context='{"target": "hook", "operation": "list", "scope": "all"}'
+```
+
+**Scopes:**
+
+- `user` - User-level hooks only
+- `project` - Project-level hooks only
+- `all` - All hooks (default)
+
+**Output:** Table showing hooks with event, matcher, command, and source file.
+
+### Add Operations
+
+For `add` operations, use a **two-phase pattern**:
+
+#### Phase 1: Gather Context
+
+```bash
+python {base_directory}/scripts/manage.py --get-questions \
+  --context='{"target": "hook", "operation": "add", "description": "user description"}'
+```
+
+Returns questions about:
+
+- Event type (PreToolUse, PostToolUse, etc.)
+- Matcher pattern (tool names)
+- Scope (user vs project)
+- Whether to use a template (formatter, logger, blocker)
+
+#### Phase 2: Execute
+
+```bash
+python {base_directory}/scripts/manage.py --execute \
+  --context='{"target": "hook", "operation": "add", "event": "PostToolUse", "matcher": "Write|Edit", "command": "prettier --write", "scope": "project"}'
+```
+
+**Common templates available:**
+
+| Template | Event | Purpose |
+|----------|-------|---------|
+| `formatter` | PostToolUse | Auto-format code after writes |
+| `logger` | PostToolUse | Log commands for audit |
+| `blocker` | PreToolUse | Block writes to sensitive files |
+| `notifier` | Notification | Desktop notifications |
+
+### Remove Operations
+
+For `remove` operations:
+
+**Script invocation:**
+
+```bash
+python {base_directory}/scripts/manage.py --execute \
+  --context='{"target": "hook", "operation": "remove", "event": "PostToolUse", "matcher": "Write|Edit", "scope": "project"}'
+```
+
+Removes the matching hook from the settings file.
+
+### Validate Operations
+
+For `validate` operations:
+
+**Script invocation:**
+
+```bash
+python {base_directory}/scripts/manage.py --execute \
+  --context='{"target": "hook", "operation": "validate", "scope": "all"}'
+```
+
+Validates:
+
+- Hook structure (required fields)
+- Event names are valid
+- Commands are safe (warns about dangerous patterns)
+- No duplicate hooks
+
 ## CLAUDE.md Operations
 
 ### Command Routing
@@ -414,6 +523,14 @@ python {base_directory}/scripts/manage.py --execute \
 | `user`    | `~/.claude/CLAUDE.md`       | Global user preferences |
 | `plugin`  | `.claude-plugin/CLAUDE.md`  | Plugin documentation    |
 
+### Hook Scopes
+
+| Scope     | Path                            | Use Case                     |
+| --------- | ------------------------------- | ---------------------------- |
+| `user`    | `~/.claude/settings.json`       | Personal automation          |
+| `project` | `./.claude/settings.json`       | Shared team hooks            |
+| `local`   | `./.claude/settings.local.json` | Personal project overrides   |
+
 ## Example Workflows
 
 ### Creating an Agent (Full Flow)
@@ -501,6 +618,7 @@ User: /aida claude optimize
   - **utils.py** - Shared utilities
   - **extensions.py** - Extension operations (agent/command/skill/plugin)
   - **claude_md.py** - CLAUDE.md operations
+  - **hooks.py** - Hook operations (list/add/remove/validate)
 
 ### references/
 
