@@ -45,6 +45,29 @@ Contains:
 - Template customization guidelines
 - Plugin organization patterns
 
+### plugin-development.md
+
+**When to use:** When creating or distributing plugins
+
+Contains:
+
+- Plugin structure and required files
+- plugin.json schema (all fields)
+- marketplace.json for publishing
+- Versioning and dependencies
+- Installation and management
+
+### claude-md-files.md
+
+**When to use:** When creating or maintaining CLAUDE.md files
+
+Contains:
+
+- Purpose and location hierarchy
+- Content guidelines (what to include/exclude)
+- Effective patterns and examples
+- Maintenance best practices
+
 ## Quick Reference
 
 | Question                                | Document                       |
@@ -57,6 +80,12 @@ Contains:
 | "How should I structure my agent?"      | design-patterns.md             |
 | "What are best practices?"              | design-patterns.md             |
 | "How do I organize a plugin?"           | design-patterns.md             |
+| "What goes in plugin.json?"             | plugin-development.md          |
+| "How do I publish a plugin?"            | plugin-development.md          |
+| "How do plugins work?"                  | plugin-development.md          |
+| "What should CLAUDE.md contain?"        | claude-md-files.md             |
+| "Where do CLAUDE.md files go?"          | claude-md-files.md             |
+| "How do I write project instructions?"  | claude-md-files.md             |
 
 ## External Resources
 

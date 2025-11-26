@@ -3,12 +3,16 @@
 This document defines the architecture and quality standards for Claude Code extensions.
 It serves as the authoritative reference for the claude-code-expert agent's expertise.
 
-## The Four Extension Types
+## Extension Types
 
-### Agent (WHO)
+### Subagent (WHO)
 
-Agents represent **expertise and judgment**. They are domain experts spawned to apply
-knowledge to problems.
+**Note:** Claude Code (the orchestrator) is the primary agent. The definitions in
+`/agents` folders are **subagents** - specialists that get spawned for specific
+expertise.
+
+Subagents represent **expertise and judgment**. They are domain experts spawned
+to apply knowledge to problems.
 
 **Contains:**
 - Identity and persona
@@ -22,24 +26,36 @@ knowledge to problems.
 - Script invocations
 - Output format specifications (caller provides these)
 
-**Analogy:** Hiring a consultant. You describe the problem; they apply expertise.
+**Analogy:** Hiring a specialist consultant. You (the orchestrator) describe the
+problem; they apply their domain expertise. When done, control returns to you.
 
 ### Command (WHAT)
 
-Commands are **entry points**. They capture user intent and route to handlers.
+Commands are **instructions/recipes/process definitions**. They define what should
+happen - both thinking steps and doing steps - but they don't execute anything
+themselves.
 
 **Contains:**
-- Argument hints and descriptions
-- Routing to appropriate skill
-- Tool restrictions if needed
-- User-facing help text
+- Process steps (thinking, deciding, doing)
+- Skill invocations (when execution capabilities are needed)
+- Agent spawns (when specialized expertise is needed)
+- Decision points and judgment criteria
+- Argument hints and user-facing help
 
 **Does NOT contain:**
-- Business logic
-- Multi-step workflows
-- Direct file operations
+- Script code (that belongs in Skills)
+- Domain expertise (that belongs in Agents)
+- The actual execution (the orchestrator does that)
 
-**Analogy:** A meeting request. "I need help with X" - not the methodology for X.
+**Analogy:** Instructions for assembling furniture or a recipe for baking a cake.
+The instructions say "attach part A to part B" or "mix ingredients, taste and
+adjust, bake at 350°" - but the instructions don't assemble or bake. The person
+following them (orchestrator/subagent) does.
+
+**Key insight:** Commands are inert text. They define a process that includes
+cognitive steps ("analyze this", "decide which approach") and execution steps
+("invoke the setup skill"). The orchestrator reads the command and actually
+performs those steps.
 
 ### Skill (HOW)
 
@@ -77,6 +93,134 @@ Knowledge is **reference material**. Facts, patterns, and examples that inform d
 
 **Analogy:** Reference books on a consultant's shelf.
 
+### CLAUDE.md (MEMORY FILES)
+
+CLAUDE.md files are **memory files** - persistent context that's always loaded.
+They appear in `/context` output as "Memory files" and provide project and
+user-level context for every request.
+
+**Contains:**
+- Project structure and conventions
+- Coding standards and preferences
+- Tool and workflow guidance
+- Team practices
+
+**Does NOT contain:**
+- Secrets or credentials
+- User-specific absolute paths
+- Temporary notes
+
+**Analogy:** Onboarding documentation for a new team member - everything they need
+to know about how this project/team works. Always in their mind, not looked up.
+
+**Scope levels (both always loaded):**
+- `~/.claude/CLAUDE.md` - User preferences (global memory)
+- `./CLAUDE.md` - Project conventions (project memory)
+
+**Key distinction from Knowledge:**
+- **Knowledge** = Extension-bundled, loaded when agent/skill is active
+- **CLAUDE.md** = Environment memory, always loaded for every request
+
+### Plugin (DISTRIBUTION)
+
+Plugins are **distribution containers**. They package agents, commands, skills,
+and knowledge for installation and sharing.
+
+**Contains:**
+- Bundled agents, commands, skills
+- Plugin metadata (plugin.json)
+- Documentation (README)
+
+**Does NOT contain:**
+- Behavior definitions (that's what the bundled components do)
+- User configuration
+
+**Analogy:** A cookbook that contains recipes (commands), techniques (skills),
+and chef expertise (agents) - packaged for distribution.
+
+---
+
+## Context Layering
+
+When Claude processes a request, context is layered from multiple sources.
+
+The `/context` command shows this as **Memory files** - persistent context that's
+always loaded for every request:
+
+```
+Memory files · /memory
+└ User (~/.claude/CLAUDE.md): 43 tokens
+└ Project (./CLAUDE.md): 282 tokens
+```
+
+### Visual Model
+
+```mermaid
+graph TB
+    subgraph "Runtime Context"
+        CONV[/"5. Conversation<br/>Current task & discussion"/]
+        EXT[/"4. Extension Context<br/>Active command/skill/subagent<br/>+ Knowledge files"/]
+    end
+
+    subgraph "Memory Files (CLAUDE.md)"
+        PROJ[/"3. Project CLAUDE.md<br/>./CLAUDE.md<br/>Project conventions"/]
+        USER[/"2. User CLAUDE.md<br/>~/.claude/CLAUDE.md<br/>Personal preferences"/]
+    end
+
+    subgraph "Foundation"
+        BASE[/"1. Base Claude<br/>Core capabilities"/]
+    end
+
+    BASE --> USER --> PROJ --> EXT --> CONV
+
+    style CONV fill:#e1f5fe
+    style EXT fill:#fff3e0
+    style PROJ fill:#f3e5f5
+    style USER fill:#f3e5f5
+    style BASE fill:#e8f5e9
+```
+
+### Layer Stack
+
+```text
+┌─────────────────────────────────────────────────────┐
+│  5. Conversation Context                            │
+│     What's been discussed, current task             │
+├─────────────────────────────────────────────────────┤
+│  4. Extension Context                               │
+│     Active command, skill, or spawned subagent      │
+│     + Subagent's knowledge files                    │
+├─────────────────────────────────────────────────────┤
+│  3. Project CLAUDE.md  ─┐                           │
+│     ./CLAUDE.md         │ "Memory files"            │
+├─────────────────────────┤ Always loaded             │
+│  2. User CLAUDE.md     ─┘                           │
+│     ~/.claude/CLAUDE.md                             │
+├─────────────────────────────────────────────────────┤
+│  1. Base Claude                                     │
+│     Core capabilities and knowledge                 │
+└─────────────────────────────────────────────────────┘
+```
+
+**How layers combine:**
+- Lower layers provide defaults
+- Higher layers can override or extend
+- Project settings override user settings for project-specific concerns
+- Extension context (command/subagent) adds task-specific guidance
+- Conversation context is the immediate task at hand
+
+**Example flow:**
+
+1. User has `~/.claude/CLAUDE.md` with preference: "Use pnpm"
+2. Project has `./CLAUDE.md` with: "Use npm for this legacy project"
+3. User invokes `/test` command
+4. Orchestrator reads the command (testing process recipe)
+5. Orchestrator spawns `test-expert` subagent with testing knowledge
+6. Subagent applies expertise within project context (uses npm, not pnpm)
+
+**Key insight:** Context flows down but specificity wins. Project overrides user.
+Extension context adds to (doesn't replace) environment context.
+
 ---
 
 ## The Consultant Rule
@@ -98,7 +242,43 @@ the agent applies expertise.
 
 ---
 
-## Quality Standards: Agents
+## Extensions Are Definitions
+
+All extension types are **inert text** - they define behavior but don't execute it.
+
+| Type | Role | Defines | Loaded |
+|------|------|---------|--------|
+| **Subagent** | WHO | Expertise to embody | When spawned |
+| **Command** | WHAT | Process to follow (recipe) | When invoked |
+| **Skill** | HOW | Execution capabilities | When activated |
+| **Knowledge** | CONTEXT | Facts to reference | With extension |
+| **CLAUDE.md** | MEMORY | Environment context | Always |
+| **Plugin** | DISTRIBUTION | Container | When installed |
+
+**Note:** The orchestrator (Claude Code) is the primary agent. Subagents are
+specialists spawned for specific expertise - they live in `/agents` folders.
+
+**Nothing happens until the orchestrator reads these definitions and acts.**
+
+A Command says "analyze X, decide Y, invoke skill Z" - but doesn't analyze, decide,
+or invoke. The orchestrator does.
+
+A Skill says "run this script, write this file" - but doesn't run or write. The
+orchestrator (or the script itself) does.
+
+A Subagent definition says "you are an expert in X with these standards" - but
+doesn't think. Claude embodies that expertise when spawned via the Task tool.
+
+Knowledge just sits there until someone reads it.
+
+**This matters because:**
+- Don't confuse the definition with the execution
+- Commands can define complex processes (they're just instructions)
+- The orchestrator is always the one doing the work
+
+---
+
+## Quality Standards: Subagents
 
 ### What Belongs
 
@@ -149,27 +329,31 @@ Return JSON: { "files": [...], "validation": {...} }
 
 ### What Belongs
 
-- Argument hint and description
-- Routing to appropriate skill
-- Tool restrictions if needed
+- Clear process definition (the recipe)
+- Thinking steps (analyze, evaluate, decide)
+- Skill invocations for execution needs
+- Agent spawns for expertise needs
+- Decision criteria and judgment points
+- Argument hints and user-facing help
 
 ### What Does NOT Belong
 
-- Business logic
-- Multi-step workflows
-- Direct file operations
+- Python/script code (use Skills)
+- Domain expertise definitions (use Agents)
+- Reference material (use Knowledge)
 
 ### Good Enough
 
-- Correctly routes to skill
-- Clear argument hint
-- Proper frontmatter
+- Clear process steps
+- Proper frontmatter with argument hints
+- Invokes appropriate skills/agents when needed
 
 ### Excellent
 
-- Pure delegation (no logic)
-- Clear user-facing description
-- Appropriate tool restrictions
+- Well-structured recipe with clear phases
+- Appropriate separation (thinking in command, execution in skills)
+- Clear decision points with criteria
+- Handles edge cases gracefully
 
 ---
 

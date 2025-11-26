@@ -12,14 +12,23 @@ use cases. This guide helps you choose the right type.
 **See also:** `framework-design-principles.md` for architectural standards and
 quality criteria for each type.
 
-## The Framework: WHO / WHAT / HOW / CONTEXT
+## The Framework: WHO / WHAT / HOW / CONTEXT / MEMORY
 
 | Type | Role | Contains |
 |------|------|----------|
-| **Agent** | WHO | Identity, expertise, judgment, quality standards |
-| **Command** | WHAT | Entry point, routing, user-facing help |
-| **Skill** | HOW | Capabilities, workflows, scripts, contracts |
-| **Knowledge** | CONTEXT | Facts, schemas, patterns, examples |
+| **Subagent** | WHO | Identity, expertise, judgment, quality standards |
+| **Command** | WHAT | Instructions/recipe/process (thinking + doing steps) |
+| **Skill** | HOW | Execution capabilities (scripts, templates, automation) |
+| **Knowledge** | CONTEXT | Facts, schemas, patterns (loaded with extensions) |
+| **CLAUDE.md** | MEMORY | Project/user conventions (always loaded) |
+| **Plugin** | DISTRIBUTION | Container for subagents, commands, skills, knowledge |
+
+**Key insight:** Claude Code (the orchestrator) is the primary agent. All extensions
+are inert definitions that the orchestrator reads and acts upon. Subagents are
+specialists spawned for specific expertise.
+
+**See also:** `framework-design-principles.md` for Context Layering - how these
+sources combine when processing requests.
 
 ## Quick Decision Tree
 
@@ -33,60 +42,77 @@ Is this a distributable package of multiple components?
     │
     ▼ NO
     │
-Does it need domain expertise or conversational interaction?
+Does it need domain expertise to DEFINE (not just use)?
     │
-    ├─ YES → Agent
-    │
-    ▼ NO
-    │
-Does it need scripts, templates, or reusable automation?
-    │
-    ├─ YES → Skill
+    ├─ YES → Subagent (expertise definition)
     │
     ▼ NO
     │
-Is it a simple user-invoked action?
+Does it need Python scripts or Jinja2 templates?
     │
-    └─ YES → Command
+    ├─ YES → Skill (execution capabilities)
+    │
+    ▼ NO
+    │
+Is it a user-invoked process (simple or complex)?
+    │
+    └─ YES → Command (instructions/recipe)
 ```
+
+**Note:** Commands can invoke Skills and spawn Subagents. The question is where
+the definition lives, not what gets used during execution.
 
 ## Extension Types Compared
 
-| Aspect         | Command     | Skill          | Agent            | Plugin       |
-| -------------- | ----------- | -------------- | ---------------- | ------------ |
-| **Purpose**    | User action | Automation     | Expert guidance  | Distribution |
-| **Invocation** | `/command`  | Auto or manual | Task or subagent | Container    |
-| **State**      | Stateless   | Stateless      | Context-aware    | N/A          |
-| **Scripts**    | No          | Yes            | Via skills       | Contains all |
-| **Knowledge**  | Minimal     | References     | Knowledge dir    | All types    |
+| Aspect         | Command              | Skill          | Subagent         | Plugin       |
+| -------------- | -------------------- | -------------- | ---------------- | ------------ |
+| **Purpose**    | Process definition   | Execution      | Expertise        | Distribution |
+| **Analogy**    | Recipe/Instructions  | Kitchen tools  | Specialist chef  | Cookbook     |
+| **Invocation** | `/command`           | Via command    | Via Task tool    | Container    |
+| **State**      | Stateless            | Stateless      | Context-aware    | N/A          |
+| **Scripts**    | No (invokes skills)  | Yes            | Via skills       | Contains all |
+| **Complexity** | Simple to complex    | Execution-focused | Domain-focused | Bundles all  |
 
 ## Commands
 
 ### What They Are
 
-Commands are user-invoked actions that perform a specific task. They're the
-simplest extension type.
+Commands are **instructions/recipes/process definitions** - they define what should
+happen when a user invokes them. Like furniture assembly instructions or a recipe,
+they describe the steps (both thinking and doing) but don't execute anything
+themselves.
 
 ### When to Use
 
-- Simple, single-purpose actions
-- Actions that don't require scripts
-- Entry points that delegate to skills
-- Quick utilities
+- User-invoked processes of any complexity
+- Workflows that combine thinking and doing steps
+- Entry points that orchestrate skills and agents
+- Any process that doesn't require custom scripts
 
 ### Characteristics
 
 - Invoked with `/command-name`
 - Defined in a single `.md` file
+- Can define multi-step processes (the recipe)
+- Can invoke skills for execution capabilities
+- Can spawn agents for expert judgment
 - Can specify allowed tools
 - Can accept arguments
 
+### What Commands Can Contain
+
+- **Thinking steps**: "Analyze X", "Evaluate against these criteria", "Decide Y"
+- **Doing steps**: "Create file", "Run tests", "Update config"
+- **Skill invocations**: "Use the `setup` skill to configure"
+- **Agent spawns**: "Spawn the security expert to review"
+- **Decision criteria**: "If TypeScript project, do X; otherwise do Y"
+
 ### Example Use Cases
 
-- `/deploy` - Deploy current project
-- `/review` - Start code review
-- `/test` - Run test suite
-- `/docs` - Generate documentation
+- `/deploy` - Analyze environment, decide deployment strategy, invoke deploy skill
+- `/review` - Apply review criteria, evaluate code, generate report
+- `/setup` - Detect project type, gather requirements, invoke setup skill
+- `/test` - Determine test strategy, run appropriate tests, report results
 
 ### Structure
 
@@ -140,28 +166,32 @@ skills/
         └── template.jinja2
 ```
 
-## Agents
+## Subagents
 
 ### What They Are
 
-Agents are expert personas with domain knowledge. They provide guidance,
-make decisions, and can use skills to accomplish tasks.
+Subagents are specialist personas with domain knowledge. The orchestrator
+(Claude Code) spawns them when specific expertise is needed. They provide
+guidance, make decisions, and can use skills to accomplish tasks.
+
+**Note:** The `/agents` folder contains subagent definitions. The orchestrator
+itself is the primary agent.
 
 ### When to Use
 
-- Domain expertise needed
-- Conversational interaction
-- Complex decision-making
-- Tasks requiring context
+- Domain expertise needed beyond the orchestrator's general knowledge
+- Specialized judgment or quality standards
+- Complex decision-making in a specific domain
+- Tasks requiring deep context in a particular area
 - Advisory or consultative roles
 
 ### Characteristics
 
-- Have a knowledge directory
-- Can use multiple skills
-- Maintain conversation context
-- Can be spawned as subagents
-- Provide expert guidance
+- Have a knowledge directory with domain expertise
+- Can use multiple skills for execution
+- Spawned by orchestrator via Task tool
+- Return results to orchestrator when done
+- Provide expert guidance within their domain
 
 ### Example Use Cases
 
@@ -175,8 +205,8 @@ make decisions, and can use skills to accomplish tasks.
 
 ```text
 agents/
-└── my-agent/
-    ├── my-agent.md
+└── my-subagent/
+    ├── my-subagent.md
     └── knowledge/
         ├── index.md
         └── domain.md
@@ -231,27 +261,30 @@ my-plugin/
 #### Recommendation: Skill
 
 Deployments are procedural (run scripts, check status, verify). A skill
-can contain deployment scripts and be invoked by commands or agents.
+can contain deployment scripts and be invoked by commands or subagents.
 
 ### "I need help designing APIs"
 
-#### Recommendation: Agent
+#### Recommendation: Subagent
 
-API design requires expertise, judgment, and understanding context. An
-agent can provide guidance based on best practices and project specifics.
+API design requires expertise, judgment, and understanding context. A
+subagent can provide guidance based on best practices and project specifics.
+The orchestrator spawns the API design expert when needed.
 
-### "I want a quick way to format code"
+### "I want a code review workflow"
 
 #### Recommendation: Command
 
-Simple action, single purpose, delegates to a formatter. A command is
-the lightest-weight option.
+A code review is a process: analyze changes, apply criteria, generate findings,
+suggest fixes. This is a recipe/set of instructions. The command defines the
+process; it can spawn a `code-review-expert` subagent for judgment and invoke
+a `report-generator` skill for output.
 
 ### "I want to share my testing tools with my team"
 
 #### Recommendation: Plugin
 
-Multiple components (commands, skills, maybe an agent) that need to be
+Multiple components (commands, skills, maybe a subagent) that need to be
 distributed together. A plugin packages them for easy installation.
 
 ## Combining Types
@@ -261,12 +294,21 @@ Often the best solution combines multiple types:
 ```text
 my-testing-plugin/           # Plugin for distribution
 ├── agents/
-│   └── test-advisor/        # Agent for test strategy
+│   └── test-advisor/        # Subagent: defines testing expertise
 ├── commands/
-│   └── test.md              # Command entry point
+│   └── test.md              # Command: defines the testing process
 └── skills/
-    └── test-runner/         # Skill for execution
+    └── test-runner/         # Skill: provides execution capabilities
 ```
 
-The command provides the entry point, the skill does the work, the agent
-provides expertise, and the plugin packages it all together.
+**How they work together:**
+
+1. User invokes `/test` (Command)
+2. Orchestrator reads the command (the recipe/instructions)
+3. Orchestrator spawns `test-advisor` subagent for strategy decisions
+4. Orchestrator invokes `test-runner` skill for execution
+5. Plugin packages it all for distribution
+
+**The command is the recipe** - it defines what happens. Skills provide execution
+capabilities. Subagents provide specialized expertise. The orchestrator (Claude Code)
+reads the command and performs the work, spawning subagents as needed.
