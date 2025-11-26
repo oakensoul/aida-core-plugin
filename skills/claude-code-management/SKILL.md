@@ -2,7 +2,7 @@
 type: skill
 name: claude-code-management
 description: Unified management for Claude Code artifacts - extensions (agents, commands, skills, plugins) and configuration files (CLAUDE.md) using templates and a two-phase API.
-version: 0.2.0
+version: 0.3.0
 tags:
   - core
   - management
@@ -40,33 +40,109 @@ Parse the command to determine:
 
 ### Create Operations
 
-For `create` operations:
+For `create` operations, use the **three-phase orchestration pattern**:
 
-1. Read `references/create-workflow.md` for the full workflow
-2. Run Phase 1 to get questions and inferred data
-3. Ask user any required questions using AskUserQuestion
-4. Run Phase 2 to create the component
-5. Report success and next steps
+#### Phase 1: Gather Context (Python)
 
-**Script invocation:**
+Run the script to infer metadata and get questions:
 
 ```bash
-# Phase 1: Get questions
 python {base_directory}/scripts/manage.py --get-questions \
   --context='{"operation": "create", "type": "agent", "description": "user description", "location": "user"}'
-
-# Phase 2: Execute
-python {base_directory}/scripts/manage.py --execute \
-  --context='{"operation": "create", "type": "agent", "name": "inferred-name", "description": "...", "version": "0.1.0", "tags": ["custom"], "location": "user"}'
 ```
+
+Returns:
+
+```json
+{
+  "inferred": {
+    "name": "inferred-name",
+    "version": "0.1.0",
+    "tags": ["custom"],
+    "base_path": "~/.claude/agents/inferred-name"
+  },
+  "questions": [
+    {"id": "location", "question": "Where to create?", "options": [...]}
+  ],
+  "project_context": {
+    "languages": ["python"],
+    "frameworks": ["fastapi"]
+  }
+}
+```
+
+#### Phase 2: Generate Content (Agent)
+
+Spawn the `claude-code-expert` agent with complete context and output contract:
+
+```text
+Operation: CREATE
+Type: agent
+
+Requirements:
+  - Name: {inferred.name}
+  - Description: {user_description}
+  - Location: {inferred.base_path}
+  - Project Context: {project_context}
+  - User Answers: {answers to questions}
+
+Output Format:
+Return a JSON object with this exact structure:
+
+{
+  "validation": {
+    "passed": true|false,
+    "issues": [
+      {"severity": "error|warning", "message": "description", "suggestion": "how to fix"}
+    ]
+  },
+  "files": [
+    {
+      "path": "relative/path/to/file.md",
+      "content": "complete file content as string"
+    }
+  ],
+  "summary": {
+    "created": ["list of files"],
+    "next_steps": ["what user should do next"]
+  }
+}
+
+If validation fails (passed=false with errors), return empty files array.
+Warnings should not prevent file generation.
+```
+
+**Handle agent response:**
+
+1. Parse the JSON response
+2. If `validation.passed` is false with errors:
+   - Report issues to user
+   - Ask if they want to proceed anyway or provide more info
+3. If validation passed (or user chose to proceed):
+   - Continue to Phase 3
+
+#### Phase 3: Write Files (Python)
+
+Pass agent output to Python for file creation:
+
+```bash
+python {base_directory}/scripts/manage.py --execute \
+  --context='{"operation": "create", "type": "agent", "agent_output": <agent_json>}'
+```
+
+The script:
+
+1. Validates file structure (required fields, proper frontmatter)
+2. Creates directories
+3. Writes files
+4. Returns success/failure
 
 ### Validate Operations
 
 For `validate` operations:
 
-1. Read `references/validate-workflow.md` for validation rules
-2. Run validation script
-3. Report results with any errors
+1. Run validation script
+2. Report results with any errors
 
 **Script invocation:**
 
@@ -117,6 +193,104 @@ For `add` and `remove` on plugins:
 
 - `add`: Create component inside plugin directory
 - `remove`: Remove component from plugin (with confirmation)
+
+## Agent Output Contract
+
+When spawning `claude-code-expert` for CREATE operations, always include this output format specification:
+
+### For Agents
+
+```text
+Output Format:
+Return a JSON object with this exact structure:
+
+{
+  "validation": {
+    "passed": boolean,
+    "issues": [
+      {"severity": "error|warning", "message": "string", "suggestion": "string"}
+    ]
+  },
+  "files": [
+    {"path": "agents/{name}/{name}.md", "content": "..."},
+    {"path": "agents/{name}/knowledge/index.md", "content": "..."},
+    {"path": "agents/{name}/knowledge/{topic}.md", "content": "..."}
+  ],
+  "summary": {
+    "created": ["list of relative paths"],
+    "next_steps": ["actionable items for user"]
+  }
+}
+```
+
+### For Commands
+
+```text
+Output Format:
+Return a JSON object with this exact structure:
+
+{
+  "validation": {
+    "passed": boolean,
+    "issues": [...]
+  },
+  "files": [
+    {"path": "commands/{name}.md", "content": "..."}
+  ],
+  "summary": {
+    "created": ["list of relative paths"],
+    "next_steps": ["actionable items for user"]
+  }
+}
+```
+
+### For Skills
+
+```text
+Output Format:
+Return a JSON object with this exact structure:
+
+{
+  "validation": {
+    "passed": boolean,
+    "issues": [...]
+  },
+  "files": [
+    {"path": "skills/{name}/SKILL.md", "content": "..."},
+    {"path": "skills/{name}/scripts/{script}.py", "content": "..."},
+    {"path": "skills/{name}/references/{doc}.md", "content": "..."},
+    {"path": "skills/{name}/templates/{template}.jinja2", "content": "..."}
+  ],
+  "summary": {
+    "created": ["list of relative paths"],
+    "next_steps": ["actionable items for user"]
+  }
+}
+```
+
+### For Plugins
+
+```text
+Output Format:
+Return a JSON object with this exact structure:
+
+{
+  "validation": {
+    "passed": boolean,
+    "issues": [...]
+  },
+  "files": [
+    {"path": ".claude-plugin/plugin.json", "content": "..."},
+    {"path": "README.md", "content": "..."},
+    {"path": ".gitignore", "content": "..."},
+    {"path": "agents/{name}/{name}.md", "content": "..."}
+  ],
+  "summary": {
+    "created": ["list of relative paths"],
+    "next_steps": ["actionable items for user"]
+  }
+}
+```
 
 ## CLAUDE.md Operations
 
@@ -215,31 +389,11 @@ python {base_directory}/scripts/manage.py --execute \
 **Reference Files:**
 
 ```text
-# Extension references
 {base_directory}/references/create-workflow.md
 {base_directory}/references/validate-workflow.md
 {base_directory}/references/schemas.md
-
-# CLAUDE.md references
 {base_directory}/references/claude-md-workflow.md
 {base_directory}/references/best-practices.md
-```
-
-**Templates:**
-
-```text
-# Extension templates
-{base_directory}/templates/agent/agent.md.jinja2
-{base_directory}/templates/command/command.md.jinja2
-{base_directory}/templates/skill/SKILL.md.jinja2
-{base_directory}/templates/plugin/plugin.json.jinja2
-{base_directory}/templates/plugin/README.md.jinja2
-{base_directory}/templates/plugin/gitignore.jinja2
-
-# CLAUDE.md templates
-{base_directory}/templates/claude-md/project.md.jinja2
-{base_directory}/templates/claude-md/user.md.jinja2
-{base_directory}/templates/claude-md/plugin.md.jinja2
 ```
 
 ## Location Options
@@ -260,42 +414,63 @@ python {base_directory}/scripts/manage.py --execute \
 | `user`    | `~/.claude/CLAUDE.md`       | Global user preferences |
 | `plugin`  | `.claude-plugin/CLAUDE.md`  | Plugin documentation    |
 
-## Two-Phase API
-
-This skill uses a two-phase API pattern:
-
-### Phase 1: Get Questions
-
-Analyzes context and returns:
-
-- Inferred metadata (name, version, tags, project context)
-- Questions that need user input
-- Audit findings (for optimize operations)
-- Validation results
-
-### Phase 2: Execute
-
-Performs the operation with:
-
-- User responses (if any)
-- Inferred data
-- Configuration options
-
 ## Example Workflows
 
-### Creating an Agent
+### Creating an Agent (Full Flow)
 
 ```text
 User: /aida agent create "handles database migrations"
 
 1. Parse: type=agent, operation=create, description="handles database migrations"
-2. Run Phase 1:
-   - Infer: name="database-migration", version="0.1.0", tags=["database", "custom"]
-   - No questions (all data inferred)
-3. Run Phase 2:
-   - Create ~/.claude/agents/database-migration/database-migration.md
-   - Create knowledge/ directory
-4. Report: "Created agent 'database-migration'. Add knowledge docs to knowledge/"
+
+2. Phase 1 (Python):
+   python manage.py --get-questions --context='{...}'
+   Returns:
+   - inferred: name="database-migration", version="0.1.0"
+   - questions: [location question]
+   - project_context: {languages: ["python"], frameworks: ["alembic"]}
+
+3. Ask user questions (if any):
+   AskUserQuestion: "Where should we create this agent?"
+
+4. Phase 2 (Agent):
+   Spawn claude-code-expert with:
+   - Operation: CREATE
+   - Type: agent
+   - Name: database-migration
+   - Description: handles database migrations
+   - Location: ~/.claude/agents/database-migration
+   - Project Context: Python, Alembic detected
+   - Output Format: [JSON contract]
+
+   Agent returns:
+   {
+     "validation": {"passed": true, "issues": []},
+     "files": [
+       {"path": "agents/database-migration/database-migration.md", "content": "..."},
+       {"path": "agents/database-migration/knowledge/index.md", "content": "..."},
+       {"path": "agents/database-migration/knowledge/migration-patterns.md", "content": "..."}
+     ],
+     "summary": {
+       "created": ["database-migration.md", "knowledge/index.md", "knowledge/migration-patterns.md"],
+       "next_steps": ["Review migration-patterns.md and add project-specific patterns"]
+     }
+   }
+
+5. Phase 3 (Python):
+   python manage.py --execute --context='{"operation": "create", "agent_output": {...}}'
+   - Validates structure
+   - Creates directories
+   - Writes files
+
+6. Report to user:
+   "Created agent 'database-migration' with 3 files:
+    - database-migration.md
+    - knowledge/index.md
+    - knowledge/migration-patterns.md
+
+   Next steps:
+    - Review migration-patterns.md and add project-specific patterns"
 ```
 
 ### Optimizing CLAUDE.md
@@ -317,19 +492,6 @@ User: /aida claude optimize
 6. Report: "Applied 3 fixes. Score improved from 65 to 85."
 ```
 
-### Validating All Commands
-
-```text
-User: /aida command validate --all
-
-1. Parse: type=command, operation=validate, all=true
-2. Run validation:
-   - Find all commands in user/project locations
-   - Validate each against schema
-3. Report: "Validated 5 commands: 4 valid, 1 invalid"
-   - Show errors for invalid commands
-```
-
 ## Resources
 
 ### scripts/
@@ -342,16 +504,8 @@ User: /aida command validate --all
 
 ### references/
 
-- **create-workflow.md** - Extension create workflow
+- **create-workflow.md** - Extension create workflow (deprecated - use this SKILL.md)
 - **validate-workflow.md** - Extension validation rules
 - **schemas.md** - Frontmatter schema reference
 - **claude-md-workflow.md** - CLAUDE.md create/optimize workflow
 - **best-practices.md** - CLAUDE.md best practices and scoring
-
-### templates/
-
-- **agent/** - Agent template
-- **command/** - Command template
-- **skill/** - Skill template
-- **plugin/** - Plugin templates (JSON, README, gitignore)
-- **claude-md/** - CLAUDE.md templates (project, user, plugin)

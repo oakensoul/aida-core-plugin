@@ -11,6 +11,19 @@ agent. Use this index to find the right document for your needs.
 
 ## Documents
 
+### framework-design-principles.md
+
+**When to use:** For architectural decisions and quality standards
+
+Contains:
+
+- The WHO/WHAT/HOW/CONTEXT framework
+- Quality standards for all extension types
+- The Consultant Rule (how agents should work)
+- What belongs vs doesn't belong in each type
+
+This is the **authoritative reference** for extension architecture.
+
 ### extension-types.md
 
 **When to use:** When deciding which type of extension to create
@@ -34,13 +47,16 @@ Contains:
 
 ## Quick Reference
 
-| Question                                | Document           |
-| --------------------------------------- | ------------------ |
-| "Should I create an agent or skill?"    | extension-types.md |
-| "What's the difference between types?"  | extension-types.md |
-| "How should I structure my agent?"      | design-patterns.md |
-| "What are best practices?"              | design-patterns.md |
-| "How do I organize a plugin?"           | design-patterns.md |
+| Question                                | Document                       |
+| --------------------------------------- | ------------------------------ |
+| "What's the architecture framework?"    | framework-design-principles.md |
+| "What belongs in an agent vs skill?"    | framework-design-principles.md |
+| "What does 'excellent' look like?"      | framework-design-principles.md |
+| "Should I create an agent or skill?"    | extension-types.md             |
+| "What's the difference between types?"  | extension-types.md             |
+| "How should I structure my agent?"      | design-patterns.md             |
+| "What are best practices?"              | design-patterns.md             |
+| "How do I organize a plugin?"           | design-patterns.md             |
 
 ## External Resources
 

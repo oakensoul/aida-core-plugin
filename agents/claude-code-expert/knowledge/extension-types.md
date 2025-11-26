@@ -9,6 +9,18 @@ description: How to choose between agents, commands, skills, and plugins
 Claude Code supports four types of extensions, each designed for different
 use cases. This guide helps you choose the right type.
 
+**See also:** `framework-design-principles.md` for architectural standards and
+quality criteria for each type.
+
+## The Framework: WHO / WHAT / HOW / CONTEXT
+
+| Type | Role | Contains |
+|------|------|----------|
+| **Agent** | WHO | Identity, expertise, judgment, quality standards |
+| **Command** | WHAT | Entry point, routing, user-facing help |
+| **Skill** | HOW | Capabilities, workflows, scripts, contracts |
+| **Knowledge** | CONTEXT | Facts, schemas, patterns, examples |
+
 ## Quick Decision Tree
 
 ```text

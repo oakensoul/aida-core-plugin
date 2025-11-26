@@ -5,13 +5,21 @@ Handles create, validate, version, and list operations for:
 - Commands
 - Skills
 - Plugins
+
+Supports three-phase orchestration:
+- Phase 1: get_questions() - Gather context, infer metadata, return questions
+- Phase 2: Agent generates content (handled by skill/orchestrator)
+- Phase 3: execute() with agent_output - Validate and write files
 """
 
 import json
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+import yaml
 
 from .utils import (
     to_kebab_case,
@@ -196,6 +204,118 @@ def infer_from_description(description: str) -> Dict[str, Any]:
     return inferred
 
 
+def detect_project_context() -> Dict[str, Any]:
+    """Detect project context for the agent to use.
+
+    Returns:
+        Dictionary of detected project facts
+    """
+    context: Dict[str, Any] = {
+        "languages": [],
+        "frameworks": [],
+        "tools": [],
+        "has_tests": False,
+        "has_ci": False,
+    }
+
+    cwd = Path.cwd()
+
+    # Detect languages
+    language_indicators = {
+        "python": ["*.py", "requirements.txt", "pyproject.toml", "setup.py", "Pipfile"],
+        "javascript": ["*.js", "package.json"],
+        "typescript": ["*.ts", "tsconfig.json"],
+        "go": ["*.go", "go.mod"],
+        "rust": ["*.rs", "Cargo.toml"],
+        "ruby": ["*.rb", "Gemfile"],
+        "java": ["*.java", "pom.xml", "build.gradle"],
+    }
+
+    for lang, indicators in language_indicators.items():
+        for indicator in indicators:
+            if indicator.startswith("*"):
+                if list(cwd.glob(indicator)) or list(cwd.glob(f"**/{indicator}")):
+                    if lang not in context["languages"]:
+                        context["languages"].append(lang)
+                    break
+            else:
+                if (cwd / indicator).exists():
+                    if lang not in context["languages"]:
+                        context["languages"].append(lang)
+                    break
+
+    # Detect frameworks (basic detection)
+    framework_files = {
+        "fastapi": ["main.py"],  # Check for FastAPI import later
+        "django": ["manage.py", "settings.py"],
+        "flask": ["app.py"],
+        "react": ["package.json"],  # Check for react dependency
+        "nextjs": ["next.config.js", "next.config.ts"],
+        "dbt": ["dbt_project.yml"],
+        "terraform": ["*.tf"],
+        "cdk": ["cdk.json"],
+    }
+
+    for framework, files in framework_files.items():
+        for f in files:
+            if f.startswith("*"):
+                if list(cwd.glob(f)):
+                    context["frameworks"].append(framework)
+                    break
+            elif (cwd / f).exists():
+                context["frameworks"].append(framework)
+                break
+
+    # Check package.json for JS frameworks
+    package_json = cwd / "package.json"
+    if package_json.exists():
+        try:
+            with open(package_json) as f:
+                pkg = json.load(f)
+                deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
+                if "react" in deps:
+                    context["frameworks"].append("react")
+                if "vue" in deps:
+                    context["frameworks"].append("vue")
+                if "next" in deps:
+                    context["frameworks"].append("nextjs")
+        except (json.JSONDecodeError, IOError):
+            pass
+
+    # Detect tools
+    tool_files = {
+        "docker": ["Dockerfile", "docker-compose.yml", "docker-compose.yaml"],
+        "make": ["Makefile"],
+        "git": [".git"],
+        "pytest": ["pytest.ini", "conftest.py"],
+        "jest": ["jest.config.js", "jest.config.ts"],
+    }
+
+    for tool, files in tool_files.items():
+        for f in files:
+            if (cwd / f).exists():
+                context["tools"].append(tool)
+                break
+
+    # Check for tests
+    context["has_tests"] = (
+        (cwd / "tests").exists() or
+        (cwd / "test").exists() or
+        (cwd / "__tests__").exists() or
+        bool(list(cwd.glob("**/test_*.py"))) or
+        bool(list(cwd.glob("**/*.test.js")))
+    )
+
+    # Check for CI
+    context["has_ci"] = (
+        (cwd / ".github" / "workflows").exists() or
+        (cwd / ".gitlab-ci.yml").exists() or
+        (cwd / ".circleci").exists()
+    )
+
+    return context
+
+
 def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
     """Analyze context and return questions that need user input (Phase 1).
 
@@ -214,6 +334,7 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
                 "questions": [...],      # Questions needing user input
                 "inferred": {...},       # Auto-detected values
                 "validation": {...},     # Validation results
+                "project_context": {...} # Detected project info (for create)
             }
     """
     operation = context.get("operation", "create")
@@ -230,6 +351,9 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
     if operation == "create":
         description = context.get("description", "")
 
+        # Always include project context for create operations
+        result["project_context"] = detect_project_context()
+
         if not description:
             result["questions"].append({
                 "id": "description",
@@ -243,6 +367,10 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
         # Infer from description
         inferred = infer_from_description(description)
         inferred["description"] = description
+
+        # Add base path - this is the location root (e.g., ~/.claude/)
+        # The agent will return relative paths like agents/{name}/{name}.md
+        inferred["base_path"] = str(get_location_path(location, plugin_path))
 
         # Validate inferred name
         is_valid, error = validate_name(inferred["name"])
@@ -611,15 +739,263 @@ def execute_list(
     }
 
 
+def validate_agent_output(agent_output: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate the structure of agent output.
+
+    Args:
+        agent_output: The output from the agent
+
+    Returns:
+        Dictionary with validation results
+    """
+    errors = []
+
+    # Check required top-level keys
+    required_keys = ["validation", "files", "summary"]
+    for key in required_keys:
+        if key not in agent_output:
+            errors.append(f"Missing required key: {key}")
+
+    if errors:
+        return {"valid": False, "errors": errors}
+
+    # Validate 'validation' section
+    validation = agent_output.get("validation", {})
+    if "passed" not in validation:
+        errors.append("validation.passed is required")
+    if not isinstance(validation.get("issues", []), list):
+        errors.append("validation.issues must be a list")
+
+    # Validate 'files' section
+    files = agent_output.get("files", [])
+    if not isinstance(files, list):
+        errors.append("files must be a list")
+    else:
+        for i, file_entry in enumerate(files):
+            if not isinstance(file_entry, dict):
+                errors.append(f"files[{i}] must be an object")
+                continue
+            if "path" not in file_entry:
+                errors.append(f"files[{i}].path is required")
+            if "content" not in file_entry:
+                errors.append(f"files[{i}].content is required")
+            # Validate path doesn't try to escape
+            path = file_entry.get("path", "")
+            if ".." in path or path.startswith("/"):
+                errors.append(f"files[{i}].path contains invalid characters: {path}")
+
+    # Validate 'summary' section
+    summary = agent_output.get("summary", {})
+    if not isinstance(summary.get("created", []), list):
+        errors.append("summary.created must be a list")
+    if not isinstance(summary.get("next_steps", []), list):
+        errors.append("summary.next_steps must be a list")
+
+    return {"valid": len(errors) == 0, "errors": errors}
+
+
+def validate_file_frontmatter(content: str, component_type: str) -> Dict[str, Any]:
+    """Validate frontmatter in a component file.
+
+    Args:
+        content: File content
+        component_type: Expected component type
+
+    Returns:
+        Dictionary with validation results
+    """
+    errors = []
+    warnings = []
+
+    # Check for frontmatter
+    if not content.strip().startswith("---"):
+        errors.append("File must start with YAML frontmatter (---)")
+        return {"valid": False, "errors": errors, "warnings": warnings}
+
+    # Extract frontmatter
+    try:
+        parts = content.split("---", 2)
+        if len(parts) < 3:
+            errors.append("Invalid frontmatter format")
+            return {"valid": False, "errors": errors, "warnings": warnings}
+
+        frontmatter_text = parts[1].strip()
+        frontmatter = yaml.safe_load(frontmatter_text)
+
+        if not isinstance(frontmatter, dict):
+            errors.append("Frontmatter must be a YAML dictionary")
+            return {"valid": False, "errors": errors, "warnings": warnings}
+
+        # Check required fields
+        required_fields = ["type", "name", "description", "version"]
+        for field in required_fields:
+            if field not in frontmatter:
+                errors.append(f"Missing required frontmatter field: {field}")
+
+        # Validate type matches
+        if frontmatter.get("type") != component_type:
+            errors.append(
+                f"Frontmatter type '{frontmatter.get('type')}' "
+                f"doesn't match expected '{component_type}'"
+            )
+
+        # Validate name format
+        name = frontmatter.get("name", "")
+        is_valid, error = validate_name(name)
+        if not is_valid:
+            errors.append(f"Invalid name in frontmatter: {error}")
+
+        # Validate version format
+        version = frontmatter.get("version", "")
+        is_valid, error = validate_version(version)
+        if not is_valid:
+            errors.append(f"Invalid version in frontmatter: {error}")
+
+    except yaml.YAMLError as e:
+        errors.append(f"Invalid YAML in frontmatter: {e}")
+
+    return {"valid": len(errors) == 0, "errors": errors, "warnings": warnings}
+
+
+def execute_create_from_agent(
+    component_type: str,
+    agent_output: Dict[str, Any],
+    base_path: str,
+    location: str = "user",
+    plugin_path: Optional[str] = None
+) -> Dict[str, Any]:
+    """Execute component creation from agent output (Phase 3).
+
+    Args:
+        component_type: Type of component being created
+        agent_output: The JSON output from the agent containing files to create
+        base_path: Base path where files should be created
+        location: Location type (user, project, plugin)
+        plugin_path: Path to plugin directory (if location is plugin)
+
+    Returns:
+        Result dictionary with success status and details
+    """
+    # Validate agent output structure
+    structure_validation = validate_agent_output(agent_output)
+    if not structure_validation["valid"]:
+        return {
+            "success": False,
+            "message": "Invalid agent output structure",
+            "errors": structure_validation["errors"],
+        }
+
+    # Check agent's own validation
+    agent_validation = agent_output.get("validation", {})
+    if not agent_validation.get("passed", False):
+        errors = agent_validation.get("issues", [])
+        error_messages = [
+            issue.get("message", str(issue))
+            for issue in errors
+            if isinstance(issue, dict) and issue.get("severity") == "error"
+        ]
+        if error_messages:
+            return {
+                "success": False,
+                "message": "Agent validation failed",
+                "errors": error_messages,
+                "issues": errors,
+            }
+
+    files = agent_output.get("files", [])
+    if not files:
+        return {
+            "success": False,
+            "message": "No files provided by agent",
+        }
+
+    # Determine actual base path
+    actual_base = Path(base_path).expanduser()
+
+    # Validate main component file has proper frontmatter
+    main_file_patterns = {
+        "agent": lambda f: f["path"].endswith(".md") and "/knowledge/" not in f["path"],
+        "command": lambda f: f["path"].endswith(".md"),
+        "skill": lambda f: f["path"].endswith("SKILL.md"),
+        "plugin": lambda f: f["path"].endswith("plugin.json"),
+    }
+
+    main_file_check = main_file_patterns.get(component_type, lambda f: False)
+    main_files = [f for f in files if main_file_check(f)]
+
+    validation_errors = []
+    for main_file in main_files:
+        if component_type != "plugin":  # plugin.json doesn't have frontmatter
+            validation = validate_file_frontmatter(main_file["content"], component_type)
+            if not validation["valid"]:
+                validation_errors.extend([
+                    f"{main_file['path']}: {err}"
+                    for err in validation["errors"]
+                ])
+
+    if validation_errors:
+        return {
+            "success": False,
+            "message": "File validation failed",
+            "errors": validation_errors,
+        }
+
+    # Create files
+    created_files = []
+    try:
+        for file_entry in files:
+            rel_path = file_entry["path"]
+            content = file_entry["content"]
+
+            # Construct full path
+            full_path = actual_base / rel_path
+            if not str(full_path).startswith(str(actual_base)):
+                # Path traversal attempt
+                return {
+                    "success": False,
+                    "message": f"Invalid path: {rel_path}",
+                }
+
+            # Create parent directories
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+
+            # Write file
+            full_path.write_text(content, encoding="utf-8")
+            created_files.append(str(full_path))
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"Failed to create files: {e}",
+            "files_created": created_files,  # Partial success info
+        }
+
+    summary = agent_output.get("summary", {})
+
+    return {
+        "success": True,
+        "message": f"Created {component_type} with {len(created_files)} files",
+        "files_created": created_files,
+        "next_steps": summary.get("next_steps", []),
+        "base_path": str(actual_base),
+    }
+
+
 def execute(
     context: Dict[str, Any],
     responses: Dict[str, Any],
     templates_dir: Path
 ) -> Dict[str, Any]:
-    """Execute the requested operation (Phase 2).
+    """Execute the requested operation (Phase 2/3).
+
+    This function handles two modes:
+    1. Template-based creation (legacy): Uses templates_dir to render files
+    2. Agent-based creation (new): Uses agent_output to write files
 
     Args:
-        context: Operation context
+        context: Operation context, may include:
+            - agent_output: JSON from claude-code-expert agent (Phase 3)
+            - base_path: Where to create files (required with agent_output)
         responses: User responses to questions (if any)
         templates_dir: Path to templates directory
 
@@ -636,6 +1012,20 @@ def execute(
         context.update(responses)
 
     if operation == "create":
+        # Check if this is agent-based creation (Phase 3)
+        agent_output = context.get("agent_output")
+        if agent_output:
+            # base_path is the location root (e.g., ~/.claude/)
+            # Agent returns paths relative to this (e.g., agents/{name}/{name}.md)
+            base_path = context.get("base_path")
+            if not base_path:
+                base_path = str(get_location_path(location, plugin_path))
+
+            return execute_create_from_agent(
+                component_type, agent_output, base_path, location, plugin_path
+            )
+
+        # Legacy template-based creation
         name = context.get("name") or to_kebab_case(context.get("description", "")[:50])
         description = context.get("description", "")
         version = context.get("version", "0.1.0")
