@@ -59,14 +59,29 @@ Contains:
 
 ### claude-md-files.md
 
-**When to use:** When creating or maintaining CLAUDE.md files
+**When to use:** When creating or maintaining CLAUDE.md memory files
 
 Contains:
 
-- Purpose and location hierarchy
-- Content guidelines (what to include/exclude)
-- Effective patterns and examples
-- Maintenance best practices
+- Memory vs Settings distinction
+- Memory file hierarchy (Enterprise, Project, User, Parent)
+- Import system (`@path/to/file` syntax)
+- `/memory` command usage
+- Content guidelines and best practices
+- Multi-file organization patterns
+
+### settings.md
+
+**When to use:** When configuring Claude Code behavior via settings.json
+
+Contains:
+
+- Settings file locations and precedence
+- Core settings (model, env, permissions, hooks)
+- Advanced settings (status line, sandbox, plugins)
+- Authentication configuration
+- Environment variables reference
+- Example configurations for different scenarios
 
 ## Quick Reference
 
@@ -86,6 +101,12 @@ Contains:
 | "What should CLAUDE.md contain?"        | claude-md-files.md             |
 | "Where do CLAUDE.md files go?"          | claude-md-files.md             |
 | "How do I write project instructions?"  | claude-md-files.md             |
+| "How do memory files work?"             | claude-md-files.md             |
+| "How do I import files in CLAUDE.md?"   | claude-md-files.md             |
+| "What goes in settings.json?"           | settings.md                    |
+| "How do I configure permissions?"       | settings.md                    |
+| "How do hooks work?"                    | settings.md                    |
+| "Memory vs settings - when to use?"     | settings.md, claude-md-files.md|
 
 ## External Resources
 

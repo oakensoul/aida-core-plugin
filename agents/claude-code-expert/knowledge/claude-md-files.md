@@ -1,57 +1,146 @@
 ---
 type: reference
-title: CLAUDE.md Files Guide
-description: Understanding and creating effective CLAUDE.md project instructions
+title: CLAUDE.md Memory Files Guide
+description: Understanding Claude Code memory files for persistent context and instructions
 ---
 
-# CLAUDE.md Files
+# CLAUDE.md Memory Files
 
-CLAUDE.md files provide project-specific instructions to Claude Code. They
-customize Claude's behavior for a particular project or user environment.
+CLAUDE.md files are **memory files** - persistent context that Claude loads at
+startup. They provide instructions, conventions, and context that shape Claude's
+behavior for a project or user.
 
-## What is CLAUDE.md?
+## Memory vs Settings
 
-A CLAUDE.md file is a **project instruction file** that tells Claude:
+Claude Code has two configuration systems:
 
-- How this project is structured
-- What conventions to follow
-- What tools and commands to prefer
-- What patterns and practices to use
+| Aspect | CLAUDE.md (Memory) | settings.json (Settings) |
+|--------|-------------------|--------------------------|
+| **Format** | Markdown | JSON |
+| **Purpose** | Instructions & context | Behavior configuration |
+| **Contains** | Conventions, patterns, workflows | Permissions, hooks, model |
+| **Analogy** | Onboarding docs | App preferences |
 
-Think of it as onboarding documentation for Claude - everything an AI assistant
-needs to know to work effectively in this codebase.
+**Use CLAUDE.md for:** What Claude SHOULD do (conventions, patterns, context)
+**Use settings.json for:** What Claude CAN do (permissions, tools, model)
 
-## Location Hierarchy
+See: `settings.md` for settings.json configuration.
 
-CLAUDE.md files are loaded from multiple locations with layered precedence:
+## Memory File Hierarchy
+
+Claude Code loads memory from four hierarchical levels:
 
 ```text
 Priority (highest to lowest):
-1. .claude/CLAUDE.md         # Project-specific (current directory)
-2. CLAUDE.md                 # Project root (current directory)
-3. ~/.claude/CLAUDE.md       # User global preferences
-4. ~/CLAUDE.md               # User home directory
+1. Enterprise Policy     # Organization-wide (managed)
+2. Project Memory        # Team-shared (.claude/CLAUDE.md or ./CLAUDE.md)
+3. User Memory           # Personal (~/.claude/CLAUDE.md)
+4. Parent Directories    # Recursively discovered upward
 ```
 
-Lower priority files are loaded first, higher priority files override them.
+### Location Details
 
-### When to Use Each Location
+| Level | Location | Scope |
+|-------|----------|-------|
+| Enterprise | `/Library/Application Support/ClaudeCode/CLAUDE.md` (macOS) | Organization |
+| Enterprise | `/etc/claude-code/CLAUDE.md` (Linux) | Organization |
+| Enterprise | `C:\ProgramData\ClaudeCode\CLAUDE.md` (Windows) | Organization |
+| Project | `./.claude/CLAUDE.md` or `./CLAUDE.md` | Team/Project |
+| User | `~/.claude/CLAUDE.md` | Personal global |
 
-| Location | Use Case |
-|----------|----------|
-| `./CLAUDE.md` | Project instructions, checked into repo |
-| `./.claude/CLAUDE.md` | Project instructions, may be gitignored |
-| `~/.claude/CLAUDE.md` | Personal global preferences |
-| `~/CLAUDE.md` | User-wide defaults |
+### How Memory Loads
+
+Claude automatically discovers memory files by:
+1. Recursing **upward** from the current working directory
+2. Recursing **downward** through subtrees
+3. Merging all discovered files with hierarchy precedence
+
+Use `/memory` command to see all loaded memory files.
+
+## Working with Memory
+
+### Viewing Memory
+
+The `/memory` command shows all loaded memory files:
+
+```
+/memory
+```
+
+Output shows:
+```
+Memory files · /memory
+└ User (~/.claude/CLAUDE.md): 43 tokens
+└ Project (./CLAUDE.md): 282 tokens
+```
+
+### Editing Memory
+
+Open any memory file in your system editor:
+
+```
+/memory
+```
+
+Then select which file to edit.
+
+### Quick Addition
+
+Start your input with `#` to quickly add to memory:
+
+```
+# Always use TypeScript strict mode
+```
+
+Claude will prompt you to select which memory file to store it in.
+
+## Import System
+
+Memory files support imports using `@path/to/file` syntax:
+
+```markdown
+# Project Memory
+
+## Shared Context
+@docs/architecture.md
+@docs/conventions.md
+
+## Team Standards
+- Use TypeScript
+- Follow ESLint rules
+```
+
+### Import Rules
+
+- Imports are evaluated recursively (max depth: 5)
+- Paths are relative to the memory file location
+- Imports inside code blocks are ignored (prevents collisions)
+- Circular imports are detected and prevented
+
+### Import Use Cases
+
+**Split large memory into modules:**
+```markdown
+# CLAUDE.md
+@.claude/architecture.md
+@.claude/conventions.md
+@.claude/workflows.md
+```
+
+**Include documentation as context:**
+```markdown
+# CLAUDE.md
+## API Reference
+@docs/api/endpoints.md
+```
 
 ## Content Guidelines
 
 ### What to Include
 
-#### Project Context
-
+**Project Context:**
 ```markdown
-# Project Name
+# ProjectName
 
 Brief description of what this project does.
 
@@ -59,296 +148,196 @@ Brief description of what this project does.
 - Language: TypeScript
 - Framework: Next.js 14
 - Database: PostgreSQL
-- Testing: Jest + React Testing Library
 ```
 
-#### Coding Conventions
-
+**Coding Conventions:**
 ```markdown
 ## Code Style
-
 - Use functional components with hooks
 - Prefer named exports over default exports
 - Use absolute imports from `@/`
-- Keep components under 200 lines
 ```
 
-#### File Structure
-
+**Workflow Preferences:**
 ```markdown
-## Project Structure
-
-- `src/components/` - React components
-- `src/lib/` - Utility functions
-- `src/api/` - API route handlers
-- `src/types/` - TypeScript type definitions
-```
-
-#### Workflow Preferences
-
-```markdown
-## Development Workflow
-
-- Run `npm run dev` for development server
+## Development
+- Run `npm run dev` for development
 - Run `npm test` before committing
-- Use conventional commits (feat:, fix:, docs:)
+- Use conventional commits
 ```
 
-#### Tool Preferences
-
+**Frequently Used Commands:**
 ```markdown
-## Tools
-
-- Use pnpm (not npm or yarn)
-- Format with Prettier (`.prettierrc` in root)
-- Lint with ESLint (`npm run lint`)
+## Commands
+- `make lint` - Run all linters
+- `make test` - Run tests
+- `make build` - Production build
 ```
 
 ### What NOT to Include
 
-#### Secrets and Credentials
+- **Secrets/credentials** - Use environment variables
+- **Absolute user paths** - Use `~` or relative paths
+- **Temporary notes** - Keep memory clean
+- **Excessive detail** - Be concise, link to docs
 
-```markdown
-# BAD - Never include secrets
-API_KEY=sk-abc123
-DATABASE_URL=postgres://user:pass@host/db
-```
+### Structure Best Practices
 
-#### User-Specific Paths
+- Use bullet points under descriptive markdown headings
+- Be specific rather than generic
+- Review periodically as projects evolve
+- Keep files focused and organized
 
-```markdown
-# BAD - Hardcoded user paths
-Project is at /Users/john/projects/my-app
+## Examples
 
-# GOOD - Use relative paths or ~ expansion
-Project root: ./ or ~/projects/my-app
-```
-
-#### Temporary Notes
-
-```markdown
-# BAD - Temporary debugging notes
-TODO: Fix the bug in auth.js line 42
-Remember to revert the console.log on line 15
-```
-
-#### Excessive Detail
-
-```markdown
-# BAD - Too much detail
-Every function should have JSDoc comments with:
-- @param for each parameter with type and description
-- @returns with type and description
-- @example with at least 2 examples
-- @throws for any possible exceptions
-- @see for related functions
-[... 50 more lines of excessive requirements ...]
-```
-
-## Effective CLAUDE.md Patterns
-
-### Minimal but Complete
-
-Start with essentials, add as needed:
+### Minimal Project Memory
 
 ```markdown
 # MyProject
 
-TypeScript/React app for [purpose].
+TypeScript/React app for task management.
 
-## Key Commands
-- `npm run dev` - Development
-- `npm test` - Tests
-- `npm run build` - Production build
+## Commands
+- `pnpm dev` - Development server
+- `pnpm test` - Run tests
+- `pnpm build` - Production build
 
 ## Conventions
 - Functional components with hooks
 - Use `@/` for absolute imports
-- Tests colocated with components (`Component.test.tsx`)
+- Tests colocated with components
 ```
 
-### Organized by Topic
-
-Group related instructions:
+### User Memory (Global Preferences)
 
 ```markdown
-# Project Name
+# My Preferences
 
-## Overview
-[Brief description]
+## Coding Style
+- Always use TypeScript strict mode
+- Prefer explicit types over inference
+- Use early returns to reduce nesting
 
-## Development
-[How to run, test, build]
+## Communication
+- Be concise in explanations
+- Show code examples when explaining
+- Ask before making large changes
 
-## Code Style
-[Conventions and patterns]
-
-## Architecture
-[Structure and patterns]
-
-## Common Tasks
-[Frequent operations]
+## Tools
+- Use pnpm over npm/yarn
+- Prefer make targets over npm scripts
 ```
 
-### Progressive Complexity
-
-Start simple, expand as project grows:
+### Enterprise Memory
 
 ```markdown
-# Phase 1: Basic
-- Tech stack
-- Key commands
-- File structure
-
-# Phase 2: Growing
-- Coding conventions
-- Testing approach
-- PR process
-
-# Phase 3: Mature
-- Architecture decisions
-- Performance guidelines
-- Security considerations
-```
-
-## Examples
-
-### Simple Web App
-
-```markdown
-# MyBlog
-
-Personal blog built with Next.js and MDX.
-
-## Commands
-- `pnpm dev` - Start dev server
-- `pnpm build` - Build for production
-- `pnpm test` - Run tests
-
-## Structure
-- `posts/` - MDX blog posts
-- `src/components/` - React components
-- `src/lib/` - Utilities
-
-## Style
-- Use Tailwind for styling
-- Components in PascalCase
-- Keep posts metadata in frontmatter
-```
-
-### API Service
-
-```markdown
-# PaymentAPI
-
-REST API for payment processing.
-
-## Tech
-- Node.js + Express
-- PostgreSQL + Prisma
-- Jest for testing
-
-## Development
-- `npm run dev` - Start with hot reload
-- `npm run db:migrate` - Run migrations
-- `npm run db:seed` - Seed test data
-
-## Conventions
-- Controllers in `src/controllers/`
-- Services in `src/services/`
-- Validation with Zod schemas
-- Error responses follow RFC 7807
+# Company Standards
 
 ## Security
-- All endpoints require authentication
+- Never commit secrets
+- All APIs require authentication
 - Input validation required
-- SQL injection prevention via Prisma
+
+## Code Review
+- All changes require PR review
+- Tests required for new features
+- Documentation required for APIs
+
+## Compliance
+- PII must be encrypted
+- Audit logging required
+- Follow data retention policies
 ```
 
-### Monorepo
+## Multi-File Organization
 
+For complex projects, split memory into focused files:
+
+```text
+.claude/
+├── CLAUDE.md           # Main memory (imports others)
+├── architecture.md     # System architecture
+├── conventions.md      # Coding standards
+├── workflows.md        # Development workflows
+└── team.md             # Team practices
+```
+
+**Main CLAUDE.md:**
 ```markdown
-# MyMonorepo
+# ProjectName
 
-Turborepo monorepo with multiple packages.
-
-## Packages
-- `apps/web` - Next.js frontend
-- `apps/api` - Express backend
-- `packages/ui` - Shared components
-- `packages/utils` - Shared utilities
-
-## Commands
-- `pnpm dev` - Run all apps
-- `pnpm build` - Build all packages
-- `pnpm test` - Test all packages
-- `pnpm --filter web dev` - Run specific app
-
-## Conventions
-- Changes to `packages/` require updating dependents
-- Use workspace protocol for internal deps
-- Keep package versions in sync
+@.claude/architecture.md
+@.claude/conventions.md
+@.claude/workflows.md
 ```
-
-## Maintenance
-
-### When to Update
-
-Update CLAUDE.md when:
-
-- Tech stack changes (new framework, new tool)
-- Conventions evolve (new patterns adopted)
-- Structure changes (refactored directories)
-- New team members struggle (add missing context)
-
-### Review Checklist
-
-Periodically verify:
-
-- [ ] Commands still work
-- [ ] File paths are accurate
-- [ ] Conventions match reality
-- [ ] No stale information
-- [ ] No secrets leaked
-
-### Version Control
-
-- Check CLAUDE.md into version control
-- Review changes in PRs
-- Keep history of convention changes
-- Use blame to understand evolution
 
 ## Troubleshooting
 
-### Claude Ignores Instructions
+### Memory Not Loading
 
-**Possible causes:**
+**Check location:** Use `/memory` to see what's loaded.
 
-1. File not in expected location
-2. Syntax errors in markdown
-3. Instructions too vague
-4. Conflicting instructions from multiple files
+**Check syntax:** Ensure valid markdown.
 
-**Solution:** Check file location, validate markdown, be specific.
+**Check imports:** Verify import paths exist.
 
-### Instructions Too Long
+### Conflicting Instructions
 
-**Problem:** CLAUDE.md is thousands of lines.
+**Higher precedence wins:** Enterprise > Project > User
 
-**Solution:**
+**Be specific:** More specific instructions override general ones.
 
+**Separate concerns:**
+- User memory: Personal preferences
+- Project memory: Team conventions
+
+### Memory Too Large
+
+**Symptoms:** Slow startup, context overflow
+
+**Solutions:**
+- Split into imported modules
+- Remove outdated content
+- Link to external docs instead of including
 - Focus on essentials
-- Link to external docs for details
-- Use bullet points, not paragraphs
-- Remove outdated information
 
-### Conflicting Files
+### Instructions Ignored
 
-**Problem:** User and project CLAUDE.md conflict.
+**Be specific:** "Use TypeScript" is better than "Follow best practices"
 
-**Solution:**
+**Use examples:**
+```markdown
+## Import Style
 
-- Project file wins for project-specific settings
-- User file for personal preferences
-- Keep them non-overlapping where possible
+GOOD:
+import { useState } from 'react';
 
+BAD:
+import React from 'react';
+const { useState } = React;
+```
+
+## Integration with Context Layering
+
+Memory files (CLAUDE.md) are part of the broader context system:
+
+```text
+┌─────────────────────────────────────────────────────┐
+│  5. Conversation Context                            │
+│     Current task & discussion                       │
+├─────────────────────────────────────────────────────┤
+│  4. Extension Context                               │
+│     Active command/skill/subagent + knowledge       │
+├─────────────────────────────────────────────────────┤
+│  3. Project Memory  ─┐                              │
+│     ./CLAUDE.md      │ "Memory files"               │
+├──────────────────────┤ Always loaded                │
+│  2. User Memory     ─┘                              │
+│     ~/.claude/CLAUDE.md                             │
+├─────────────────────────────────────────────────────┤
+│  1. Base Claude                                     │
+│     Core capabilities                               │
+└─────────────────────────────────────────────────────┘
+```
+
+See: `framework-design-principles.md` for complete context layering details.
