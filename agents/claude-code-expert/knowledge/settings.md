@@ -101,6 +101,7 @@ Control tool access with allow/deny/ask rules:
 ```
 
 Permission patterns:
+
 - `"Read"` - Allow all Read operations
 - `"Bash(git:*)"` - Allow git commands
 - `"Bash(npm install)"` - Allow specific command
@@ -130,6 +131,7 @@ Run commands before/after tool execution:
 ```
 
 Hook types:
+
 - `preToolExecution` - Run before a tool executes
 - `postToolExecution` - Run after a tool completes
 
@@ -350,6 +352,7 @@ Locked-down settings for sensitive projects:
 ### Common Patterns
 
 **Allow only specific npm scripts:**
+
 ```json
 {
   "permissions": {
@@ -360,6 +363,7 @@ Locked-down settings for sensitive projects:
 ```
 
 **Pre-commit hook equivalent:**
+
 ```json
 {
   "hooks": {
@@ -397,6 +401,7 @@ Locked-down settings for sensitive projects:
 ```
 
 Use wildcards for flexibility:
+
 ```json
 {
   "permissions": {

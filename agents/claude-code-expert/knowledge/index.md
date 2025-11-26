@@ -83,6 +83,19 @@ Contains:
 - Environment variables reference
 - Example configurations for different scenarios
 
+### hooks.md
+
+**When to use:** When implementing deterministic automation via hooks
+
+Contains:
+
+- Hook lifecycle events (PreToolUse, PostToolUse, etc.)
+- Configuration structure and matcher patterns
+- Hook execution model (stdin JSON, exit codes)
+- Security considerations
+- Common patterns (formatting, logging, blocking)
+- Hooks vs other extension types comparison
+
 ## Quick Reference
 
 | Question                                | Document                       |
@@ -105,8 +118,11 @@ Contains:
 | "How do I import files in CLAUDE.md?"   | claude-md-files.md             |
 | "What goes in settings.json?"           | settings.md                    |
 | "How do I configure permissions?"       | settings.md                    |
-| "How do hooks work?"                    | settings.md                    |
 | "Memory vs settings - when to use?"     | settings.md, claude-md-files.md|
+| "How do hooks work?"                    | hooks.md                       |
+| "How do I auto-format code?"            | hooks.md                       |
+| "How do I block dangerous operations?"  | hooks.md                       |
+| "What lifecycle events exist?"          | hooks.md                       |
 
 ## External Resources
 

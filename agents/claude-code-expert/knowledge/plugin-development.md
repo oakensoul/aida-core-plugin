@@ -380,4 +380,3 @@ template_path = plugin_dir / "templates" / "my-template.jinja2"
 1. Ensure all referenced components exist
 2. Use `/aida plugin validate` to check integrity
 3. Test installation in clean environment
-

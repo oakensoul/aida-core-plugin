@@ -51,6 +51,7 @@ Priority (highest to lowest):
 ### How Memory Loads
 
 Claude automatically discovers memory files by:
+
 1. Recursing **upward** from the current working directory
 2. Recursing **downward** through subtrees
 3. Merging all discovered files with hierarchy precedence
@@ -68,6 +69,7 @@ The `/memory` command shows all loaded memory files:
 ```
 
 Output shows:
+
 ```
 Memory files · /memory
 └ User (~/.claude/CLAUDE.md): 43 tokens
@@ -120,6 +122,7 @@ Memory files support imports using `@path/to/file` syntax:
 ### Import Use Cases
 
 **Split large memory into modules:**
+
 ```markdown
 # CLAUDE.md
 @.claude/architecture.md
@@ -128,6 +131,7 @@ Memory files support imports using `@path/to/file` syntax:
 ```
 
 **Include documentation as context:**
+
 ```markdown
 # CLAUDE.md
 ## API Reference
@@ -139,6 +143,7 @@ Memory files support imports using `@path/to/file` syntax:
 ### What to Include
 
 **Project Context:**
+
 ```markdown
 # ProjectName
 
@@ -151,6 +156,7 @@ Brief description of what this project does.
 ```
 
 **Coding Conventions:**
+
 ```markdown
 ## Code Style
 - Use functional components with hooks
@@ -159,6 +165,7 @@ Brief description of what this project does.
 ```
 
 **Workflow Preferences:**
+
 ```markdown
 ## Development
 - Run `npm run dev` for development
@@ -167,6 +174,7 @@ Brief description of what this project does.
 ```
 
 **Frequently Used Commands:**
+
 ```markdown
 ## Commands
 - `make lint` - Run all linters
@@ -263,6 +271,7 @@ For complex projects, split memory into focused files:
 ```
 
 **Main CLAUDE.md:**
+
 ```markdown
 # ProjectName
 
@@ -288,6 +297,7 @@ For complex projects, split memory into focused files:
 **Be specific:** More specific instructions override general ones.
 
 **Separate concerns:**
+
 - User memory: Personal preferences
 - Project memory: Team conventions
 
@@ -296,6 +306,7 @@ For complex projects, split memory into focused files:
 **Symptoms:** Slow startup, context overflow
 
 **Solutions:**
+
 - Split into imported modules
 - Remove outdated content
 - Link to external docs instead of including
@@ -306,6 +317,7 @@ For complex projects, split memory into focused files:
 **Be specific:** "Use TypeScript" is better than "Follow best practices"
 
 **Use examples:**
+
 ```markdown
 ## Import Style
 

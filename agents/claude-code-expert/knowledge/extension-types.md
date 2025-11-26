@@ -1,18 +1,18 @@
 ---
 type: reference
 title: Extension Types Decision Guide
-description: How to choose between agents, commands, skills, and plugins
+description: How to choose between agents, commands, skills, plugins, and hooks
 ---
 
 # Extension Types
 
-Claude Code supports four types of extensions, each designed for different
+Claude Code supports multiple extension types, each designed for different
 use cases. This guide helps you choose the right type.
 
 **See also:** `framework-design-principles.md` for architectural standards and
 quality criteria for each type.
 
-## The Framework: WHO / WHAT / HOW / CONTEXT / MEMORY
+## The Framework: WHO / WHAT / HOW / CONTEXT / MEMORY / AUTOMATION
 
 | Type | Role | Contains |
 |------|------|----------|
@@ -22,6 +22,7 @@ quality criteria for each type.
 | **Knowledge** | CONTEXT | Facts, schemas, patterns (loaded with extensions) |
 | **CLAUDE.md** | MEMORY | Project/user conventions (always loaded) |
 | **Plugin** | DISTRIBUTION | Container for subagents, commands, skills, knowledge |
+| **Hooks** | AUTOMATION | Shell commands triggered on lifecycle events |
 
 **Key insight:** Claude Code (the orchestrator) is the primary agent. All extensions
 are inert definitions that the orchestrator reads and acts upon. Subagents are
@@ -39,6 +40,12 @@ Start Here
 Is this a distributable package of multiple components?
     │
     ├─ YES → Plugin
+    │
+    ▼ NO
+    │
+Should it run AUTOMATICALLY on lifecycle events (not user-invoked)?
+    │
+    ├─ YES → Hook (deterministic automation)
     │
     ▼ NO
     │
@@ -254,6 +261,72 @@ my-plugin/
 └── .gitignore
 ```
 
+## Hooks
+
+### What They Are
+
+Hooks are shell commands that execute automatically at specific lifecycle
+events. Unlike other extensions that rely on LLM judgment, hooks provide
+deterministic control - things that MUST happen, every time.
+
+### When to Use
+
+- Actions that must ALWAYS happen (not "should" happen)
+- Automatic formatting after file edits
+- Logging/audit trails for compliance
+- Blocking dangerous operations
+- Custom notifications
+- Integration with external tools
+
+### Characteristics
+
+- Triggered automatically (not user-invoked)
+- Deterministic (same input = same output)
+- Execute shell commands
+- Receive JSON input via stdin
+- Can block operations (PreToolUse) with non-zero exit
+- Configured in settings.json, not as separate files
+
+### Example Use Cases
+
+- Auto-format code after Write/Edit (PostToolUse)
+- Block writes to .env files (PreToolUse)
+- Log all Bash commands for compliance (PostToolUse)
+- Desktop notifications when Claude needs input (Notification)
+- Security scanning before commits (PreToolUse)
+
+### Configuration
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "prettier --write \"$FILE\""
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Hooks vs Commands/Skills
+
+| Aspect | Hooks | Commands/Skills |
+|--------|-------|-----------------|
+| **Trigger** | Automatic | User-invoked |
+| **Control** | Deterministic | LLM-guided |
+| **Purpose** | Enforcement | Workflows |
+| **Execution** | Shell commands | Claude orchestration |
+
+**Key insight:** Use hooks when something MUST happen. Use commands/skills
+when something SHOULD happen based on context and judgment.
+
 ## Decision Examples
 
 ### "I want to automate deployments"
@@ -286,6 +359,14 @@ a `report-generator` skill for output.
 
 Multiple components (commands, skills, maybe a subagent) that need to be
 distributed together. A plugin packages them for easy installation.
+
+### "I want code to always be formatted after edits"
+
+#### Recommendation: Hook
+
+This is enforcement, not guidance. Every time Claude writes or edits a file,
+prettier should run. No judgment needed - it must always happen. A PostToolUse
+hook with a Write|Edit matcher ensures deterministic formatting.
 
 ## Combining Types
 

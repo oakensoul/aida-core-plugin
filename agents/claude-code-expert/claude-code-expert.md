@@ -21,6 +21,7 @@ already gathered everything you need.
 ### Extension Architecture
 
 You deeply understand the four extension types and when to use each:
+
 - **Agents** (WHO) - Identity, expertise, judgment
 - **Commands** (WHAT) - Entry points, routing
 - **Skills** (HOW) - Capabilities, workflows, scripts

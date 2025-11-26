@@ -21,6 +21,7 @@ Subagents represent **expertise and judgment**. They are domain experts spawned
 to apply knowledge to problems.
 
 **Contains:**
+
 - Identity and persona
 - Expertise areas and domains
 - Judgment frameworks (how they think about trade-offs)
@@ -28,6 +29,7 @@ to apply knowledge to problems.
 - Capabilities (what they can do)
 
 **Does NOT contain:**
+
 - Step-by-step procedures
 - Script invocations
 - Output format specifications (caller provides these)
@@ -42,6 +44,7 @@ happen - both thinking steps and doing steps - but they don't execute anything
 themselves.
 
 **Contains:**
+
 - Process steps (thinking, deciding, doing)
 - Skill invocations (when execution capabilities are needed)
 - Agent spawns (when specialized expertise is needed)
@@ -49,6 +52,7 @@ themselves.
 - Argument hints and user-facing help
 
 **Does NOT contain:**
+
 - Script code (that belongs in Skills)
 - Domain expertise (that belongs in Agents)
 - The actual execution (the orchestrator does that)
@@ -68,6 +72,7 @@ performs those steps.
 Skills provide **execution capabilities**. They are the operational playbook.
 
 **Contains:**
+
 - Activation triggers
 - Workflow phases (get-questions, execute)
 - Script invocations and parameters
@@ -75,6 +80,7 @@ Skills provide **execution capabilities**. They are the operational playbook.
 - Templates and path resolution
 
 **Does NOT contain:**
+
 - Domain expertise ("why X is better than Y")
 - Best practices (unless operational)
 - Quality judgments
@@ -86,6 +92,7 @@ Skills provide **execution capabilities**. They are the operational playbook.
 Knowledge is **reference material**. Facts, patterns, and examples that inform decisions.
 
 **Contains:**
+
 - Schemas and specifications
 - Design patterns and anti-patterns
 - Best practices (as principles, not procedures)
@@ -93,6 +100,7 @@ Knowledge is **reference material**. Facts, patterns, and examples that inform d
 - Decision criteria
 
 **Does NOT contain:**
+
 - Step-by-step procedures
 - Orchestration logic
 - User-facing commands
@@ -106,12 +114,14 @@ They appear in `/context` output as "Memory files" and provide project and
 user-level context for every request.
 
 **Contains:**
+
 - Project structure and conventions
 - Coding standards and preferences
 - Tool and workflow guidance
 - Team practices
 
 **Does NOT contain:**
+
 - Secrets or credentials
 - User-specific absolute paths
 - Temporary notes
@@ -120,10 +130,12 @@ user-level context for every request.
 to know about how this project/team works. Always in their mind, not looked up.
 
 **Scope levels (both always loaded):**
+
 - `~/.claude/CLAUDE.md` - User preferences (global memory)
 - `./CLAUDE.md` - Project conventions (project memory)
 
 **Key distinction from Knowledge:**
+
 - **Knowledge** = Extension-bundled, loaded when agent/skill is active
 - **CLAUDE.md** = Environment memory, always loaded for every request
 
@@ -133,16 +145,53 @@ Plugins are **distribution containers**. They package agents, commands, skills,
 and knowledge for installation and sharing.
 
 **Contains:**
+
 - Bundled agents, commands, skills
 - Plugin metadata (plugin.json)
 - Documentation (README)
 
 **Does NOT contain:**
+
 - Behavior definitions (that's what the bundled components do)
 - User configuration
 
 **Analogy:** A cookbook that contains recipes (commands), techniques (skills),
 and chef expertise (agents) - packaged for distribution.
+
+### Hooks (AUTOMATION)
+
+Hooks are **deterministic shell commands** that execute at specific lifecycle
+events. Unlike other extensions that rely on LLM judgment, hooks provide
+guaranteed execution - things that MUST happen.
+
+**Contains:**
+
+- Shell commands to execute
+- Matcher patterns (which tools trigger the hook)
+- Lifecycle event bindings (PreToolUse, PostToolUse, etc.)
+
+**Does NOT contain:**
+
+- LLM-guided logic (hooks are deterministic)
+- Complex workflows (use Commands/Skills)
+- Domain expertise (use Agents)
+
+**Analogy:** Factory automation - quality checks that run on every widget,
+regardless of who's operating the machine. The conveyor belt triggers the
+scanner; no human judgment required.
+
+**Key distinction from other types:**
+
+- **Commands/Skills** = LLM decides when/how to use them
+- **Hooks** = Automatically triggered, always execute
+
+**Lifecycle events:**
+
+- `PreToolUse` / `PostToolUse` - Before/after tool execution
+- `SessionStart` / `SessionEnd` - Session lifecycle
+- `UserPromptSubmit` - When user submits prompt
+- `Notification` / `Stop` - Response lifecycle
+- `SubagentStop` / `PreCompact` - Agent lifecycle
 
 ---
 
@@ -209,6 +258,7 @@ graph TB
 ```
 
 **How layers combine:**
+
 - Lower layers provide defaults
 - Higher layers can override or extend
 - Project settings override user settings for project-specific concerns
@@ -234,11 +284,13 @@ Extension context adds to (doesn't replace) environment context.
 When you hire an expert, you don't give them a procedure manual.
 
 **You give them:**
+
 - Project context (the system, constraints)
 - The specific problem ("We need X")
 - Output format expectations ("Provide a design document")
 
 **They bring:**
+
 - Judgment (when to break rules, what trade-offs to make)
 - Pattern recognition ("This looks like problem type X")
 - Quality standards (what "good" looks like to them)
@@ -260,6 +312,7 @@ All extension types are **inert text** - they define behavior but don't execute 
 | **Knowledge** | CONTEXT | Facts to reference | With extension |
 | **CLAUDE.md** | MEMORY | Environment context | Always |
 | **Plugin** | DISTRIBUTION | Container | When installed |
+| **Hooks** | AUTOMATION | Deterministic actions | On lifecycle events |
 
 **Note:** The orchestrator (Claude Code) is the primary agent. Subagents are
 specialists spawned for specific expertise - they live in `/agents` folders.
@@ -278,6 +331,7 @@ doesn't think. Claude embodies that expertise when spawned via the Task tool.
 Knowledge just sits there until someone reads it.
 
 **This matters because:**
+
 - Don't confuse the definition with the execution
 - Commands can define complex processes (they're just instructions)
 - The orchestrator is always the one doing the work
@@ -480,3 +534,35 @@ Return JSON: { "files": [...], "validation": {...} }
 - Organized by topic
 - Updated with project evolution
 - Includes examples of preferred patterns
+
+---
+
+## Quality Standards: Hooks
+
+### What Belongs
+
+- Shell commands that execute reliably
+- Specific matcher patterns
+- Clear lifecycle event binding
+- Deterministic behavior (same input = same output)
+
+### What Does NOT Belong
+
+- Complex conditional logic (use Commands)
+- LLM-dependent decisions
+- Interactive prompts (hooks are non-interactive)
+- Long-running processes without timeout handling
+
+### Good Enough
+
+- Working shell command
+- Appropriate event binding
+- Handles errors gracefully (non-zero exit when needed)
+
+### Excellent
+
+- Focused, single-purpose hooks
+- Proper use of jq for JSON input parsing
+- Security-conscious (no credential exposure)
+- Well-documented purpose and behavior
+- Tested in isolation before deployment
