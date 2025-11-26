@@ -1,8 +1,8 @@
 ---
 type: skill
 name: aida-dispatch
-description: This skill routes /aida commands to appropriate handlers - configuration, diagnostics, feedback, and extension management (agent, command, skill, plugin operations).
-version: 0.3.0
+description: This skill routes /aida commands to appropriate handlers - configuration, diagnostics, feedback, extension management, session persistence (memento operations), and CLAUDE.md management.
+version: 0.5.0
 tags:
   - core
   - dispatcher
@@ -84,6 +84,64 @@ For `agent`, `command`, `skill`, or `plugin` commands:
 /aida plugin list                    → claude-code-management skill
 ```
 
+### Memento Commands
+
+For `memento` commands:
+
+- **Invoke the `memento` skill** to handle these operations
+- Pass the full command arguments to the skill
+- The skill handles create, read, list, update, complete, and remove operations
+
+**Process:**
+
+1. Parse the command to extract:
+   - Operation: `create`, `read`, `list`, `update`, `complete`, `remove`
+   - Arguments: description, slug, source, filter options
+
+2. Invoke `memento` skill with the parsed context
+
+**Examples:**
+
+```text
+/aida memento create "description"   → memento skill
+/aida memento create from-pr         → memento skill (source=from-pr)
+/aida memento create from-changes    → memento skill (source=from-changes)
+/aida memento read my-memento        → memento skill
+/aida memento list                   → memento skill
+/aida memento list --filter active   → memento skill
+/aida memento update my-memento      → memento skill
+/aida memento complete my-memento    → memento skill
+/aida memento remove my-memento      → memento skill
+```
+
+### CLAUDE.md Management Commands
+
+For `claude` commands:
+
+- **Invoke the `claude-md` skill** to handle these operations
+- Pass the full command arguments to the skill
+- The skill handles create, optimize, validate, and list operations
+
+**Process:**
+
+1. Parse the command to extract:
+   - Operation: `create`, `optimize`, `validate`, `list`
+   - Arguments: scope (project/user/plugin), path, options
+
+2. Invoke `claude-md` skill with the parsed context
+
+**Examples:**
+
+```text
+/aida claude create                  → claude-md skill (auto-detect scope)
+/aida claude create --scope project  → claude-md skill (scope=project)
+/aida claude create --scope user     → claude-md skill (scope=user)
+/aida claude optimize                → claude-md skill (audit current)
+/aida claude optimize ./CLAUDE.md    → claude-md skill (audit specific)
+/aida claude validate                → claude-md skill
+/aida claude list                    → claude-md skill
+```
+
 ## Path Resolution
 
 **Base Directory:** Provided when skill loads via `<command-message>` tags containing the skill base directory.
@@ -134,6 +192,22 @@ When displaying help (for `help` command or no arguments), show:
 - `/aida skill [create|validate|version|list]` - Manage skills
 - `/aida plugin [create|validate|version|list|add|remove]` - Manage plugins
 
+### Session Persistence
+- `/aida memento create "description"` - Save current work context
+- `/aida memento create from-pr` - Create from current PR
+- `/aida memento create from-changes` - Create from file changes
+- `/aida memento read <slug>` - Load memento into context
+- `/aida memento list` - List active mementos
+- `/aida memento update <slug>` - Update memento sections
+- `/aida memento complete <slug>` - Archive completed memento
+
+### CLAUDE.md Management
+- `/aida claude create` - Create CLAUDE.md with auto-detection
+- `/aida claude create --scope user` - Create user-level CLAUDE.md
+- `/aida claude optimize` - Full audit with scoring and findings
+- `/aida claude validate` - Validate CLAUDE.md structure
+- `/aida claude list` - List all CLAUDE.md files in hierarchy
+
 ### Help
 - `/aida help` or `/aida` - Show this help message
 
@@ -143,6 +217,8 @@ If you haven't configured AIDA yet: `/aida config`
 To check if AIDA is working: `/aida status`
 If you encounter issues: `/aida doctor`
 To create an agent: `/aida agent create "description"`
+To save work context: `/aida memento create "description"`
+To optimize your CLAUDE.md: `/aida claude optimize`
 ```
 
 ## Resources

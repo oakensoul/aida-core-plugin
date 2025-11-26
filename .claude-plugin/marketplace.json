@@ -1,0 +1,16 @@
+{
+  "name": "aida",
+  "owner": {
+    "name": "oakensoul",
+    "email": "github@oakensoul.com"
+  },
+  "description": "AIDA - Agentic Intelligence Digital Assistant plugins",
+  "plugins": [
+    {
+      "name": "aida-core",
+      "description": "Smart configuration with auto-detection, GitHub integration, and context management",
+      "version": "0.5.0",
+      "source": "./"
+    }
+  ]
+}

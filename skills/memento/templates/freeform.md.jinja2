@@ -1,0 +1,19 @@
+---
+type: memento
+slug: {{ slug }}
+description: {{ description }}
+status: {{ status | default('active') }}
+created: {{ created }}
+updated: {{ updated }}
+source: {{ source | default('manual') }}
+tags: {{ tags | default([]) | tojson }}
+files: {{ files | default([]) | tojson }}
+---
+
+# {{ description }}
+
+{{ content | default('Add your notes here...') }}
+
+---
+
+*Last updated: {{ updated }}*

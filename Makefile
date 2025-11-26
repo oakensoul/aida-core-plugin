@@ -15,46 +15,14 @@ help: ## Show this help message
 	@echo ""
 
 # Development Mode
-dev-mode-enable: ## Enable dev mode - use local plugin in Claude Code
-	@echo "=== AIDA Dev Mode: ENABLE ==="
-	@echo ""
-	@echo "Run these commands in Claude Code:"
-	@echo ""
-	@echo "  1. Remove installed version (if any):"
-	@echo "     /plugin remove $(PLUGIN_NAME)"
-	@echo ""
-	@echo "  2. Add local development version:"
-	@echo "     /plugin add $(PLUGIN_PATH)"
-	@echo ""
-	@echo "  3. Verify it's loaded:"
-	@echo "     /plugin list"
-	@echo ""
+dev-mode-enable: ## Enable dev mode - register local plugin with Claude Code
+	@python3 scripts/dev_mode.py enable
 
-dev-mode-disable: ## Disable dev mode - switch back to released plugin
-	@echo "=== AIDA Dev Mode: DISABLE ==="
-	@echo ""
-	@echo "Run these commands in Claude Code:"
-	@echo ""
-	@echo "  1. Remove local version:"
-	@echo "     /plugin remove $(PLUGIN_NAME)"
-	@echo ""
-	@echo "  2. Install released version:"
-	@echo "     /plugin install $(PLUGIN_NAME)@aida-marketplace"
-	@echo ""
-	@echo "  3. Verify it's loaded:"
-	@echo "     /plugin list"
-	@echo ""
+dev-mode-disable: ## Disable dev mode - unregister local plugin from Claude Code
+	@python3 scripts/dev_mode.py disable
 
-dev-mode: ## Show dev mode status and options
-	@echo "=== AIDA Dev Mode ==="
-	@echo ""
-	@echo "Plugin path: $(PLUGIN_PATH)"
-	@echo "Plugin name: $(PLUGIN_NAME)"
-	@echo ""
-	@echo "Commands:"
-	@echo "  make dev-mode-enable   - Switch to local development version"
-	@echo "  make dev-mode-disable  - Switch back to released version"
-	@echo ""
+dev-mode: ## Show dev mode status
+	@python3 scripts/dev_mode.py status
 
 # Testing
 test: ## Run pytest tests
