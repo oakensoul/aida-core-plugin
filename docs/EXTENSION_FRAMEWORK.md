@@ -1,9 +1,9 @@
 # Claude Code Extension Design Principles
 
 <!--
-  NOTE: This is the authoritative source for this document.
-  A copy exists at docs/EXTENSION_FRAMEWORK.md for broader visibility.
-  If updating this file, please also update the copy in docs/.
+  NOTE: This is a copy for documentation/visibility purposes.
+  Authoritative source: agents/claude-code-expert/knowledge/framework-design-principles.md
+  If updating this file, please update the source file first, then sync here.
 -->
 
 This document defines the architecture and quality standards for Claude Code extensions.
