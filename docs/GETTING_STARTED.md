@@ -111,19 +111,24 @@ AIDA extends Claude Code with specialized capabilities organized into three type
 
 ## Next Steps
 
-### Create Your First Custom Agent
+### Learn Mementos
 
-```bash
-/aida agent create
-```
+Save and restore context across sessions:
 
-### Explore the Examples
+- [How to Use Mementos](HOWTO_MEMENTO.md)
+
+### Create Custom Extensions
+
+Build your own agents, commands, and skills:
+
+- [Creating Agents](HOWTO_CREATE_AGENT.md) - Expert personas
+- [Creating Commands](HOWTO_CREATE_COMMAND.md) - Workflows and procedures
+- [Creating Skills](HOWTO_CREATE_SKILL.md) - Execution capabilities
+- [Using Hooks](HOWTO_HOOKS.md) - Lifecycle automation
+
+### Explore Examples
 
 See real-world usage scenarios in [EXAMPLES.md](EXAMPLES.md).
-
-### Read the Extension Framework
-
-Learn how AIDA's architecture works in [EXTENSION_FRAMEWORK.md](EXTENSION_FRAMEWORK.md).
 
 ### Contribute
 
@@ -150,7 +155,7 @@ Learn how AIDA's architecture works in [EXTENSION_FRAMEWORK.md](EXTENSION_FRAMEW
 
 - [Full Installation Guide](USER_GUIDE_INSTALL.md)
 - [Configuration Guide](USER_GUIDE_CONFIGURE.md)
-- [Architecture](ARCHITECTURE.md)
+- [Extension Framework](EXTENSION_FRAMEWORK.md) - Architecture reference
 
 ### Community
 

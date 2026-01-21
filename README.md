@@ -86,11 +86,24 @@ For detailed walkthrough, see the [Getting Started Guide](docs/GETTING_STARTED.m
 
 ## Documentation
 
+### Getting Started
+
 - **[Getting Started](docs/GETTING_STARTED.md)** - Quick onboarding guide
 - **[Installation Guide](docs/USER_GUIDE_INSTALL.md)** - Detailed setup walkthrough
 - **[Configuration Guide](docs/USER_GUIDE_CONFIGURE.md)** - Project configuration
+
+### How-To Guides
+
+- **[Using Mementos](docs/HOWTO_MEMENTO.md)** - Save and restore session context
+- **[Creating Agents](docs/HOWTO_CREATE_AGENT.md)** - Build custom expert personas
+- **[Creating Commands](docs/HOWTO_CREATE_COMMAND.md)** - Define workflows and procedures
+- **[Creating Skills](docs/HOWTO_CREATE_SKILL.md)** - Add execution capabilities
+- **[Using Hooks](docs/HOWTO_HOOKS.md)** - Automate with lifecycle events
+
+### Reference
+
 - **[Examples](docs/EXAMPLES.md)** - Real-world usage scenarios
-- **[Extension Framework](docs/EXTENSION_FRAMEWORK.md)** - Building custom extensions
+- **[Extension Framework](docs/EXTENSION_FRAMEWORK.md)** - Architecture and design
 
 ## Requirements
 
