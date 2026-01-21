@@ -1,0 +1,13 @@
+# AIDA Core Plugin Dependencies
+#
+# This file lists all Python dependencies required for AIDA core functionality.
+# Install with: pip install -r requirements.txt
+
+# Template rendering for skill generation
+jinja2>=3.1.0
+
+# YAML parsing for questionnaire system
+PyYAML>=6.0
+
+# JSON Schema validation for frontmatter
+jsonschema>=4.0

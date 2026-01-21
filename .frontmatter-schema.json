@@ -1,0 +1,255 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AIDA Markdown Frontmatter",
+  "description": "Schema for validating YAML frontmatter in all markdown files",
+  "type": "object",
+  "required": ["type"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Document type",
+      "enum": ["skill", "agent", "command", "documentation", "guide", "adr", "diagram", "reference", "changelog", "readme"]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "type": { "const": "skill" } }
+      },
+      "then": {
+        "required": ["name", "description", "version", "tags"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "minLength": 2,
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "agent" } }
+      },
+      "then": {
+        "required": ["name", "description", "version", "tags"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "minLength": 2,
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "command" } }
+      },
+      "then": {
+        "required": ["name", "description", "version", "tags"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "minLength": 2,
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+          },
+          "args": {
+            "type": "string",
+            "description": "Command arguments specification"
+          },
+          "allowed-tools": {
+            "type": "string",
+            "description": "Tools allowed for this command"
+          },
+          "argument-hint": {
+            "type": "string",
+            "description": "Hint shown to user for arguments"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "adr" } }
+      },
+      "then": {
+        "required": ["title", "status", "date"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 5
+          },
+          "status": {
+            "type": "string",
+            "enum": ["proposed", "accepted", "deprecated", "superseded"]
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "deciders": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "supersedes": {
+            "type": "string"
+          },
+          "superseded-by": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "documentation" } }
+      },
+      "then": {
+        "required": ["title"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 3
+          },
+          "description": {
+            "type": "string"
+          },
+          "audience": {
+            "type": "string",
+            "enum": ["developers", "users", "contributors", "all"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "guide" } }
+      },
+      "then": {
+        "required": ["title"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 3
+          },
+          "description": {
+            "type": "string"
+          },
+          "audience": {
+            "type": "string",
+            "enum": ["developers", "users", "contributors", "all"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "diagram" } }
+      },
+      "then": {
+        "required": ["title", "diagram-type"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 3
+          },
+          "diagram-type": {
+            "type": "string",
+            "enum": ["c4-context", "c4-container", "c4-component", "c4-code", "sequence", "flowchart", "erd", "other"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "reference" } }
+      },
+      "then": {
+        "required": ["title"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 3
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "changelog" } }
+      },
+      "then": {
+        "required": ["title"],
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "readme" } }
+      },
+      "then": {
+        "required": ["title"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 3
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": true
+}

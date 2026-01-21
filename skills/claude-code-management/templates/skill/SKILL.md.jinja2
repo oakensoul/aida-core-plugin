@@ -1,0 +1,70 @@
+---
+type: skill
+name: {{ name }}
+description: {{ description }}
+version: {{ version }}
+tags:
+{% for tag in tags %}
+  - {{ tag }}
+{% endfor %}
+---
+
+# {{ name | replace("-", " ") | title }}
+
+{{ description }}
+
+## Activation
+
+This skill activates when:
+
+- Trigger condition 1
+- Trigger condition 2
+
+## Operations
+
+### Operation 1
+
+Description of operation 1.
+
+**Process:**
+1. Step 1
+2. Step 2
+3. Step 3
+
+### Operation 2
+
+Description of operation 2.
+
+## Path Resolution
+
+**Base Directory:** Provided when skill loads via `<command-message>` tags.
+
+**Script Execution:** Construct full paths from base directory:
+
+```text
+{base_directory}/scripts/script-name.py
+```
+
+**Reference Loading:** Reference files are located in `references/` subdirectory:
+
+```text
+{base_directory}/references/reference-name.md
+```
+
+## Resources
+
+### scripts/
+
+Executable scripts for this skill:
+
+- **script-name.py** - Description
+
+### references/
+
+Detailed workflow guides:
+
+- **reference-name.md** - Description
+
+---
+
+*Created: {{ timestamp }}*
