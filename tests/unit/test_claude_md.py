@@ -1,6 +1,6 @@
-"""Unit tests for claude-md skill claude_md.py script.
+"""Unit tests for claude-code-management CLAUDE.md operations.
 
-This test suite covers the claude_md.py script functionality including
+This test suite covers the operations/claude_md.py module functionality including
 CLAUDE.md detection, validation, audit scoring, and management operations.
 """
 
@@ -12,13 +12,18 @@ import shutil
 from pathlib import Path
 
 # Add scripts directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "skills" / "claude-md" / "scripts"))
+SKILL_DIR = Path(__file__).parent.parent.parent / "skills" / "claude-code-management"
+sys.path.insert(0, str(SKILL_DIR / "scripts"))
+TEMPLATES_DIR = SKILL_DIR / "templates"
 
-from claude_md import (
+from operations.utils import (  # noqa: E402
     get_project_root,
+    parse_frontmatter,
+    safe_json_load,
+)
+from operations.claude_md import (  # noqa: E402
     get_claude_md_path,
     find_claude_md,
-    parse_frontmatter,
     detect_sections,
     extract_commands_from_makefile,
     extract_commands_from_package_json,
@@ -29,7 +34,6 @@ from claude_md import (
     generate_audit_findings,
     get_questions,
     execute,
-    safe_json_load,
     REQUIRED_SECTIONS,
     RECOMMENDED_SECTIONS,
 )
@@ -696,7 +700,7 @@ class TestExecute(unittest.TestCase):
     def test_execute_list(self):
         """Test list operation execution."""
         context = {"operation": "list", "scope": "all"}
-        result = execute(context)
+        result = execute(context, {}, TEMPLATES_DIR)
 
         self.assertTrue(result["success"])
         self.assertIn("files", result)
@@ -705,7 +709,7 @@ class TestExecute(unittest.TestCase):
     def test_execute_validate(self):
         """Test validate operation execution."""
         context = {"operation": "validate", "scope": "all"}
-        result = execute(context)
+        result = execute(context, {}, TEMPLATES_DIR)
 
         self.assertTrue(result["success"])
         self.assertIn("results", result)
@@ -713,7 +717,7 @@ class TestExecute(unittest.TestCase):
     def test_execute_unknown_operation(self):
         """Test unknown operation fails."""
         context = {"operation": "unknown"}
-        result = execute(context)
+        result = execute(context, {}, TEMPLATES_DIR)
 
         self.assertFalse(result["success"])
         self.assertIn("Unknown operation", result["message"])
@@ -745,7 +749,7 @@ class TestExecuteCreate(unittest.TestCase):
         (self.temp_path / "CLAUDE.md").write_text("# Existing")
 
         context = {"operation": "create", "scope": "project"}
-        result = execute(context)
+        result = execute(context, {}, TEMPLATES_DIR)
 
         self.assertFalse(result["success"])
         self.assertIn("already exists", result["message"])

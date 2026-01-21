@@ -15,7 +15,7 @@ behavior for a project or user.
 Claude Code has two configuration systems:
 
 | Aspect | CLAUDE.md (Memory) | settings.json (Settings) |
-|--------|-------------------|--------------------------|
+| ------ | ------------------ | ------------------------ |
 | **Format** | Markdown | JSON |
 | **Purpose** | Instructions & context | Behavior configuration |
 | **Contains** | Conventions, patterns, workflows | Permissions, hooks, model |
@@ -41,7 +41,7 @@ Priority (highest to lowest):
 ### Location Details
 
 | Level | Location | Scope |
-|-------|----------|-------|
+| ----- | -------- | ----- |
 | Enterprise | `/Library/Application Support/ClaudeCode/CLAUDE.md` (macOS) | Organization |
 | Enterprise | `/etc/claude-code/CLAUDE.md` (Linux) | Organization |
 | Enterprise | `C:\ProgramData\ClaudeCode\CLAUDE.md` (Windows) | Organization |
@@ -64,13 +64,13 @@ Use `/memory` command to see all loaded memory files.
 
 The `/memory` command shows all loaded memory files:
 
-```
+```text
 /memory
 ```
 
 Output shows:
 
-```
+```text
 Memory files · /memory
 └ User (~/.claude/CLAUDE.md): 43 tokens
 └ Project (./CLAUDE.md): 282 tokens
@@ -80,7 +80,7 @@ Memory files · /memory
 
 Open any memory file in your system editor:
 
-```
+```text
 /memory
 ```
 
@@ -90,7 +90,7 @@ Then select which file to edit.
 
 Start your input with `#` to quickly add to memory:
 
-```
+```text
 # Always use TypeScript strict mode
 ```
 

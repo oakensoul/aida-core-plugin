@@ -364,7 +364,7 @@ python {base_directory}/scripts/manage.py --execute \
 **Common templates available:**
 
 | Template | Event | Purpose |
-|----------|-------|---------|
+| -------- | ----- | ------- |
 | `formatter` | PostToolUse | Auto-format code after writes |
 | `logger` | PostToolUse | Log commands for audit |
 | `blocker` | PreToolUse | Block writes to sensitive files |

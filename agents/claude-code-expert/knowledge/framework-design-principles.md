@@ -1,3 +1,9 @@
+---
+type: reference
+title: Claude Code Extension Design Principles
+description: Architecture and quality standards for Claude Code extensions
+---
+
 # Claude Code Extension Design Principles
 
 <!--
@@ -202,7 +208,7 @@ When Claude processes a request, context is layered from multiple sources.
 The `/context` command shows this as **Memory files** - persistent context that's
 always loaded for every request:
 
-```
+```text
 Memory files · /memory
 └ User (~/.claude/CLAUDE.md): 43 tokens
 └ Project (./CLAUDE.md): 282 tokens
@@ -305,7 +311,7 @@ the agent applies expertise.
 All extension types are **inert text** - they define behavior but don't execute it.
 
 | Type | Role | Defines | Loaded |
-|------|------|---------|--------|
+| ---- | ---- | ------- | ------ |
 | **Subagent** | WHO | Expertise to embody | When spawned |
 | **Command** | WHAT | Process to follow (recipe) | When invoked |
 | **Skill** | HOW | Execution capabilities | When activated |

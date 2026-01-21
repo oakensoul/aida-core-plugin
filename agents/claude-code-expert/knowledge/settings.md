@@ -13,7 +13,7 @@ and context.
 ## Settings vs CLAUDE.md
 
 | Aspect | settings.json | CLAUDE.md |
-|--------|---------------|-----------|
+| ------ | ------------- | --------- |
 | **Format** | JSON | Markdown |
 | **Purpose** | Behavior configuration | Instructions & context |
 | **Contains** | Permissions, hooks, model | Conventions, workflows |
@@ -38,7 +38,7 @@ Priority (highest to lowest):
 ### Location Details
 
 | Location | Scope | Shared |
-|----------|-------|--------|
+| -------- | ----- | ------ |
 | `~/.claude/settings.json` | User global | No |
 | `.claude/settings.json` | Project | Yes (commit to repo) |
 | `.claude/settings.local.json` | Project local | No (gitignored) |
@@ -48,7 +48,7 @@ Priority (highest to lowest):
 
 Use the `/config` command in Claude Code to open the settings interface:
 
-```
+```text
 /config
 ```
 
@@ -226,21 +226,21 @@ Claude Code recognizes these environment variables:
 ### Authentication
 
 | Variable | Purpose |
-|----------|---------|
+| -------- | ------- |
 | `ANTHROPIC_API_KEY` | API key for authentication |
 | `ANTHROPIC_AUTH_TOKEN` | Auth token (alternative) |
 
 ### Behavior
 
 | Variable | Purpose |
-|----------|---------|
+| -------- | ------- |
 | `BASH_DEFAULT_TIMEOUT_MS` | Default bash command timeout |
 | `DISABLE_TELEMETRY` | Disable usage telemetry |
 
 ### Network
 
 | Variable | Purpose |
-|----------|---------|
+| -------- | ------- |
 | `HTTP_PROXY` | HTTP proxy server |
 | `HTTPS_PROXY` | HTTPS proxy server |
 | `NO_PROXY` | Hosts to bypass proxy |

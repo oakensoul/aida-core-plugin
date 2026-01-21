@@ -15,7 +15,7 @@ quality criteria for each type.
 ## The Framework: WHO / WHAT / HOW / CONTEXT / MEMORY / AUTOMATION
 
 | Type | Role | Contains |
-|------|------|----------|
+| ---- | ---- | -------- |
 | **Subagent** | WHO | Identity, expertise, judgment, quality standards |
 | **Command** | WHAT | Instructions/recipe/process (thinking + doing steps) |
 | **Skill** | HOW | Execution capabilities (scripts, templates, automation) |
@@ -71,14 +71,14 @@ the definition lives, not what gets used during execution.
 
 ## Extension Types Compared
 
-| Aspect         | Command              | Skill          | Subagent         | Plugin       |
-| -------------- | -------------------- | -------------- | ---------------- | ------------ |
-| **Purpose**    | Process definition   | Execution      | Expertise        | Distribution |
-| **Analogy**    | Recipe/Instructions  | Kitchen tools  | Specialist chef  | Cookbook     |
-| **Invocation** | `/command`           | Via command    | Via Task tool    | Container    |
-| **State**      | Stateless            | Stateless      | Context-aware    | N/A          |
-| **Scripts**    | No (invokes skills)  | Yes            | Via skills       | Contains all |
-| **Complexity** | Simple to complex    | Execution-focused | Domain-focused | Bundles all  |
+| Aspect | Command | Skill | Subagent | Plugin |
+| ------ | ------- | ----- | -------- | ------ |
+| **Purpose** | Process definition | Execution | Expertise | Distribution |
+| **Analogy** | Recipe/Instructions | Kitchen tools | Specialist chef | Cookbook |
+| **Invocation** | `/command` | Via command | Via Task tool | Container |
+| **State** | Stateless | Stateless | Context-aware | N/A |
+| **Scripts** | No (invokes skills) | Yes | Via skills | Contains all |
+| **Complexity** | Simple to complex | Execution-focused | Domain-focused | Bundles all |
 
 ## Commands
 
@@ -318,7 +318,7 @@ deterministic control - things that MUST happen, every time.
 ### Hooks vs Commands/Skills
 
 | Aspect | Hooks | Commands/Skills |
-|--------|-------|-----------------|
+| ------ | ----- | --------------- |
 | **Trigger** | Automatic | User-invoked |
 | **Control** | Deterministic | LLM-guided |
 | **Purpose** | Enforcement | Workflows |

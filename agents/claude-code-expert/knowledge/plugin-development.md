@@ -115,7 +115,7 @@ my-plugin/
 ### Field Definitions
 
 | Field | Required | Description |
-|-------|----------|-------------|
+| ----- | -------- | ----------- |
 | `name` | Yes | Unique identifier (kebab-case) |
 | `version` | Yes | Semantic version (X.Y.Z) |
 | `description` | Yes | One-line description |
@@ -247,7 +247,7 @@ For testing before release:
 ### Version Operators
 
 | Operator | Meaning | Example |
-|----------|---------|---------|
+| -------- | ------- | ------- |
 | `^` | Compatible | `^1.2.3` = `>=1.2.3 <2.0.0` |
 | `~` | Patch updates | `~1.2.3` = `>=1.2.3 <1.3.0` |
 | `>=` | Minimum | `>=1.0.0` |

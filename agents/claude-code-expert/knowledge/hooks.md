@@ -13,7 +13,7 @@ actions always happen rather than relying on the LLM to choose.
 ## Hooks vs Other Extension Types
 
 | Aspect | Hooks | Commands/Skills |
-|--------|-------|-----------------|
+| ------ | ----- | --------------- |
 | **Trigger** | Automatic (lifecycle events) | Manual (user invocation) |
 | **Control** | Deterministic | LLM-guided |
 | **Purpose** | Enforcement, automation | Workflows, expertise |
@@ -29,7 +29,7 @@ Claude Code supports 10 hook events:
 ### Tool Lifecycle
 
 | Event | Trigger | Use Case |
-|-------|---------|----------|
+| ----- | ------- | -------- |
 | `PreToolUse` | Before tool executes | Block dangerous operations, validate inputs |
 | `PostToolUse` | After tool completes | Format code, log actions, trigger builds |
 | `PermissionRequest` | Permission dialog appears | Auto-approve safe patterns |
@@ -37,14 +37,14 @@ Claude Code supports 10 hook events:
 ### Session Lifecycle
 
 | Event | Trigger | Use Case |
-|-------|---------|----------|
+| ----- | ------- | -------- |
 | `SessionStart` | Session begins/resumes | Load context, set environment |
 | `SessionEnd` | Session terminates | Cleanup, save state |
 
 ### Prompt Lifecycle
 
 | Event | Trigger | Use Case |
-|-------|---------|----------|
+| ----- | ------- | -------- |
 | `UserPromptSubmit` | User submits prompt | Validate input, inject context |
 | `Notification` | Claude sends notification | Custom alerts, integrations |
 | `Stop` | Claude finishes responding | Post-processing, notifications |
@@ -52,7 +52,7 @@ Claude Code supports 10 hook events:
 ### Agent Lifecycle
 
 | Event | Trigger | Use Case |
-|-------|---------|----------|
+| ----- | ------- | -------- |
 | `SubagentStop` | Subagent task completes | Aggregate results, cleanup |
 | `PreCompact` | Before context compaction | Save important context |
 
@@ -95,7 +95,7 @@ hooks
 Matchers determine which tools trigger hooks:
 
 | Pattern | Matches |
-|---------|---------|
+| ------- | ------- |
 | `"Write"` | Only Write tool |
 | `"Edit\|Write"` | Edit OR Write tools |
 | `"Bash"` | Bash tool |
@@ -135,7 +135,7 @@ Hooks receive JSON via stdin containing event context:
 Hooks have access to:
 
 | Variable | Description |
-|----------|-------------|
+| -------- | ----------- |
 | `CLAUDE_PROJECT_DIR` | Current project directory |
 | `CLAUDE_SESSION_ID` | Current session identifier |
 
@@ -144,7 +144,7 @@ Hooks have access to:
 For `PreToolUse` and `PermissionRequest`:
 
 | Exit Code | Meaning |
-|-----------|---------|
+| --------- | ------- |
 | `0` | Allow/approve |
 | Non-zero | Block/deny |
 
@@ -316,7 +316,7 @@ Check Claude Code's output for hook execution results.
 ## Hooks vs Permissions
 
 | Aspect | Hooks | Permissions |
-|--------|-------|-------------|
+| ------ | ----- | ----------- |
 | **Mechanism** | Run code on events | Allow/deny rules |
 | **Flexibility** | Can inspect content | Pattern matching only |
 | **Action** | Execute anything | Block or allow |

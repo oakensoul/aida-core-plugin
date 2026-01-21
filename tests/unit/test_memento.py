@@ -12,7 +12,7 @@ import shutil
 from pathlib import Path
 
 # Add scripts directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "skills" / "memento" / "scripts"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "skills" / "memento" / "scripts"))
 
 from memento import (
     to_kebab_case,

@@ -1,3 +1,8 @@
+---
+type: readme
+title: AIDA Core Plugin
+---
+
 # AIDA Core Plugin
 
 Claude Code plugin providing smart configuration, GitHub integration, and context
@@ -5,7 +10,7 @@ management capabilities.
 
 ## Project Structure
 
-```
+```text
 aida-core-plugin/
 ├── .claude-plugin/       # Plugin metadata
 │   ├── plugin.json       # Required plugin manifest

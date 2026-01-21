@@ -10,19 +10,18 @@ import json
 from pathlib import Path
 
 # Add scripts directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "skills" / "claude-code-management" / "scripts"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "skills" / "claude-code-management" / "scripts"))
 
-from manage import (
+from operations.utils import (
     to_kebab_case,
     validate_name,
     validate_description,
     validate_version,
     bump_version,
-    infer_from_description,
-    get_questions,
-    execute,
     safe_json_load,
 )
+from operations.extensions import infer_from_description
+from manage import get_questions, execute
 
 
 class TestKebabCase(unittest.TestCase):
@@ -310,7 +309,7 @@ class TestExecute(unittest.TestCase):
             "type": "agent",
             "location": "user",
         }
-        result = execute(context)
+        result = execute(context, {})
 
         self.assertTrue(result["success"])
         self.assertIn("components", result)
@@ -324,7 +323,7 @@ class TestExecute(unittest.TestCase):
             "name": "Invalid Name!",
             "description": "Test agent for testing purposes",
         }
-        result = execute(context)
+        result = execute(context, {})
 
         self.assertFalse(result["success"])
         self.assertIn("Invalid name", result["message"])
@@ -337,7 +336,7 @@ class TestExecute(unittest.TestCase):
             "name": "valid-name",
             "description": "Short",  # Too short
         }
-        result = execute(context)
+        result = execute(context, {})
 
         self.assertFalse(result["success"])
         self.assertIn("description", result["message"].lower())
@@ -349,7 +348,7 @@ class TestExecute(unittest.TestCase):
             "type": "agent",
             "bump": "patch",
         }
-        result = execute(context)
+        result = execute(context, {})
 
         self.assertFalse(result["success"])
         self.assertIn("Name is required", result["message"])
@@ -360,7 +359,7 @@ class TestExecute(unittest.TestCase):
             "operation": "unknown",
             "type": "agent",
         }
-        result = execute(context)
+        result = execute(context, {})
 
         self.assertFalse(result["success"])
         self.assertIn("Unknown operation", result["message"])
