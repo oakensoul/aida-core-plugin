@@ -1,0 +1,20 @@
+{
+  "name": "aida-test-monorepo",
+  "version": "1.0.0",
+  "description": "Sample monorepo for AIDA testing",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0"
+  },
+  "keywords": ["aida", "test", "monorepo"],
+  "author": "AIDA Test",
+  "license": "MIT"
+}

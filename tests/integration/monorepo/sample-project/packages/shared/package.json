@@ -1,0 +1,10 @@
+{
+  "name": "@monorepo/shared",
+  "version": "1.0.0",
+  "description": "Shared utilities",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo 'No tests yet'"
+  }
+}

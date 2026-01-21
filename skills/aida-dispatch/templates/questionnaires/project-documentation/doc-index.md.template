@@ -1,0 +1,123 @@
+---
+type: reference
+name: documentation-index
+description: Project documentation index and navigation guide
+version: 0.2.0
+tags:
+  - documentation
+  - index
+  - reference
+created: {{ CREATED_DATE }}
+modified: {{ CREATED_DATE }}
+project: {{ PROJECT_NAME }}
+---
+
+# Documentation Index
+
+## Quick Reference
+
+### Main Documentation
+- **README:** `README.md` - Project overview and setup instructions
+{% if DOC_LOCATIONS %}
+{% for location in DOC_LOCATIONS %}
+- **{{ location.name }}:** `{{ location.path }}`{% if location.description %} - {{ location.description }}{% endif %}
+{% endfor %}
+{% endif %}
+
+## Core Documentation
+
+### Getting Started
+- `README.md` - Project overview, setup, and quick start
+- `CONTRIBUTING.md` - How to contribute to the project (if exists)
+- `LICENSE` - Project license
+
+### Architecture & Design
+- Architecture overview: {{ ARCHITECTURE_DOC_PATH | default('docs/architecture.md') }}
+- Design decisions: (Add path if exists)
+- Technical specifications: (Add path if exists)
+
+### API Documentation
+<!-- Add your API documentation locations -->
+- API reference: (Add path)
+- OpenAPI/Swagger spec: (Add path if exists)
+- API examples: (Add path if exists)
+
+### Development Documentation
+<!-- Documentation for developers working on this project -->
+- Development setup: (Add path)
+- Coding standards: (Add path)
+- Testing guide: (Add path)
+- Debugging guide: (Add path)
+
+## Specialized Documentation
+
+### Operations & Deployment
+<!-- Deployment, infrastructure, operations documentation -->
+- Deployment guide: (Add path)
+- Configuration guide: (Add path)
+- Monitoring and logging: (Add path)
+- Troubleshooting: (Add path)
+
+### User Documentation
+<!-- End-user facing documentation -->
+- User guide: (Add path)
+- Tutorials: (Add path)
+- FAQ: (Add path)
+
+### Process Documentation
+<!-- Team processes and workflows -->
+- Git workflow: (Add path)
+- Release process: (Add path)
+- Code review guidelines: (Add path)
+
+## Project Management
+
+### Planning & Tracking
+- Roadmap: (Add path)
+- Changelog: `CHANGELOG.md` (if exists)
+- Issue templates: `.github/ISSUE_TEMPLATE/` (if exists)
+- PR templates: `.github/PULL_REQUEST_TEMPLATE.md` (if exists)
+
+## External Resources
+
+<!-- Links to external documentation -->
+- Official framework docs: (Add links)
+- Related libraries: (Add links)
+- Team wiki: (Add link if exists)
+- Confluence/Notion: (Add link if exists)
+
+## Documentation Standards
+
+### Where to Find Things
+
+- **Code documentation:** Inline comments and docstrings in source files
+- **Markdown docs:** `docs/` directory
+- **API specs:** `docs/api/` directory (if exists)
+- **Examples:** `examples/` directory (if exists)
+
+### Documentation TODO
+
+<!-- Keep track of documentation that needs to be created or updated -->
+
+- [ ] Document: (What needs documentation)
+- [ ] Update: (What needs updating)
+
+## Notes for Documentation Writers
+
+<!-- Guidelines for writing and maintaining documentation -->
+
+**When adding new documentation:**
+1. Add entry to this index
+2. Follow project documentation standards
+3. Include code examples where appropriate
+4. Keep documentation close to the code it describes
+
+**Maintenance:**
+- Review documentation quarterly
+- Update when features change
+- Remove or archive obsolete docs
+- Keep this index current
+
+---
+
+*Update this index when documentation is added, moved, or removed.*

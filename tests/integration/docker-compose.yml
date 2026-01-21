@@ -1,0 +1,106 @@
+services:
+  # Base image (built first, used by all others)
+  base:
+    build:
+      context: ./base
+      dockerfile: Dockerfile
+    image: aida-test-base:latest
+    container_name: aida-test-base
+    command: /bin/true  # Exit immediately after build
+
+  # AIDA project test environment
+  aida:
+    build:
+      context: ./aida
+      dockerfile: Dockerfile
+    image: aida-test-aida:latest
+    container_name: aida-test-aida
+    depends_on:
+      - base
+    volumes:
+      - aida-home:/home/tester
+      - ./scripts:/usr/local/aida-test/scripts:ro
+      - ../:/mnt/aida-plugin:ro
+    environment:
+      - PATH=/home/tester/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    stdin_open: true
+    tty: true
+
+  # PHP project test environment
+  php:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    image: aida-test-php:latest
+    container_name: aida-test-php
+    depends_on:
+      - base
+    volumes:
+      - php-home:/home/tester
+      - ./scripts:/usr/local/aida-test/scripts:ro
+      - ../:/mnt/aida-plugin:ro
+    environment:
+      - PATH=/home/tester/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    stdin_open: true
+    tty: true
+
+  # Node.js project test environment
+  nodejs:
+    build:
+      context: ./nodejs
+      dockerfile: Dockerfile
+    image: aida-test-nodejs:latest
+    container_name: aida-test-nodejs
+    depends_on:
+      - base
+    volumes:
+      - nodejs-home:/home/tester
+      - ./scripts:/usr/local/aida-test/scripts:ro
+      - ../:/mnt/aida-plugin:ro
+    environment:
+      - PATH=/home/tester/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    stdin_open: true
+    tty: true
+
+  # Python project test environment
+  python:
+    build:
+      context: ./python
+      dockerfile: Dockerfile
+    image: aida-test-python:latest
+    container_name: aida-test-python
+    depends_on:
+      - base
+    volumes:
+      - python-home:/home/tester
+      - ./scripts:/usr/local/aida-test/scripts:ro
+      - ../:/mnt/aida-plugin:ro
+    environment:
+      - PATH=/home/tester/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    stdin_open: true
+    tty: true
+
+  # Monorepo project test environment
+  monorepo:
+    build:
+      context: ./monorepo
+      dockerfile: Dockerfile
+    image: aida-test-monorepo:latest
+    container_name: aida-test-monorepo
+    depends_on:
+      - base
+    volumes:
+      - monorepo-home:/home/tester
+      - ./scripts:/usr/local/aida-test/scripts:ro
+      - ../:/mnt/aida-plugin:ro
+    environment:
+      - PATH=/home/tester/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    stdin_open: true
+    tty: true
+
+volumes:
+  aida-home:
+  php-home:
+  nodejs-home:
+  python-home:
+  monorepo-home:

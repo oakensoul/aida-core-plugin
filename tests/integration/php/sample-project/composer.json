@@ -1,0 +1,21 @@
+{
+    "name": "aida-test/php-project",
+    "description": "Sample PHP project for AIDA testing",
+    "type": "project",
+    "require": {
+        "php": "^8.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AidaTest\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AidaTest\\Tests\\": "tests/"
+        }
+    }
+}

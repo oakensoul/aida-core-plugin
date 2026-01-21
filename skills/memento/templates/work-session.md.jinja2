@@ -1,0 +1,51 @@
+---
+type: memento
+slug: {{ slug }}
+description: {{ description }}
+status: {{ status | default('active') }}
+created: {{ created }}
+updated: {{ updated }}
+source: {{ source | default('manual') }}
+tags: {{ tags | default([]) | tojson }}
+files: {{ files | default([]) | tojson }}
+---
+
+# {{ description }}
+
+## Problem
+
+{{ problem | default('Describe the core problem being solved...') }}
+
+## Approach
+
+{{ approach | default('Describe the solution approach...') }}
+
+## Progress
+
+### Completed
+
+{{ completed | default('- Nothing yet') }}
+
+### In Progress
+
+{{ in_progress | default('- Starting work') }}
+
+### Pending
+
+{{ pending | default('- TBD') }}
+
+## Key Decisions
+
+{{ decisions | default('None yet') }}
+
+## Files
+
+{{ files_detail | default('TBD') }}
+
+## Next Step
+
+{{ next_step | default('Start work on the problem') }}
+
+---
+
+*Last updated: {{ updated }}*

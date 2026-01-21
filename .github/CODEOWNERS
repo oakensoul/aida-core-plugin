@@ -1,0 +1,20 @@
+# CODEOWNERS - defines who must review changes to specific files/paths
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+* @oakensoul
+
+# Plugin configuration
+/.claude-plugin/ @oakensoul
+
+# Core agents and their knowledge
+/agents/ @oakensoul
+
+# Commands and skills
+/commands/ @oakensoul
+/skills/ @oakensoul
+
+# Documentation
+/docs/ @oakensoul
+CLAUDE.md @oakensoul
+README.md @oakensoul
