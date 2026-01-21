@@ -437,7 +437,7 @@ def install(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dict[
 
         if "enabledPlugins" not in current_settings:
             current_settings["enabledPlugins"] = {}
-        current_settings["enabledPlugins"]["aida-core@aida"] = True
+        current_settings["enabledPlugins"]["aida-core"] = True
 
         write_json(settings_file, current_settings)
         files_created.append(str(settings_file))

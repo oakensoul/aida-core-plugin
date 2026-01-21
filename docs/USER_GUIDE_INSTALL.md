@@ -75,7 +75,7 @@ gh auth login
 
 ### 4. Git (Optional but Recommended)
 
-**Recommended**: For project detection in `/aida configure`
+**Recommended**: For project detection in `/aida config`
 
 ```bash
 git --version
@@ -97,10 +97,10 @@ Open Claude Code and install the plugin:
 Installing plugin from oakensoul/aida-core-plugin...
 ✓ Downloaded plugin files
 ✓ Verified plugin structure
-✓ Installed aida-core@aida
+✓ Installed aida-core
 ✓ Plugin enabled
 
-Run /aida install to set up your personal preferences.
+Run /aida config to set up your personal preferences.
 ```
 
 **Time required**: ~30 seconds
@@ -110,7 +110,7 @@ Run /aida install to set up your personal preferences.
 Launch the installation wizard:
 
 ```bash
-/aida install
+/aida config
 ```
 
 #### 2.1 Welcome & Requirements Check
@@ -138,7 +138,7 @@ Checking requirements...
 
 #### 2.2 Existing Installation Check
 
-If you've run `/aida install` before:
+If you've run `/aida config` before:
 
 ```text
 ⚠ Personal skills already exist at:
@@ -205,7 +205,7 @@ providing consistent context about your preferences.
 Next Steps:
   1. Configure AIDA for a specific project:
      cd your-project/
-     /aida configure
+     /aida config
 
   2. Check your configuration:
      /aida status
@@ -379,7 +379,7 @@ After installation, AIDA creates these files and directories:
 │       └── SKILL.md                # AIDA management knowledge
 ├── settings.json                   # Claude Code settings
 └── plugins/
-    └── aida-core@aida/             # Plugin files
+    └── aida-core/             # Plugin files
         ├── commands/               # /aida commands (15 total)
         ├── scripts/                # Python utilities
         └── templates/              # Jinja2 templates
@@ -474,7 +474,7 @@ AIDA adds/updates:
 ```json
 {
   "enabledPlugins": {
-    "aida-core@aida": true
+    "aida-core": true
   }
 }
 ```
@@ -507,10 +507,10 @@ Personal Skills:
   ✓ aida-core
 
 Project Configuration: Not configured
-  Run /aida configure in a project directory
+  Run /aida config in a project directory
 
 Settings: ✓ Configured
-  Plugin enabled: aida-core@aida
+  Plugin enabled: aida-core
 ```
 
 ### Step 2: Verify Skill Files
@@ -542,8 +542,8 @@ AIDA - Agentic Intelligence Digital Assistant
 
 Available commands:
   /aida help               Show this help message
-  /aida install            Global setup (run once)
-  /aida configure          Project setup (per project)
+  /aida config            Global setup (run once)
+  /aida config          Project setup (per project)
   [... etc ...]
 
 For detailed help: /aida command info [name]
@@ -575,7 +575,7 @@ Skills:
 
 Settings:
   ✓ ~/.claude/settings.json valid
-  ✓ Plugin aida-core@aida enabled
+  ✓ Plugin aida-core enabled
 
 All checks passed! ✓
 ```
@@ -601,7 +601,7 @@ brew upgrade python3
 sudo apt update && sudo apt upgrade python3
 
 # Try again
-/aida install
+/aida config
 ```
 
 #### Error: "gh CLI not found"
@@ -621,7 +621,7 @@ brew install gh
 gh auth login
 
 # Try again
-/aida install
+/aida config
 ```
 
 #### Error: "Permission denied: ~/.claude/"
@@ -645,11 +645,11 @@ chmod -R u+w ~/.claude/
 
 #### Accidentally Canceled (Ctrl+C)
 
-**Solution**: Just run `/aida install` again. No partial state is saved.
+**Solution**: Just run `/aida config` again. No partial state is saved.
 
 #### Want to Change Answers
 
-**Solution**: Run `/aida install` again and confirm overwrite when prompted.
+**Solution**: Run `/aida config` again and confirm overwrite when prompted.
 
 #### Unsure How to Answer
 
@@ -676,7 +676,7 @@ Press Enter without typing to use the default value shown in `[brackets]`.
 # Look for errors, follow suggestions
 
 # If needed, reinstall
-/aida install
+/aida config
 ```
 
 #### `/aida` commands not recognized
@@ -690,10 +690,10 @@ Press Enter without typing to use the default value shown in `[brackets]`.
 /plugin list
 
 # Should show:
-# aida-core@aida (enabled)
+# aida-core (enabled)
 
 # If not enabled
-/plugin enable aida-core@aida
+/plugin enable aida-core
 ```
 
 ### Getting More Help
@@ -715,7 +715,7 @@ Navigate to any project and run:
 
 ```bash
 cd your-project/
-/aida configure
+/aida config
 ```
 
 This creates project-specific skills. See [Configuration Guide](USER_GUIDE_CONFIGURE.md).

@@ -418,7 +418,7 @@ from utils import write_json
 
 data = {
     "enabledPlugins": {
-        "aida-core@aida": True
+        "aida-core": True
     }
 }
 write_json(Path("~/.claude/settings.json"), data)
@@ -451,7 +451,7 @@ from utils import update_json
 # Add plugin without overwriting other settings
 updates = {
     "enabledPlugins": {
-        "aida-core@aida": True
+        "aida-core": True
     }
 }
 update_json(Path("~/.claude/settings.json"), updates)
@@ -1121,7 +1121,7 @@ def main() -> int:
         settings_path = claude_dir / "settings.json"
         update_json(settings_path, {
             "enabledPlugins": {
-                "aida-core@aida": True
+                "aida-core": True
             }
         })
 

@@ -428,9 +428,9 @@ def get_aida_plugin_dir() -> Path:
     """Get AIDA plugin directory.
 
     Returns:
-        Path to ~/.claude/plugins/aida-core@aida/
+        Path to ~/.claude/plugins/aida-core/
     """
-    return get_claude_dir() / "plugins/aida-core@aida"
+    return get_claude_dir() / "plugins/aida-core"
 ```
 
 **2. Export in \_\_init\_\_.py**:
@@ -456,7 +456,7 @@ __all__ = [
 # tests/test_paths.py
 def test_get_aida_plugin_dir():
     result = get_aida_plugin_dir()
-    assert result.name == "aida-core@aida"
+    assert result.name == "aida-core"
 ```
 
 **4. Update API documentation**:

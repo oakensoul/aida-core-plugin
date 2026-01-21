@@ -31,7 +31,7 @@ Real-world examples of using AIDA commands in different scenarios.
 /aida status
 # Output: ✓ Global Installation: /Users/sarah/.claude
 #         ✓ Global Skills: 1 loaded (user-context)
-#         Plugin Version: 0.2.0
+#         Plugin Version: 0.5.0
 
 # Run health check
 /aida doctor
@@ -192,7 +192,7 @@ cd ~/my-monorepo
 # Select "View current configuration"
 # Output:
 # Global Configuration: ~/.claude/aida.yml
-#   Version: 0.2.0
+#   Version: 0.5.0
 #   Skills: user-context
 #
 # Project Configuration: .claude/aida-project-context.yml
@@ -218,7 +218,7 @@ cd ~/my-monorepo
 /aida bug
 # AIDA automatically collects:
 #   - Python version: 3.11.2
-#   - AIDA version: 0.2.0
+#   - AIDA version: 0.5.0
 #   - OS: macOS 14.1
 #   - Active skills: user-context, project-context
 #   - Git status (if in repo)
@@ -248,12 +248,12 @@ cd ~/my-monorepo
 /aida upgrade
 # Output: AIDA Upgrade Check
 #         ====================================
-#         Current version: 0.2.0
-#         Latest version: 0.2.1
+#         Current version: 0.5.0
+#         Latest version: 0.5.1
 #
 #         ✓ New version available!
 #
-#         Changes in 0.2.1:
+#         Changes in 0.5.1:
 #         • Enhanced language detection
 #         • Bug fixes for Windows paths
 #         • Improved error messages
@@ -261,7 +261,7 @@ cd ~/my-monorepo
 #         To upgrade:
 #         1. Backup your config (optional): cp -r ~/.claude ~/.claude.backup
 #         2. Run: /plugin marketplace update
-#         3. Reinstall: /plugin install core@aida
+#         3. Reinstall: /plugin install aida-core
 #
 #         Note: Your configuration will be preserved
 ```

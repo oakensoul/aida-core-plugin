@@ -236,7 +236,7 @@ def update_settings_json() -> None:
 
     updates = {
         "enabledPlugins": {
-            "aida-core@aida": True
+            "aida-core": True
         }
     }
 

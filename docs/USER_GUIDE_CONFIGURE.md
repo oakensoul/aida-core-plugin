@@ -63,7 +63,7 @@ cd /path/to/your-project/
 
 ## When to Configure
 
-Run `/aida configure` when:
+Run `/aida config` when:
 
 ### First Time Setup
 
@@ -98,7 +98,7 @@ Ensure you're at the project root (where `package.json`, `pyproject.toml`, `.git
 ### Step 2: Run Configuration
 
 ```bash
-/aida configure
+/aida config
 ```
 
 #### 2.1 Installation Check
@@ -114,10 +114,10 @@ Checking AIDA installation...
 ```text
 ✗ AIDA not installed
 
-Run /aida install first to set up personal preferences.
+Run /aida config first to set up personal preferences.
 ```
 
-Solution: Run `/aida install` first (see [Installation Guide](USER_GUIDE_INSTALL.md))
+Solution: Run `/aida config` first (see [Installation Guide](USER_GUIDE_INSTALL.md))
 
 #### 2.2 Existing Configuration Check
 
@@ -233,7 +233,7 @@ Next Steps:
   2. Check configuration:
      /aida status
   3. Update skills if project evolves:
-     /aida configure
+     /aida config
 
 Happy coding! 🚀
 ```
@@ -801,7 +801,7 @@ cd ~/projects/ecommerce-backend
 
 # Evening: Personal project
 cd ~/projects/blog
-/aida configure  # First time, configure it
+/aida config  # First time, configure it
 # Work on blog features...
 ```
 
@@ -813,15 +813,15 @@ Each project has appropriate context automatically!
 
 #### Error: "AIDA not installed"
 
-**Cause**: `/aida install` hasn't been run
+**Cause**: `/aida config` hasn't been run
 
 **Solution**:
 
 ```bash
-/aida install
+/aida config
 # Complete installation first
 cd your-project/
-/aida configure
+/aida config
 ```
 
 #### Error: "Not in a git repository"
@@ -833,7 +833,7 @@ cd your-project/
 ```bash
 git init
 # OR run from a different directory
-/aida configure
+/aida config
 ```
 
 Configuration will work, but detection may be limited.

@@ -445,7 +445,7 @@ Claude Code Start
   ▼
 Load Plugins
   │
-  ├─> Load aida-core@aida
+  ├─> Load aida-core
   │
   ▼
 Load Global Skills
@@ -482,7 +482,7 @@ Skills Active
 │       └── SKILL.md            # AIDA management knowledge
 ├── settings.json               # Claude Code settings
 ├── plugins/
-│   └── aida-core@aida/         # This plugin
+│   └── aida-core/         # This plugin
 │       ├── .claude-plugin/
 │       │   └── plugin.json     # Plugin metadata
 │       ├── commands/
