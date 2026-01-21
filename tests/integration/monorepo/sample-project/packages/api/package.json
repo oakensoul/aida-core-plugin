@@ -1,0 +1,14 @@
+{
+  "name": "@monorepo/api",
+  "version": "1.0.0",
+  "description": "API service",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo 'No tests yet'"
+  },
+  "dependencies": {
+    "@monorepo/shared": "1.0.0"
+  }
+}

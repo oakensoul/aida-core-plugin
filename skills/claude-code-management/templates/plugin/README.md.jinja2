@@ -1,0 +1,63 @@
+# {{ name | replace("-", " ") | title }}
+
+{{ description }}
+
+## Installation
+
+```bash
+# Using Claude Code plugin command
+/plugin add /path/to/{{ name }}
+```
+
+## Contents
+
+This plugin provides:
+
+### Agents
+
+<!-- List agents included in this plugin -->
+
+- None yet
+
+### Commands
+
+<!-- List commands included in this plugin -->
+
+- None yet
+
+### Skills
+
+<!-- List skills included in this plugin -->
+
+- None yet
+
+## Development
+
+### Adding Components
+
+Use AIDA commands to add components to this plugin:
+
+```bash
+# Add an agent
+/aida agent create "description" --location plugin
+
+# Add a command
+/aida command create "description" --location plugin
+
+# Add a skill
+/aida skill create "description" --location plugin
+```
+
+### Validation
+
+```bash
+/aida plugin validate {{ name }}
+```
+
+## License
+
+MIT
+
+---
+
+*Created: {{ timestamp }}*

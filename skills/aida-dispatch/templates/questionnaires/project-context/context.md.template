@@ -1,0 +1,64 @@
+---
+type: documentation
+name: project-context
+description: Project context, current focus, and recent decisions
+version: 0.2.0
+tags:
+  - context
+  - project
+  - decisions
+created: {{ CREATED_DATE }}
+modified: {{ CREATED_DATE }}
+project: {{ PROJECT_NAME }}
+---
+
+# Project Context
+
+## Project Description
+
+{{ PROJECT_DESCRIPTION }}
+
+**Project Type:** {{ PROJECT_TYPE }}
+
+## Current Focus
+
+{{ CURRENT_FOCUS }}
+
+<!-- Update this section as your work evolves -->
+
+## Recent Decisions
+
+<!-- Document important decisions here with context and rationale -->
+
+### [Decision Title]
+**Date:** _[Add date: YYYY-MM-DD]_
+**Context:** Why was this decision needed?
+**Decision:** What did we decide?
+**Rationale:** Why this approach?
+**Alternatives Considered:** What else did we consider?
+**Consequences:** What are the implications?
+
+---
+
+## Active Development Areas
+
+<!-- What parts of the codebase are actively being worked on? -->
+
+- **Area 1:** Description of what's happening
+- **Area 2:** Description of what's happening
+
+## Upcoming Priorities
+
+<!-- What's on the horizon? -->
+
+1. Priority 1
+2. Priority 2
+3. Priority 3
+
+## Notes
+
+<!-- General notes, observations, or things to remember about this project -->
+
+---
+
+*This file should be updated regularly to reflect the current state of the project.*
