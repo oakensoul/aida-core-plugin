@@ -83,18 +83,36 @@ git --version
 
 ## Installation Steps
 
-### Step 1: Install the Plugin
+### Step 1: Add AIDA Marketplace
 
-Open Claude Code and install the plugin:
+Open Claude Code and add the AIDA marketplace (one-time setup):
 
 ```bash
-/plugin install oakensoul/aida-core-plugin
+/plugin marketplace add oakensoul/aida-marketplace
 ```
 
 **Expected output:**
 
 ```text
-Installing plugin from oakensoul/aida-core-plugin...
+Adding marketplace oakensoul/aida-marketplace...
+✓ Fetched marketplace registry
+✓ Added marketplace "aida"
+
+Available plugins: core
+```
+
+### Step 2: Install Core Plugin
+
+Install the core AIDA plugin:
+
+```bash
+/plugin install core@aida
+```
+
+**Expected output:**
+
+```text
+Installing plugin core@aida...
 ✓ Downloaded plugin files
 ✓ Verified plugin structure
 ✓ Installed aida-core
@@ -105,7 +123,7 @@ Run /aida config to set up your personal preferences.
 
 **Time required**: ~30 seconds
 
-### Step 2: Run Installation Wizard
+### Step 3: Run Installation Wizard
 
 Launch the installation wizard:
 
