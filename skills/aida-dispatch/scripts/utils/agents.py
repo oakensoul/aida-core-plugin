@@ -7,15 +7,13 @@ in the project's CLAUDE.md file.
 
 from __future__ import annotations
 
-import errno
 import glob
 import logging
-import os
 from pathlib import Path
 
-from .json_utils import safe_json_load
-from .paths import get_home_dir
 from .files import write_file
+from .paths import get_home_dir
+from .plugins import _read_aida_config, _safe_read_file
 
 logger = logging.getLogger(__name__)
 
@@ -43,68 +41,6 @@ _REQUIRED_FIELDS = {"name", "description", "version", "tags"}
 
 # Section header
 _SECTION_HEADER = "## Available Agents"
-
-
-# ── File reading ────────────────────────────────────
-
-
-def _safe_read_agent_file(
-    file_path: Path,
-    label: str,
-    resolved_root: Path | None = None,
-) -> str | None:
-    """Read a file with TOCTOU-safe security checks.
-
-    Uses ``O_NOFOLLOW`` to atomically reject symlinks.
-    Enforces a 500 KB size limit for agent files.
-    Optionally validates path containment within a root.
-    """
-    if resolved_root is not None:
-        try:
-            file_path.resolve().relative_to(resolved_root)
-        except ValueError:
-            logger.warning(
-                "%s path outside root: %s",
-                label,
-                file_path,
-            )
-            return None
-
-    fd = -1
-    try:
-        fd = os.open(
-            str(file_path), os.O_RDONLY | os.O_NOFOLLOW
-        )
-        st = os.fstat(fd)
-        if st.st_size > _MAX_AGENT_FILE_SIZE:
-            logger.warning(
-                "%s too large (%d bytes): %s",
-                label,
-                st.st_size,
-                file_path,
-            )
-            return None
-        with os.fdopen(fd, "r", encoding="utf-8") as f:
-            fd = -1  # fd now owned by file object
-            return f.read()
-    except OSError as exc:
-        if exc.errno == errno.ELOOP:
-            logger.warning(
-                "Skipping symlink %s: %s",
-                label,
-                file_path,
-            )
-        elif exc.errno != errno.ENOENT:
-            logger.warning(
-                "Failed to read %s %s: %s",
-                label,
-                file_path,
-                exc,
-            )
-        return None
-    finally:
-        if fd >= 0:
-            os.close(fd)
 
 
 # ── Frontmatter parsing ────────────────────────────
@@ -180,8 +116,11 @@ def _read_agent_frontmatter(
     Returns dict with name, description, version, tags,
     skills, model — or ``None`` on failure.
     """
-    content = _safe_read_agent_file(
-        agent_path, "agent file", resolved_root
+    content = _safe_read_file(
+        agent_path,
+        "agent file",
+        resolved_root,
+        max_size=_MAX_AGENT_FILE_SIZE,
     )
     if content is None:
         return None
@@ -255,30 +194,6 @@ def _find_agents_in_directory(
     return agents
 
 
-def _read_aida_config_for_agents(
-    config_path: Path,
-    resolved_root: Path | None = None,
-) -> dict | None:
-    """Read aida-config.json for agent declarations."""
-    raw = _safe_read_agent_file(
-        config_path, "aida-config.json", resolved_root
-    )
-    if raw is None:
-        return None
-    try:
-        data = safe_json_load(raw)
-        if not isinstance(data, dict):
-            return None
-        return data
-    except Exception:
-        logger.warning(
-            "Failed to parse aida-config.json: %s",
-            config_path,
-            exc_info=True,
-        )
-        return None
-
-
 def _find_plugin_agents(
     plugin_root: Path,
     plugin_name: str,
@@ -294,11 +209,9 @@ def _find_plugin_agents(
     agents_dir = plugin_root / "agents"
     source = f"plugin:{plugin_name}"
 
-    config_path = (
-        plugin_root / ".claude-plugin" / "aida-config.json"
-    )
-    aida_config = _read_aida_config_for_agents(
-        config_path, resolved_root
+    plugin_meta_dir = plugin_root / ".claude-plugin"
+    aida_config = _read_aida_config(
+        plugin_meta_dir, resolved_root
     )
 
     if aida_config is not None and "agents" in aida_config:

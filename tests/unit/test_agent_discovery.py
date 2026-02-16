@@ -33,11 +33,11 @@ from utils.agents import (
     _find_plugin_agents,
     _parse_managed_section,
     _read_agent_frontmatter,
-    _safe_read_agent_file,
     discover_agents,
     generate_agent_routing_section,
     update_agent_routing,
 )
+from utils.plugins import _safe_read_file
 
 # Valid agent frontmatter template
 _VALID_FRONTMATTER = """\
@@ -521,7 +521,7 @@ class TestAgentDiscovery(unittest.TestCase):
         safe_root = self.temp_path / "safe"
         safe_root.mkdir()
 
-        result = _safe_read_agent_file(
+        result = _safe_read_file(
             outside,
             "test",
             resolved_root=safe_root.resolve(),
