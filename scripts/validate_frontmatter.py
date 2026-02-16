@@ -47,6 +47,7 @@ IGNORE_PATTERNS = [
     '.ruff_cache',
     'venv',
     '.venv',
+    'issues',
 ]
 
 

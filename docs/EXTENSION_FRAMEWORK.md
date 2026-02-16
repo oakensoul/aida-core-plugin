@@ -6,12 +6,6 @@ description: Architecture and quality standards for Claude Code extensions
 
 # Claude Code Extension Design Principles
 
-<!--
-  NOTE: This is a copy for documentation/visibility purposes.
-  Authoritative source: agents/claude-code-expert/knowledge/framework-design-principles.md
-  If updating this file, please update the source file first, then sync here.
--->
-
 This document defines the architecture and quality standards for Claude Code extensions.
 It serves as the authoritative reference for the claude-code-expert agent's expertise.
 

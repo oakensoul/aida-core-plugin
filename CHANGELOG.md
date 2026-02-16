@@ -214,24 +214,6 @@ See git history for details on versions prior to 0.2.0.
 
 ---
 
-## Unreleased
-
-### Planned for v0.2.1
-
-- [ ] Enhanced language detection (Python, JavaScript, Go, Rust, etc.)
-- [ ] Better source directory detection
-- [ ] Test directory enumeration
-- [ ] CI/CD system-specific detection
-
-### Planned for v0.3.0
-
-- [ ] Memory management system
-- [ ] Personal knowledge base
-- [ ] Custom command creation
-- [ ] Workflow automation
-
----
-
 [0.7.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.7.0
 [0.6.1]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.6.1
 [0.6.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.6.0

@@ -18,7 +18,7 @@ and next steps.
 /aida memento create "Implementing OAuth flow"
 
 # Later, restore it
-/aida memento restore
+/aida memento read
 ```
 
 ## When to Use Mementos
@@ -69,8 +69,8 @@ Shows all saved mementos with their:
 ### Restore a Memento
 
 ```bash
-/aida memento restore
-/aida memento restore auth-feature
+/aida memento read
+/aida memento read auth-feature
 ```
 
 Loads the memento context so Claude understands:
@@ -130,7 +130,7 @@ Deletes a memento you no longer need.
 /aida memento create "Quick fix for login bug"
 # ... fix the bug ...
 /aida memento complete
-/aida memento restore user-dashboard
+/aida memento read user-dashboard
 ```
 
 ### Ending a Session
@@ -147,7 +147,7 @@ Deletes a memento you no longer need.
 
 ```bash
 # Resume where you left off
-/aida memento restore
+/aida memento read
 
 # Claude will know your context and continue
 ```
@@ -265,7 +265,7 @@ Key files:
 ```bash
 /aida memento update
 /clear
-/aida memento restore
+/aida memento read
 ```
 
 ### Multiple Workstreams
@@ -280,7 +280,7 @@ Key files:
 /aida memento complete
 
 # Resume original work
-/aida memento restore feature-work
+/aida memento read feature-work
 ```
 
 ### Review Old Context

@@ -166,7 +166,7 @@ See [C4 Diagrams](architecture/c4/) for visual representations.
 #### Layer 2: Python Scripts
 
 - **install.py**: Global setup wizard
-- **configure.py**: Project setup wizard (planned)
+- **configure.py**: Project setup wizard
 - **feedback.py**: GitHub issue creation
 - **utils/**: Shared utilities
 
@@ -192,7 +192,7 @@ See [C4 Diagrams](architecture/c4/) for visual representations.
 
 ## Component Architecture
 
-See [C4 Component Diagrams](architecture/c4/component-diagrams.md) for details.
+See [C4 Component Diagrams](architecture/c4/component-diagram.md) for details.
 
 ### Python Utilities Module
 
@@ -242,8 +242,7 @@ main()
 ├── run_questionnaire("install.yml")
 ├── create_directory_structure()
 ├── render_skills()
-│   ├── render_personal_preferences()
-│   └── render_work_patterns()
+│   └── render_user_context()
 ├── update_settings_json()
 └── print_success()
 ```
@@ -334,7 +333,7 @@ description: {{ skill_description }}
 ```text
 User
   │
-  ├─> /aida install
+  ├─> /aida config
   │
   ▼
 check_python_version()
@@ -363,8 +362,7 @@ run_questionnaire("install.yml")
   ▼
 create_directory_structure()
   │
-  ├─> ~/.claude/skills/personal-preferences/
-  ├─> ~/.claude/skills/work-patterns/
+  ├─> ~/.claude/skills/user-context/
   └─> ~/.claude/skills/aida-core/
   │
   ▼
@@ -391,14 +389,14 @@ Success!
 ```text
 User
   │
-  ├─> /aida configure
+  ├─> /aida config
   │
   ▼
 check_installation()
   │
   ├─> Personal skills exist?
   │   ├─ Yes → Continue
-  │   └─ No  → Error: Run /aida install first
+  │   └─ No  → Error: Run /aida config first
   │
   ▼
 detect_project()
@@ -420,13 +418,6 @@ create_project_skills()
   │
   ├─> .claude/skills/project-context/
   └─> .claude/skills/project-documentation/
-  │
-  ▼
-prompt_pkm_symlink()
-  │
-  ├─> User wants symlink?
-  │   ├─ Yes → Create .pkm/ → target
-  │   └─ No  → Skip
   │
   ▼
 update_project_settings()
@@ -474,10 +465,8 @@ Skills Active
 ```text
 ~/.claude/
 ├── skills/                      # Personal skills (global)
-│   ├── personal-preferences/
-│   │   └── SKILL.md            # Coding standards, preferences
-│   ├── work-patterns/
-│   │   └── SKILL.md            # Work habits, schedule
+│   ├── user-context/
+│   │   └── SKILL.md            # Environment, preferences, standards
 │   └── aida-core/
 │       └── SKILL.md            # AIDA management knowledge
 ├── settings.json               # Claude Code settings
@@ -486,7 +475,7 @@ Skills Active
 │       ├── .claude-plugin/
 │       │   └── plugin.json     # Plugin metadata
 │       ├── commands/
-│       │   └── [15 command files - planned]
+│       │   └── aida.md             # Command entry point
 │       ├── scripts/
 │       │   ├── install.py
 │       │   ├── feedback.py
@@ -501,9 +490,7 @@ Skills Active
 │       │       └── errors.py
 │       └── templates/
 │           ├── blueprints/
-│           │   ├── personal-preferences/
-│           │   │   └── SKILL.md.jinja2
-│           │   └── work-patterns/
+│           │   └── user-context/
 │           │       └── SKILL.md.jinja2
 │           └── questionnaires/
 │               ├── install.yml
@@ -522,8 +509,6 @@ your-project/
 │   │   └── project-documentation/
 │   │       └── SKILL.md        # Documentation standards
 │   └── settings.json           # Project settings
-├── .pkm/                       # Optional symlink to PKM vault
-│   └── [symlink target]
 └── [your project files...]
 ```
 
@@ -623,6 +608,11 @@ See [Architecture Decision Records](architecture/adr/) for detailed rationale.
 - [ADR-004: YAML for Questionnaires](architecture/adr/004-yaml-questionnaires.md)
 - [ADR-005: Local-First Storage](architecture/adr/005-local-first-storage.md)
 - [ADR-006: gh CLI for Feedback](architecture/adr/006-gh-cli-feedback.md)
+- [ADR-007: YAML Config as Single Source of Truth](architecture/adr/007-yaml-config-single-source-truth.md)
+- [ADR-008: Marketplace-Centric Distribution](architecture/adr/008-marketplace-centric-distribution.md)
+- [ADR-009: Input Validation and Path Security](architecture/adr/009-input-validation-path-security.md)
+- [ADR-010: Two-Phase API for LLM Integration](architecture/adr/010-two-phase-api-pattern.md)
+- [ADR-011: User-Level Memento Storage](architecture/adr/011-user-level-memento-storage.md)
 
 ### Key Decisions Summary
 
@@ -710,7 +700,7 @@ See [Architecture Decision Records](architecture/adr/) for detailed rationale.
 
 ### Installation Speed
 
-**Target**: < 30 seconds for `/aida install`
+**Target**: < 30 seconds for `/aida config`
 
 **Optimizations**:
 

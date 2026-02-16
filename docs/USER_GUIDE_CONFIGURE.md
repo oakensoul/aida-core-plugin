@@ -8,13 +8,11 @@ audience: users
 
 Complete walkthrough for configuring AIDA for your projects
 
-This guide walks you through using the unified `/aida config` command
-(introduced in v0.2.0) to set up project-specific context, skills, and
-preferences.
+This guide walks you through using the `/aida config` command to set up
+project-specific context, skills, and preferences.
 
-Note: As of v0.2.0, AIDA uses a unified `/aida config` command (not separate
-install/configure commands) with smart auto-detection that reduces questions
-from 22 → 2!
+AIDA uses a unified `/aida config` command with smart auto-detection that
+reduces questions from 22 → 2!
 
 ## Table of Contents
 
@@ -24,7 +22,6 @@ from 22 → 2!
 - [Questionnaire Deep Dive](#questionnaire-deep-dive)
 - [Project Detection](#project-detection)
 - [What Gets Created](#what-gets-created)
-- [PKM Integration](#pkm-integration)
 - [Verification](#verification)
 - [Working with Multiple Projects](#working-with-multiple-projects)
 - [Troubleshooting](#troubleshooting)
@@ -184,23 +181,7 @@ Press Ctrl+C at any time to cancel.
 
 See [Questionnaire Deep Dive](#questionnaire-deep-dive) for detailed explanations.
 
-#### 2.5 PKM Symlink Prompt
-
-After the questionnaire, you can optionally link your Personal Knowledge Management system:
-
-```text
-PKM Integration (Optional)
-───────────────────────────────────────────────────────────
-
-Do you maintain project documentation in a PKM system
-(Obsidian, Notion, etc.)?
-
-Create a .pkm/ symlink in this project? [y/N]: _
-```
-
-See [PKM Integration](#pkm-integration) for details.
-
-#### 2.6 Skill Creation
+#### 2.5 Skill Creation
 
 ```text
 Creating project skills...
@@ -212,7 +193,7 @@ Creating project skills...
 ───────────────────────────────────────────────────────────
 ```
 
-#### 2.7 Success Message
+#### 2.6 Success Message
 
 ```text
 ╔══════════════════════════════════════════════════════════╗
@@ -481,7 +462,6 @@ your-project/
 │   │   └── project-documentation/
 │   │       └── SKILL.md           # Documentation standards
 │   └── settings.json              # Project settings
-├── .pkm/                          # Optional symlink
 └── [your project files...]
 ```
 
@@ -597,70 +577,6 @@ Comprehensive - Full guides, examples, architecture docs
 
 **Purpose**: Machine-readable project metadata
 
-## PKM Integration
-
-AIDA can integrate with Personal Knowledge Management systems.
-
-### What is PKM Integration?
-
-If you maintain project documentation in Obsidian, Notion, Logseq, or similar tools, AIDA can create a symlink to your notes.
-
-**Benefits:**
-
-- Claude can reference your detailed notes
-- Keep single source of truth
-- Documentation stays in your PKM system
-
-### Setting Up PKM Symlink
-
-During configuration:
-
-```text
-Create a .pkm/ symlink in this project? [y/N]: y
-
-Where is your PKM vault or project notes directory?
-Path: ~/Obsidian/Projects/my-awesome-app
-
-✓ Created symlink: .pkm/ → ~/Obsidian/Projects/my-awesome-app
-```
-
-**Result:**
-
-```text
-your-project/
-├── .pkm/  → ~/Obsidian/Projects/my-awesome-app
-│   ├── Architecture.md
-│   ├── API-Design.md
-│   └── Decisions.md
-└── ...
-```
-
-Claude can now read your PKM notes when working on this project.
-
-### Supported PKM Systems
-
-- **Obsidian**: Markdown-based vault
-- **Logseq**: Markdown/org-mode
-- **Foam** (VS Code): Markdown
-- **Notion**: Export to markdown first
-- **Custom**: Any directory with markdown files
-
-### Manual PKM Setup
-
-Skip during configuration, add later:
-
-```bash
-cd your-project/
-ln -s ~/Obsidian/Projects/my-awesome-app .pkm
-```
-
-### Removing PKM Link
-
-```bash
-cd your-project/
-rm .pkm  # Just removes symlink, not your notes!
-```
-
 ## Verification
 
 After configuration, verify everything works:
@@ -704,8 +620,7 @@ Detected:
 
 ```text
 Global Skills:
-  • personal-preferences
-  • work-patterns
+  • user-context
   • aida-core
 
 Project Skills (.claude/skills/):
@@ -782,8 +697,7 @@ Your personal preferences apply to all projects:
 
 ```text
 ~/.claude/skills/
-├── personal-preferences/   ← Active in ALL projects
-└── work-patterns/          ← Active in ALL projects
+└── user-context/           ← Active in ALL projects
 ```
 
 ### Example Multi-Project Workflow
@@ -872,37 +786,6 @@ Actually uses Python with Flask (not detected correctly)
 
 **Normal**: Not all projects use frameworks. Just answer questions accurately.
 
-### PKM Issues
-
-#### Symlink Creation Failed
-
-**Possible causes:**
-
-1. Invalid path provided
-2. Target directory doesn't exist
-3. Permission issues
-
-**Solution**:
-
-```bash
-# Verify path exists
-ls ~/path/to/pkm/directory
-
-# Create manually if needed
-ln -s ~/path/to/pkm/directory .pkm
-
-# Verify
-ls -la .pkm
-```
-
-#### Claude Can't Read PKM Notes
-
-**Check:**
-
-1. Symlink exists: `ls -la .pkm`
-2. Target exists: `ls ~/.pkm/../`
-3. Readable: `cat .pkm/some-note.md`
-
 ### Getting Help
 
 1. **Run diagnostics**: `/aida doctor`
@@ -959,20 +842,6 @@ ls -la .pkm
 - Don't duplicate personal preferences
 - Personal preferences live in `~/.claude/skills/`
 
-### PKM Integration
-
-**Keep it focused:**
-
-- Link project-specific notes only
-- Don't link your entire vault
-- Too much information can be overwhelming
-
-**Structure helps:**
-
-- Organize PKM notes clearly
-- Use consistent naming
-- Link to most relevant notes
-
 ### Maintenance
 
 **Periodic review:**
@@ -985,8 +854,6 @@ ls -la .pkm
 
 - **DO** commit `.claude/skills/` to git
 - **DO** commit `.claude/settings.json`
-- **DON'T** commit `.pkm/` symlink (add to `.gitignore`)
-
 **Team sharing:**
 
 - Share project skills with team

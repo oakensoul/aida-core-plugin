@@ -93,8 +93,8 @@ Running AIDA Diagnostics...
 ```text
 Checking for AIDA updates...
 ========================================
-Current version: 0.2.0
-Latest version: 0.3.0
+Current version: 0.7.0
+Latest version: 0.7.1
 ...
 ```
 

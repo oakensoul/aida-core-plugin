@@ -313,10 +313,10 @@ Get path relative to base directory.
 from utils import get_relative_path
 
 rel = get_relative_path(
-    Path("/home/user/.claude/skills/personal-preferences"),
+    Path("/home/user/.claude/skills/user-context"),
     Path("/home/user/.claude")
 )
-print(rel)  # skills/personal-preferences
+print(rel)  # skills/user-context
 ```
 
 ---
@@ -893,10 +893,10 @@ Recursively render entire directory of templates.
 from utils import render_skill_directory
 
 render_skill_directory(
-    Path("templates/blueprints/personal-preferences"),
-    Path("~/.claude/skills/personal-preferences"),
+    Path("templates/blueprints/user-context"),
+    Path("~/.claude/skills/user-context"),
     {
-        "skill_name": "personal-preferences",
+        "skill_name": "user-context",
         "coding_standards": "PEP 8",
     }
 )
@@ -1101,19 +1101,12 @@ def main() -> int:
         )
 
         # Create directories
-        ensure_directory(skills_dir / "personal-preferences")
-        ensure_directory(skills_dir / "work-patterns")
+        ensure_directory(skills_dir / "user-context")
 
         # Render skills
         render_skill_directory(
-            Path("templates/blueprints/personal-preferences"),
-            skills_dir / "personal-preferences",
-            responses
-        )
-
-        render_skill_directory(
-            Path("templates/blueprints/work-patterns"),
-            skills_dir / "work-patterns",
+            Path("templates/blueprints/user-context"),
+            skills_dir / "user-context",
             responses
         )
 

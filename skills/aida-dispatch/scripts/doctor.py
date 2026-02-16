@@ -39,7 +39,7 @@ def check_directory(path, name, should_exist=True):
                 test_file.unlink()
                 print(f"✓ {name}: {path} (exists, writable)")
                 return True
-            except Exception:
+            except (OSError, PermissionError):
                 print(f"✗ {name}: {path} (exists, not writable)")
                 print(f"  → Fix permissions: chmod u+w {path}")
                 return False
@@ -72,7 +72,7 @@ def check_git():
         print("✗ Git: not found")
         print("  → Install: https://git-scm.com/downloads")
         return False
-    except Exception as e:
+    except (subprocess.TimeoutExpired, subprocess.SubprocessError) as e:
         print(f"✗ Git: error checking ({e})")
         return False
 
@@ -102,7 +102,7 @@ def check_github_cli():
         print("⚠ GitHub CLI: not found (optional for feedback)")
         print("  → Install: brew install gh (macOS)")
         return True  # Not required, just warning
-    except Exception as e:
+    except (subprocess.TimeoutExpired, subprocess.SubprocessError) as e:
         print(f"⚠ GitHub CLI: error checking ({e})")
         return True  # Not required
 
@@ -122,7 +122,10 @@ def validate_yaml_file(path, name):
             with open(path, 'r') as f:
                 f.read()
         return True
-    except Exception as e:
+    except (FileNotFoundError, PermissionError):
+        # File doesn't exist or can't be read
+        return False
+    except yaml.YAMLError as e:
         print(f"✗ {name}: Invalid YAML - {e}")
         return False
 
@@ -173,7 +176,8 @@ def count_and_validate_skills(claude_dir, name):
                         content = f.read()
                         if len(content) > 0:
                             valid += 1
-                except Exception:
+                except (FileNotFoundError, PermissionError, UnicodeDecodeError):
+                    # Can't read skill file - skip it
                     pass
 
     if total > 0:

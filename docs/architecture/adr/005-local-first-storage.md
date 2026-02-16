@@ -90,8 +90,7 @@ Markdown files (skills), JSON (settings)
 ```text
 ~/.claude/                  # Global config
 ├── skills/
-│   ├── personal-preferences/
-│   ├── work-patterns/
+│   ├── user-context/
 │   └── aida-core/
 └── settings.json
 
@@ -113,9 +112,8 @@ your-project/.claude/       # Project config
 **Recommended** `.gitignore`:
 
 ```text
-# Global config (don't commit personal preferences)
-.claude/skills/personal-*
-.claude/skills/work-*
+# Global user-level config lives in ~/.claude/ (not in project repos)
+# Project skills live in .claude/ and SHOULD be committed
 
 # But DO commit project skills
 !.claude/skills/project-*
