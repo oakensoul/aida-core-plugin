@@ -38,7 +38,7 @@ properly structured extensions that follow best practices.
 /aida memento create "Implementing OAuth flow"
 
 # Tomorrow, restore where you left off
-/aida memento restore
+/aida memento read
 ```
 
 ## Features
