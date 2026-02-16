@@ -30,6 +30,9 @@ sys.path.insert(
     ),
 )
 
+import shutil
+
+from memento import _ensure_within_dir
 from rule_validation import validate_rules
 
 
@@ -43,7 +46,6 @@ class TestPathTraversalAttempts(unittest.TestCase):
 
     def tearDown(self):
         """Clean up temporary directory."""
-        import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_path_normalization_prevents_traversal(self):
@@ -197,7 +199,6 @@ class TestJsonInjectionAttempts(unittest.TestCase):
 
     def tearDown(self):
         """Clean up temporary directory."""
-        import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_json_with_control_characters(self):
@@ -245,13 +246,10 @@ class TestEnsureWithinDir(unittest.TestCase):
 
     def tearDown(self):
         """Clean up temporary directory."""
-        import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_valid_path_within_base(self):
         """Test that valid paths within base are accepted."""
-        from memento import _ensure_within_dir
-
         child = self.temp_path / "subdir"
         child.mkdir()
         result = _ensure_within_dir(child, self.temp_path)
@@ -259,9 +257,6 @@ class TestEnsureWithinDir(unittest.TestCase):
 
     def test_parent_traversal_rejected(self):
         """Test that parent directory traversal is rejected."""
-        from memento import _ensure_within_dir
-
-        # Create a path that traverses above the base directory
         escape_path = self.temp_path / ".." / ".." / "etc"
         with self.assertRaises(ValueError) as ctx:
             _ensure_within_dir(escape_path, self.temp_path)
@@ -269,8 +264,6 @@ class TestEnsureWithinDir(unittest.TestCase):
 
     def test_absolute_path_outside_base_rejected(self):
         """Test that absolute paths outside base are rejected."""
-        from memento import _ensure_within_dir
-
         outside_path = Path("/tmp/outside-base")
         outside_path.mkdir(exist_ok=True)
         try:
@@ -282,8 +275,6 @@ class TestEnsureWithinDir(unittest.TestCase):
 
     def test_symlink_rejected(self):
         """Test that symlinks are rejected."""
-        from memento import _ensure_within_dir
-
         target = self.temp_path / "real-dir"
         target.mkdir()
         link = self.temp_path / "link-dir"
@@ -307,7 +298,6 @@ class TestSymlinkSecurity(unittest.TestCase):
 
     def tearDown(self):
         """Clean up temporary directory."""
-        import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_symlink_detection(self):

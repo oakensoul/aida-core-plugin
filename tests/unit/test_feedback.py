@@ -462,6 +462,18 @@ class TestValidateLabels(unittest.TestCase):
         self.assertFalse(valid)
         self.assertIn("Invalid label", error)
 
+    def test_invalid_label_tabs(self):
+        """Test labels with tabs are rejected."""
+        valid, error = feedback.validate_labels(['label\tinjection'])
+        self.assertFalse(valid)
+        self.assertIn("Invalid label", error)
+
+    def test_invalid_label_carriage_return(self):
+        """Test labels with carriage returns are rejected."""
+        valid, error = feedback.validate_labels(['label\rinjection'])
+        self.assertFalse(valid)
+        self.assertIn("Invalid label", error)
+
     def test_empty_label_rejected(self):
         """Test empty label string is rejected."""
         valid, error = feedback.validate_labels([''])

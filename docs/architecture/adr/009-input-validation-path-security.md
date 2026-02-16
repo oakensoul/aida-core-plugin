@@ -96,9 +96,8 @@ ALLOWED_LABEL_PATTERN = re.compile(r'^[a-zA-Z0-9 \-:\/]+$')
 
 def validate_labels(labels):
     for label in labels:
-        if not ALLOWED_LABEL_PATTERN.match(label):
-            return False, "Invalid label: only alphanumeric, hyphens,
-            spaces, colons, slashes allowed"
+        if not label or not ALLOWED_LABEL_PATTERN.match(label):
+            return False, "Invalid label: only alphanumeric, hyphens, spaces, colons, slashes allowed"
 ```
 
 **Path Sanitization** (PII prevention):

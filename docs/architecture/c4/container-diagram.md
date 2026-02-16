@@ -21,14 +21,19 @@ graph TB
 
         subgraph "Python Scripts"
             InstallScript[install.py<br/>Global setup wizard]
+            ConfigScript[configure.py<br/>Project setup]
             FeedbackScript[feedback.py<br/>GitHub integration]
-            ConfigScript[configure.py<br/>Project setup<br/>PLANNED]
+            MementoScript[memento.py<br/>Session persistence]
+            UpgradeScript[upgrade.py<br/>Version management]
+            StatusScript[status.py<br/>System diagnostics]
+            DoctorScript[doctor.py<br/>Health checks]
         end
 
         subgraph "Utils Module"
             VersionUtil[version.py<br/>Python version check]
             PathsUtil[paths.py<br/>Path resolution]
             FilesUtil[files.py<br/>File operations]
+            JsonUtil[json_utils.py<br/>Safe JSON parsing]
             QuestionnaireUtil[questionnaire.py<br/>Interactive Q&A]
             InferenceUtil[inference.py<br/>Project detection]
             TemplateUtil[template_renderer.py<br/>Jinja2 rendering]
@@ -50,8 +55,12 @@ graph TB
     Claude -->|Executes| Commands
 
     Commands -->|Call| InstallScript
-    Commands -->|Call| FeedbackScript
     Commands -->|Call| ConfigScript
+    Commands -->|Call| FeedbackScript
+    Commands -->|Call| MementoScript
+    Commands -->|Call| UpgradeScript
+    Commands -->|Call| StatusScript
+    Commands -->|Call| DoctorScript
 
     InstallScript -->|Uses| VersionUtil
     InstallScript -->|Uses| PathsUtil
@@ -59,22 +68,23 @@ graph TB
     InstallScript -->|Uses| QuestionnaireUtil
     InstallScript -->|Uses| TemplateUtil
 
-    ConfigScript -.->|Uses| PathsUtil
-    ConfigScript -.->|Uses| FilesUtil
-    ConfigScript -.->|Uses| QuestionnaireUtil
-    ConfigScript -.->|Uses| InferenceUtil
-    ConfigScript -.->|Uses| TemplateUtil
+    ConfigScript -->|Uses| PathsUtil
+    ConfigScript -->|Uses| FilesUtil
+    ConfigScript -->|Uses| QuestionnaireUtil
+    ConfigScript -->|Uses| InferenceUtil
+    ConfigScript -->|Uses| TemplateUtil
 
-    FeedbackScript -->|Uses| PathsUtil
-    FeedbackScript -->|Uses| FilesUtil
+    MementoScript -->|Uses| JsonUtil
+    UpgradeScript -->|Checks releases| GitHub
 
     QuestionnaireUtil -->|Loads| Templates
     TemplateUtil -->|Loads| Templates
     InferenceUtil -->|Scans| ProjectFS
 
     InstallScript -->|Reads/Writes| GlobalFS
-    ConfigScript -.->|Reads/Writes| ProjectFS
+    ConfigScript -->|Reads/Writes| ProjectFS
     FeedbackScript -->|Creates issues| GitHub
+    MementoScript -->|Reads/Writes| GlobalFS
 
     Skills -->|Stored in| GlobalFS
     Skills -->|Stored in| ProjectFS
@@ -86,9 +96,14 @@ graph TB
     style InstallScript fill:#85bbf0
     style ConfigScript fill:#85bbf0
     style FeedbackScript fill:#85bbf0
+    style MementoScript fill:#85bbf0
+    style UpgradeScript fill:#85bbf0
+    style StatusScript fill:#85bbf0
+    style DoctorScript fill:#85bbf0
     style VersionUtil fill:#c0d9eb
     style PathsUtil fill:#c0d9eb
     style FilesUtil fill:#c0d9eb
+    style JsonUtil fill:#c0d9eb
     style QuestionnaireUtil fill:#c0d9eb
     style InferenceUtil fill:#c0d9eb
     style TemplateUtil fill:#c0d9eb
@@ -173,7 +188,7 @@ Python script
 
 #### File
 
-`scripts/install.py`
+`skills/aida-dispatch/scripts/install.py`
 
 #### Responsibilities
 
@@ -202,7 +217,7 @@ Python script
 - `~/.claude/skills/work-patterns/`
 - `~/.claude/settings.json` (updated)
 
-### Configure Script (Planned)
+### Configure Script
 
 #### Type
 
@@ -210,7 +225,7 @@ Python script
 
 #### File
 
-`scripts/configure.py` (planned M2)
+`skills/aida-dispatch/scripts/configure.py`
 
 #### Responsibilities
 
@@ -218,7 +233,6 @@ Python script
 - Project detection (language, framework)
 - Interactive questionnaire
 - Project skill creation
-- PKM symlink setup
 
 #### Dependencies
 
@@ -237,7 +251,6 @@ Python script
 - `.claude/skills/project-context/`
 - `.claude/skills/project-documentation/`
 - `.claude/settings.json`
-- `.pkm/` symlink (optional)
 
 ### Feedback Script
 
@@ -247,7 +260,7 @@ Python script
 
 #### File
 
-`scripts/feedback.py`
+`skills/aida-dispatch/scripts/feedback.py`
 
 #### Responsibilities
 
@@ -255,11 +268,10 @@ Python script
 - Bug reports with template
 - Feature requests with template
 - General feedback
+- Input sanitization and label validation
 
 #### Dependencies
 
-- utils.paths
-- utils.files
 - External: `gh` CLI
 
 #### Entry Points
@@ -271,6 +283,104 @@ Python script
 #### Outputs
 
 - GitHub issues (via gh CLI)
+
+### Memento Script
+
+#### Type
+
+Python script
+
+#### File
+
+`skills/memento/scripts/memento.py`
+
+#### Responsibilities
+
+- Save session context as mementos
+- Restore context across /clear and /compact
+- Path containment validation
+- Atomic file writes
+
+#### Dependencies
+
+- utils.json_utils
+
+#### Entry Points
+
+- `/aida memento save` command
+- `/aida memento restore` command
+
+#### Outputs
+
+- `~/.claude/memento/{project}--{slug}.md`
+
+### Upgrade Script
+
+#### Type
+
+Python script
+
+#### File
+
+`skills/aida-dispatch/scripts/upgrade.py`
+
+#### Responsibilities
+
+- Check current plugin version
+- Query GitHub releases API for latest version
+- Compare versions and report status
+
+#### Dependencies
+
+- External: `gh` CLI
+
+#### Entry Points
+
+- `/aida upgrade` command
+
+#### Outputs
+
+- Version comparison results (stdout JSON)
+
+### Status Script
+
+#### Type
+
+Python script
+
+#### File
+
+`skills/aida-dispatch/scripts/status.py`
+
+#### Responsibilities
+
+- Display AIDA system status
+- Check configuration health
+- Report installed components
+
+#### Entry Points
+
+- `/aida status` command
+
+### Doctor Script
+
+#### Type
+
+Python script
+
+#### File
+
+`skills/aida-dispatch/scripts/doctor.py`
+
+#### Responsibilities
+
+- Run diagnostic checks
+- Verify dependencies
+- Check file permissions and paths
+
+#### Entry Points
+
+- `/aida doctor` command
 
 ### Utils Module
 
@@ -633,7 +743,7 @@ Exit with appropriate code
 ### Updates
 
 ```bash
-/aida upgrade  # (planned)
+/aida upgrade
 ```
 
 ### Dependencies

@@ -22,6 +22,8 @@ from typing import Tuple, Optional, Dict, Any
 
 def get_current_version() -> str:
     """Get current plugin version."""
+    # Path: skills/aida-dispatch/scripts/upgrade.py → repo root
+    # parent(1)=scripts/, parent(2)=aida-dispatch/, parent(3)=skills/, parent(4)=root
     plugin_json = Path(__file__).parent.parent.parent.parent / ".claude-plugin" / "plugin.json"
     try:
         with open(plugin_json, 'r') as f:

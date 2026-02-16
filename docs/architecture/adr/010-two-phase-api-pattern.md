@@ -94,21 +94,28 @@ user input or context inference.
 
 **Input**: JSON context + responses (via `--context` and `--responses`):
 
+Context (from Phase 1):
+
 ```json
-// Context (from Phase 1)
 {
   "operation": "configure",
   "project_root": "/path/to/project"
 }
+```
 
-// Responses (from user via AskUserQuestion)
+Responses (from user via AskUserQuestion):
+
+```json
 {
   "project_type": "Web app",
   "team_size": "5-10",
-  "custom_slug": "my-work"  // Override inferred slug
+  "custom_slug": "my-work"
 }
+```
 
-// Inferred (from Phase 1)
+Inferred (from Phase 1):
+
+```json
 {
   "languages": ["Python", "JavaScript"],
   "tools": ["pytest", "ruff"]

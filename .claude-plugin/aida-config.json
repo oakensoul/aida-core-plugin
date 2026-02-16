@@ -47,11 +47,11 @@
     },
     "filesystem-utilities": {
       "label": "Filesystem Utilities",
-      "description": "File search and directory inspection commands",
+      "description": "File search and directory inspection commands. Note: find supports -exec which can run arbitrary commands.",
       "rules": [
         "Bash(find:*)"
       ],
-      "suggested": "allow"
+      "suggested": "ask"
     }
   },
   "agents": ["aida", "claude-code-expert"]
