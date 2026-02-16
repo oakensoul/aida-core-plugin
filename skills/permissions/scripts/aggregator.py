@@ -185,6 +185,7 @@ def deduplicate_and_categorize(
                     "suggested": None,
                     "sources": [],
                     "_rules_lists": [],
+                    "_suggestions": [],
                 }
 
             cat = categories[cat_key]
@@ -196,6 +197,7 @@ def deduplicate_and_categorize(
 
             suggested = cat_data.get("suggested", "ask")
             if isinstance(suggested, str):
+                cat["_suggestions"].append(suggested)
                 if cat["suggested"] is None:
                     # First plugin sets the initial suggestion
                     cat["suggested"] = suggested
@@ -210,7 +212,31 @@ def deduplicate_and_categorize(
                         cat["suggested"] = suggested
 
     for cat in categories.values():
-        cat["rules"] = merge_rules(cat.pop("_rules_lists", []))
+        rules_lists = cat.pop("_rules_lists", [])
+        suggestions = cat.pop("_suggestions", [])
+        unique_suggestions = set(suggestions)
+
+        if len(unique_suggestions) > 1:
+            # Plugins disagree on suggestion for this category.
+            # Skip wildcard subsumption to preserve narrow rules
+            # that one plugin may have intended for a different
+            # action (e.g., a narrow deny rule shouldn't be
+            # collapsed under a broad allow rule).
+            all_rules: set[str] = set()
+            for rl in rules_lists:
+                all_rules.update(rl)
+            cat["rules"] = sorted(all_rules)
+            cat["suggestion_conflict"] = True
+            logger.info(
+                "Category %r has conflicting suggestions %s; "
+                "skipping wildcard subsumption",
+                cat["label"],
+                unique_suggestions,
+            )
+        else:
+            cat["rules"] = merge_rules(rules_lists)
+            cat["suggestion_conflict"] = False
+
         cat["sources"] = sorted(set(cat["sources"]))
         # Default to "ask" if no plugin provided a suggestion
         if cat["suggested"] is None:

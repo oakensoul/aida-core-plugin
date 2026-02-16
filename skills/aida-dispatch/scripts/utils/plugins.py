@@ -232,13 +232,16 @@ def generate_plugin_preference_questions(
 
         for pref in preferences:
             key = pref.get("key", "")
-            question_id = f"plugin_{name}_{key.replace('.', '_')}"
+            # Use __ as delimiter between name and key to avoid
+            # collisions with underscores in plugin names or keys
+            question_id = f"plugin_{name}__{key.replace('.', '_')}"
             q_type = PREFERENCE_TYPE_MAP.get(pref.get("type", ""), "text")
 
             question: dict = {
                 "id": question_id,
                 "question": pref.get("label", key),
                 "type": q_type,
+                "_plugin_name": name,
             }
 
             if "default" in pref:

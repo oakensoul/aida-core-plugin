@@ -243,6 +243,79 @@ class TestScanPlugins(unittest.TestCase):
         results = scan_plugins()
         self.assertEqual(results, [])
 
+    @patch("scanner.get_home_dir")
+    def test_invalid_rules_filtered_at_scan_time(self, mock_home):
+        """Test that plugins with invalid rules are skipped."""
+        mock_home.return_value = self.temp_path
+
+        plugin_dir = (
+            self.temp_path
+            / ".claude"
+            / "plugins"
+            / "cache"
+            / "owner1"
+            / "plugin1"
+            / ".claude-plugin"
+        )
+        plugin_dir.mkdir(parents=True)
+
+        manifest = {
+            "name": "bad-rules-plugin",
+            "recommendedPermissions": {
+                "file-read": {
+                    "rules": ["Read(*)"],
+                    "suggested": "allow",
+                },
+                "dangerous": {
+                    "rules": ["$(evil command)"],
+                    "suggested": "deny",
+                },
+            },
+        }
+        with open(
+            plugin_dir / "plugin.json", "w", encoding="utf-8"
+        ) as f:
+            json.dump(manifest, f)
+
+        results = scan_plugins()
+        self.assertEqual(len(results), 1)
+        # Only valid category survives
+        self.assertIn("file-read", results[0]["permissions"])
+        self.assertNotIn("dangerous", results[0]["permissions"])
+
+    @patch("scanner.get_home_dir")
+    def test_all_categories_invalid_skips_plugin(self, mock_home):
+        """Test that plugin is skipped if all categories invalid."""
+        mock_home.return_value = self.temp_path
+
+        plugin_dir = (
+            self.temp_path
+            / ".claude"
+            / "plugins"
+            / "cache"
+            / "owner1"
+            / "plugin1"
+            / ".claude-plugin"
+        )
+        plugin_dir.mkdir(parents=True)
+
+        manifest = {
+            "name": "all-bad-plugin",
+            "recommendedPermissions": {
+                "dangerous": {
+                    "rules": ["$(evil command)"],
+                    "suggested": "deny",
+                },
+            },
+        }
+        with open(
+            plugin_dir / "plugin.json", "w", encoding="utf-8"
+        ) as f:
+            json.dump(manifest, f)
+
+        results = scan_plugins()
+        self.assertEqual(results, [])
+
 
 class TestMergeRules(unittest.TestCase):
     """Test rule merging and subsumption."""
@@ -399,6 +472,67 @@ class TestDeduplicateAndCategorize(unittest.TestCase):
         result = deduplicate_and_categorize(plugin_permissions)
         # deny > ask > allow in priority, so deny wins
         self.assertEqual(result["categories"]["git"]["suggested"], "deny")
+
+    def test_suggestion_conflict_skips_subsumption(self):
+        """Test that conflicting suggestions skip subsumption."""
+        plugin_permissions = [
+            {
+                "name": "plugin1",
+                "permissions": {
+                    "git": {
+                        "rules": ["Bash(git:*)"],
+                        "suggested": "allow",
+                    }
+                },
+            },
+            {
+                "name": "plugin2",
+                "permissions": {
+                    "git": {
+                        "rules": ["Bash(git commit:*)"],
+                        "suggested": "deny",
+                    }
+                },
+            },
+        ]
+
+        result = deduplicate_and_categorize(plugin_permissions)
+        cat = result["categories"]["git"]
+        # When suggestions conflict, both rules preserved
+        # (no subsumption of git commit:* under git:*)
+        self.assertEqual(len(cat["rules"]), 2)
+        self.assertIn("Bash(git:*)", cat["rules"])
+        self.assertIn("Bash(git commit:*)", cat["rules"])
+        self.assertTrue(cat["suggestion_conflict"])
+
+    def test_no_suggestion_conflict_applies_subsumption(self):
+        """Test that agreeing suggestions apply subsumption."""
+        plugin_permissions = [
+            {
+                "name": "plugin1",
+                "permissions": {
+                    "git": {
+                        "rules": ["Bash(git:*)"],
+                        "suggested": "allow",
+                    }
+                },
+            },
+            {
+                "name": "plugin2",
+                "permissions": {
+                    "git": {
+                        "rules": ["Bash(git commit:*)"],
+                        "suggested": "allow",
+                    }
+                },
+            },
+        ]
+
+        result = deduplicate_and_categorize(plugin_permissions)
+        cat = result["categories"]["git"]
+        # Same suggestion: subsumption applies
+        self.assertEqual(cat["rules"], ["Bash(git:*)"])
+        self.assertFalse(cat["suggestion_conflict"])
 
 
 class TestDetectConflicts(unittest.TestCase):

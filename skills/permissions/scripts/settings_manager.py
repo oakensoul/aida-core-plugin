@@ -7,6 +7,7 @@ project, and local scopes.
 
 from __future__ import annotations
 
+import fcntl
 import json
 import logging
 import os
@@ -167,50 +168,70 @@ def write_permissions(
             raise ValueError(error)
 
     path = get_settings_path(scope)
-    existing = _read_settings_file(path)
-
-    if merge_strategy == "merge":
-        for action in VALID_ACTIONS:
-            new_rules = rules.get(action, [])
-            if new_rules:
-                current = existing.get(action, [])
-                if not isinstance(current, list):
-                    current = []
-                merged = sorted(set(current) | set(new_rules))
-                existing[action] = merged
-    elif merge_strategy == "replace":
-        for action in VALID_ACTIONS:
-            if action in rules:
-                existing[action] = rules[action]
-            elif action in existing:
-                del existing[action]
-    else:
-        msg = (
-            f"Unknown merge_strategy {merge_strategy!r}. "
-            "Expected 'merge' or 'replace'."
-        )
-        raise ValueError(msg)
-
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd = None
-    tmp_path = None
+
+    # Use advisory file locking to prevent concurrent writes
+    lock_path = path.with_suffix(".lock")
+    lock_fd = None
     try:
-        fd, tmp_path = tempfile.mkstemp(
-            dir=str(path.parent), suffix=".tmp"
+        lock_fd = os.open(
+            str(lock_path), os.O_CREAT | os.O_WRONLY, 0o644
         )
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            fd = None  # Prevent double-close
-            json.dump(existing, f, indent=2)
-            f.write("\n")
-        Path(tmp_path).replace(path)
-        tmp_path = None  # Prevent cleanup after success
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+
+        # Read inside the lock to avoid TOCTOU races
+        existing = _read_settings_file(path)
+
+        if merge_strategy == "merge":
+            for action in VALID_ACTIONS:
+                new_rules = rules.get(action, [])
+                if new_rules:
+                    current = existing.get(action, [])
+                    if not isinstance(current, list):
+                        current = []
+                    merged = sorted(set(current) | set(new_rules))
+                    existing[action] = merged
+        elif merge_strategy == "replace":
+            for action in VALID_ACTIONS:
+                if action in rules:
+                    existing[action] = rules[action]
+                elif action in existing:
+                    del existing[action]
+        else:
+            msg = (
+                f"Unknown merge_strategy {merge_strategy!r}. "
+                "Expected 'merge' or 'replace'."
+            )
+            raise ValueError(msg)
+
+        fd = None
+        tmp_path = None
+        try:
+            fd, tmp_path = tempfile.mkstemp(
+                dir=str(path.parent), suffix=".tmp"
+            )
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                fd = None  # Prevent double-close
+                json.dump(existing, f, indent=2)
+                f.write("\n")
+            Path(tmp_path).replace(path)
+            tmp_path = None  # Prevent cleanup after success
+        except OSError:
+            return False
+        finally:
+            if fd is not None:
+                os.close(fd)
+            if tmp_path is not None:
+                Path(tmp_path).unlink(missing_ok=True)
     except OSError:
+        logger.warning(
+            "Failed to acquire lock for %s", path, exc_info=True
+        )
         return False
     finally:
-        if fd is not None:
-            os.close(fd)
-        if tmp_path is not None:
-            Path(tmp_path).unlink(missing_ok=True)
+        if lock_fd is not None:
+            fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            os.close(lock_fd)
 
     return True
 

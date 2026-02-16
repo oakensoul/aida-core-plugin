@@ -632,12 +632,25 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
             discover_installed_plugins,
             get_plugins_with_config,
             generate_plugin_checklist,
+            generate_plugin_preference_questions,
         )
         all_plugins = discover_installed_plugins()
         config_plugins = get_plugins_with_config(all_plugins)
         plugin_checklist = generate_plugin_checklist(config_plugins)
         if plugin_checklist:
             questions.insert(0, plugin_checklist)
+            # Generate preference questions for all config plugins;
+            # the UI uses the condition field to show only selected ones
+            all_names = [p["name"] for p in config_plugins]
+            pref_questions = generate_plugin_preference_questions(
+                all_names, config_plugins
+            )
+            for pq in pref_questions:
+                pq["condition"] = {"selected_plugins": pq.get(
+                    "_plugin_name", ""
+                )}
+                pq.pop("_plugin_name", None)
+            questions.extend(pref_questions)
     except Exception as e:
         logger.warning("Plugin discovery failed (non-critical): %s", e)
 
@@ -780,16 +793,18 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
                 logger.info(f"Updated preference: {key} = {value}")
 
         # Store plugin preferences
+        # Question IDs use format: plugin_{name}__{key} with __
+        # as delimiter to avoid collisions with underscores in names
         selected_plugins = responses.pop("selected_plugins", None)
         plugin_prefs = {}
         for key in list(responses.keys()):
             if key.startswith("plugin_"):
                 value = responses.pop(key)
                 rest = key[len("plugin_"):]
-                sep_idx = rest.find("_")
+                sep_idx = rest.find("__")
                 if sep_idx > 0:
                     p_name = rest[:sep_idx]
-                    p_key = rest[sep_idx + 1:].replace("_", ".")
+                    p_key = rest[sep_idx + 2:].replace("_", ".")
                     if p_name not in plugin_prefs:
                         plugin_prefs[p_name] = {"enabled": True}
                     plugin_prefs[p_name][p_key] = value

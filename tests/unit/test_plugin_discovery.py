@@ -574,7 +574,7 @@ class TestGeneratePluginPreferenceQuestions(unittest.TestCase):
         )
         self.assertEqual(len(questions), 1)
         self.assertEqual(
-            questions[0]["id"], "plugin_test-plugin_some_dotted_key"
+            questions[0]["id"], "plugin_test-plugin__some_dotted_key"
         )
 
     def test_description_included_when_present(self):

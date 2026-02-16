@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import sys
 from pathlib import Path
 
@@ -93,8 +94,74 @@ def read_plugin_manifest(plugin_dir: Path) -> dict | None:
         return None
 
 
+_RULE_PATTERN = re.compile(
+    r"^[A-Za-z]\w*\([A-Za-z0-9_.*:/ -]+\)$"
+)
+_MAX_RULE_LENGTH = 500
+
+
+def _validate_permission_rules(
+    permissions: dict, plugin_name: str
+) -> dict:
+    """Validate and filter permission rules at scan time.
+
+    Removes categories with invalid rules and logs warnings
+    rather than propagating malformed data downstream.
+
+    Args:
+        permissions: Raw recommendedPermissions dict.
+        plugin_name: Plugin name for log messages.
+
+    Returns:
+        Filtered permissions dict with only valid categories.
+    """
+    valid: dict = {}
+    for cat_key, cat_data in permissions.items():
+        if not isinstance(cat_data, dict):
+            logger.warning(
+                "Plugin %r category %r is not a dict; skipping",
+                plugin_name,
+                cat_key,
+            )
+            continue
+        rules = cat_data.get("rules", [])
+        if not isinstance(rules, list):
+            logger.warning(
+                "Plugin %r category %r rules is not a list; "
+                "skipping",
+                plugin_name,
+                cat_key,
+            )
+            continue
+
+        invalid_rules = []
+        for rule in rules:
+            if not isinstance(rule, str):
+                invalid_rules.append(repr(rule))
+            elif len(rule) > _MAX_RULE_LENGTH:
+                invalid_rules.append(f"{rule[:50]!r}... (too long)")
+            elif not _RULE_PATTERN.match(rule):
+                invalid_rules.append(repr(rule))
+
+        if invalid_rules:
+            logger.warning(
+                "Plugin %r category %r has invalid rules: %s; "
+                "skipping category",
+                plugin_name,
+                cat_key,
+                ", ".join(invalid_rules),
+            )
+            continue
+
+        valid[cat_key] = cat_data
+    return valid
+
+
 def scan_plugins() -> list[dict]:
     """Collect recommendedPermissions from all installed plugins.
+
+    Rules are validated at scan time so that malformed plugin
+    data is rejected early rather than propagating downstream.
 
     Returns:
         List of dicts with ``name`` (str) and ``permissions``
@@ -111,7 +178,11 @@ def scan_plugins() -> list[dict]:
             continue
 
         name = manifest.get("name", plugin_dir.parent.name)
-        results.append({"name": name, "permissions": permissions})
+        validated = _validate_permission_rules(permissions, name)
+        if validated:
+            results.append(
+                {"name": name, "permissions": validated}
+            )
 
     return results
 
