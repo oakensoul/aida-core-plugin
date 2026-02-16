@@ -1,6 +1,9 @@
 {
   "permissions": {
     "allow": [
+      "Edit",
+      "Write",
+      "NotebookEdit",
       "Bash(make:*)",
       "Bash(pytest:*)",
       "Bash(python:*)",
