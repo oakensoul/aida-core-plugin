@@ -623,7 +623,11 @@ Exit with appropriate code
 ### Installation
 
 ```bash
-/plugin install oakensoul/aida-core-plugin
+# Add AIDA marketplace (one-time)
+/plugin marketplace add oakensoul/aida-marketplace
+
+# Install core plugin
+/plugin install core@aida
 ```
 
 ### Updates
