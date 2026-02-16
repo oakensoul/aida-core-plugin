@@ -123,7 +123,7 @@ def sanitize_git_url(url: str) -> str:
     Returns:
         URL with credentials replaced by '***'
     """
-    return re.sub(r'(https?://)([^@]+)@', r'\1***@', url)
+    return re.sub(r'(://)[^@/]+@', r'\1***@', url)
 
 
 def validate_project_name(name: str) -> Tuple[bool, Optional[str]]:
@@ -144,6 +144,8 @@ def validate_project_name(name: str) -> Tuple[bool, Optional[str]]:
         )
     if '..' in name or '/' in name or '\\' in name:
         return False, "Project name contains path traversal characters"
+    if len(name) > 100:
+        return False, "Project name must be at most 100 characters"
     if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9._-]*$', name):
         return False, "Project name contains invalid characters"
     return True, None
@@ -168,7 +170,8 @@ def _ensure_within_dir(path: Path, base_dir: Path) -> Path:
         raise ValueError(f"Symlink detected at {path}")
     resolved = path.resolve()
     base_resolved = base_dir.resolve()
-    if not str(resolved).startswith(str(base_resolved) + os.sep):
+    if not (resolved == base_resolved
+            or str(resolved).startswith(str(base_resolved) + os.sep)):
         raise ValueError(f"Path escape detected: {resolved}")
     return resolved
 
@@ -192,8 +195,9 @@ def _atomic_write(path: Path, content: str) -> None:
         with os.fdopen(fd, 'w', encoding='utf-8') as f:
             f.write(content)
         os.chmod(tmp_path, 0o600)
-        os.rename(tmp_path, str(path))
+        os.replace(tmp_path, str(path))
     except BaseException:
+        # BaseException: clean up temp even on KeyboardInterrupt/SystemExit
         try:
             os.unlink(tmp_path)
         except OSError:
@@ -298,7 +302,7 @@ def get_user_archive_dir() -> Path:
     Returns:
         Path to ~/.claude/memento/.completed/
     """
-    return Path.home() / ".claude" / "memento" / ".completed"
+    return get_user_mementos_dir() / ".completed"
 
 
 def make_memento_filename(project_name: str, slug: str) -> str:
@@ -363,12 +367,12 @@ def parse_frontmatter(content: str) -> Tuple[Dict[str, Any], str]:
     if not content.startswith("---"):
         return {}, content
 
-    end = content.find("---", 3)
+    end = content.find("\n---", 3)
     if end < 0:
         return {}, content
 
     frontmatter_text = content[3:end].strip()
-    body = content[end + 3:].strip()
+    body = content[end + 4:].strip()
 
     try:
         parsed = yaml.safe_load(frontmatter_text)
@@ -420,9 +424,16 @@ def find_memento(
     archive_dir = get_user_archive_dir()
     filename = make_memento_filename(project_name, slug)
 
-    # Check active mementos
+    # Check active mementos.
+    # Note: TOCTOU gap between check and use is accepted because
+    # ~/.claude/memento/ is 0o700 (owner-only), and an attacker with
+    # write access there already has full user privileges.
     memento_path = mementos_dir / filename
-    if memento_path.exists() and not memento_path.is_symlink():
+    if memento_path.exists():
+        try:
+            _ensure_within_dir(memento_path, mementos_dir)
+        except ValueError:
+            return None
         return {
             "slug": slug,
             "project": project_name,
@@ -433,7 +444,11 @@ def find_memento(
     # Check archive if requested
     if include_archive:
         archive_path = archive_dir / filename
-        if archive_path.exists() and not archive_path.is_symlink():
+        if archive_path.exists():
+            try:
+                _ensure_within_dir(archive_path, archive_dir)
+            except ValueError:
+                return None
             return {
                 "slug": slug,
                 "project": project_name,
@@ -873,10 +888,7 @@ def execute_create(context: Dict[str, Any]) -> Dict[str, Any]:
     source = context.get("source", "manual")
     template_type = context.get("template", "work-session")
 
-    # Validate slug
-    is_valid, error = validate_slug(slug)
-    if not is_valid:
-        return {"success": False, "message": f"Invalid slug: {error}"}
+    # Slug validation is handled centrally by execute()
 
     # Get project context
     project_ctx = get_project_context()
@@ -927,6 +939,10 @@ def execute_create(context: Dict[str, Any]) -> Dict[str, Any]:
     # Write memento file atomically
     filename = make_memento_filename(project_name, slug)
     memento_path = mementos_dir / filename
+    try:
+        _ensure_within_dir(memento_path, mementos_dir)
+    except ValueError as e:
+        return {"success": False, "message": f"Path validation failed: {e}"}
     try:
         _atomic_write(memento_path, content)
     except IOError as e:
@@ -1035,42 +1051,26 @@ def execute_update(context: Dict[str, Any]) -> Dict[str, Any]:
         # Reconstruct frontmatter
         frontmatter["updated"] = now
 
-        # Build new content based on section
-        if section == "progress":
-            # Find and update the "### In Progress" section
+        # Build new content based on section.
+        # Note: section headings are coupled to work-session template
+        # structure. Freeform mementos fall through to the else branch.
+        # Lambda replacements prevent regex backreference injection
+        # from user content containing \1 or \g<1>.
+        section_patterns = {
+            "progress": r'(### In Progress[ \t]*\n)(.*?)(\n##|\n---|\Z)',
+            "decisions": r'(## Key Decisions[ \t]*\n)(.*?)(\n##|\n---|\Z)',
+            "next_step": r'(## Next Step[ \t]*\n)(.*?)(\n---|\Z)',
+            "approach": r'(## Approach[ \t]*\n)(.*?)(\n##|\n---|\Z)',
+            "files": r'(## Files[ \t]*\n)(.*?)(\n##|\n---|\Z)',
+        }
+
+        pattern = section_patterns.get(section)
+        if pattern:
             body = re.sub(
-                r'(### In Progress\s*\n)(.*?)(\n##|\n---|\Z)',
-                f'\\g<1>{new_content}\n\\g<3>',
+                pattern,
+                lambda m: m.group(1) + new_content + '\n' + m.group(3),
                 body,
-                flags=re.DOTALL
-            )
-        elif section == "decisions":
-            body = re.sub(
-                r'(## Key Decisions\s*\n)(.*?)(\n##|\n---|\Z)',
-                f'\\g<1>{new_content}\n\\g<3>',
-                body,
-                flags=re.DOTALL
-            )
-        elif section == "next_step":
-            body = re.sub(
-                r'(## Next Step\s*\n)(.*?)(\n---|\Z)',
-                f'\\g<1>{new_content}\n\\g<3>',
-                body,
-                flags=re.DOTALL
-            )
-        elif section == "approach":
-            body = re.sub(
-                r'(## Approach\s*\n)(.*?)(\n##|\n---|\Z)',
-                f'\\g<1>{new_content}\n\\g<3>',
-                body,
-                flags=re.DOTALL
-            )
-        elif section == "files":
-            body = re.sub(
-                r'(## Files\s*\n)(.*?)(\n##|\n---|\Z)',
-                f'\\g<1>{new_content}\n\\g<3>',
-                body,
-                flags=re.DOTALL
+                flags=re.DOTALL,
             )
         else:
             # Append to end if section not recognized
@@ -1125,9 +1125,20 @@ def execute_complete(context: Dict[str, Any]) -> Dict[str, Any]:
         # Ensure archive directory exists
         archive_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
 
-        # Move to archive atomically (preserve namespaced filename)
+        # Move to archive (preserve namespaced filename).
+        # This is intentionally write-then-unlink rather than a single
+        # atomic rename, because we need to update frontmatter status.
+        # Failure between write and unlink produces duplication (safe),
+        # not data loss.
         filename = make_memento_filename(project_name, slug)
         dest_path = archive_dir / filename
+        try:
+            _ensure_within_dir(dest_path, archive_dir)
+        except ValueError as e:
+            return {
+                "success": False,
+                "message": f"Path validation failed: {e}",
+            }
         _atomic_write(dest_path, content)
         source_path.unlink()
 
@@ -1172,21 +1183,22 @@ def execute_remove(context: Dict[str, Any]) -> Dict[str, Any]:
         return {"success": False, "message": f"Failed to remove memento: {e}"}
 
 
-def execute(context: Dict[str, Any], responses: Dict[str, Any] = None) -> Dict[str, Any]:
+def execute(
+    context: Dict[str, Any],
+    responses: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     """Execute the requested operation (Phase 2).
 
     Args:
-        context: Operation context
+        context: Operation context (not mutated)
         responses: User responses to questions (if any)
 
     Returns:
         Result dictionary
     """
+    # Merge responses into a new dict to avoid mutating the caller's context
+    context = {**context, **(responses or {})}
     operation = context.get("operation", "create")
-
-    # Merge responses into context
-    if responses:
-        context.update(responses)
 
     # Centralized slug validation for all operations
     slug = context.get("slug")

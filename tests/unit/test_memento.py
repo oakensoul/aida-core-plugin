@@ -33,6 +33,7 @@ from memento import (
     render_template,
     _atomic_write,
     _rebuild_file,
+    _ensure_within_dir,
     _reset_project_context_cache,
 )
 
@@ -271,6 +272,11 @@ class TestProjectNameValidation(unittest.TestCase):
         is_valid, error = validate_project_name("foo/bar")
         self.assertFalse(is_valid)
 
+    def test_too_long(self):
+        is_valid, error = validate_project_name("a" * 101)
+        self.assertFalse(is_valid)
+        self.assertIn("100", error)
+
 
 class TestSanitizeGitUrl(unittest.TestCase):
     """Test git URL credential sanitization."""
@@ -295,6 +301,18 @@ class TestSanitizeGitUrl(unittest.TestCase):
         url = "https://oauth2:ghp_xxxx@github.com/org/repo.git"
         result = sanitize_git_url(url)
         self.assertNotIn("ghp_xxxx", result)
+        self.assertIn("***@", result)
+
+    def test_ftp_url_sanitized(self):
+        url = "ftp://user:pass@host.com/file"
+        result = sanitize_git_url(url)
+        self.assertNotIn("pass", result)
+        self.assertIn("***@", result)
+
+    def test_git_protocol_sanitized(self):
+        url = "git://user:token@host.com/repo.git"
+        result = sanitize_git_url(url)
+        self.assertNotIn("token", result)
         self.assertIn("***@", result)
 
 
@@ -459,8 +477,8 @@ class TestListFiltering(unittest.TestCase):
 
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
-        self.mementos_dir = Path(self.temp_dir) / "mementos"
-        self.archive_dir = Path(self.temp_dir) / "mementos" / ".completed"
+        self.mementos_dir = Path(self.temp_dir) / "memento"
+        self.archive_dir = Path(self.temp_dir) / "memento" / ".completed"
         self.mementos_dir.mkdir(parents=True)
         self.archive_dir.mkdir(parents=True)
 
@@ -1085,36 +1103,204 @@ class TestMementoLifecycle(unittest.TestCase):
         self.assertFalse(archived_path.exists())
 
 
-def run_tests():
-    """Run all tests and return results."""
-    loader = unittest.TestLoader()
-    suite = unittest.TestSuite()
+class TestEnsureWithinDir(unittest.TestCase):
+    """Test path containment validation."""
 
-    suite.addTests(loader.loadTestsFromTestCase(TestKebabCase))
-    suite.addTests(loader.loadTestsFromTestCase(TestValidateSlug))
-    suite.addTests(loader.loadTestsFromTestCase(TestParseFrontmatter))
-    suite.addTests(loader.loadTestsFromTestCase(TestMementoFilename))
-    suite.addTests(loader.loadTestsFromTestCase(TestProjectNameValidation))
-    suite.addTests(loader.loadTestsFromTestCase(TestSanitizeGitUrl))
-    suite.addTests(loader.loadTestsFromTestCase(TestNestedFrontmatter))
-    suite.addTests(loader.loadTestsFromTestCase(TestProjectContext))
-    suite.addTests(loader.loadTestsFromTestCase(TestListFiltering))
-    suite.addTests(loader.loadTestsFromTestCase(TestGetQuestions))
-    suite.addTests(loader.loadTestsFromTestCase(TestExecute))
-    suite.addTests(loader.loadTestsFromTestCase(TestSafeJsonLoad))
-    suite.addTests(loader.loadTestsFromTestCase(TestMementoOperationsWithTempDir))
-    suite.addTests(loader.loadTestsFromTestCase(TestFrontmatterEdgeCases))
-    suite.addTests(loader.loadTestsFromTestCase(TestQuestionGeneration))
-    suite.addTests(loader.loadTestsFromTestCase(TestAtomicWrite))
-    suite.addTests(loader.loadTestsFromTestCase(TestFrontmatterRoundTrip))
-    suite.addTests(loader.loadTestsFromTestCase(TestMementoLifecycle))
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        self.base_dir = Path(self.temp_dir) / "memento"
+        self.base_dir.mkdir()
 
-    runner = unittest.TextTestRunner(verbosity=2)
-    result = runner.run(suite)
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
 
-    return result
+    def test_valid_path_within_dir(self):
+        child = self.base_dir / "test.md"
+        child.touch()
+        resolved = _ensure_within_dir(child, self.base_dir)
+        self.assertEqual(resolved, child.resolve())
+
+    def test_rejects_symlink(self):
+        target = Path(self.temp_dir) / "outside.md"
+        target.touch()
+        link = self.base_dir / "link.md"
+        link.symlink_to(target)
+        with self.assertRaises(ValueError) as cm:
+            _ensure_within_dir(link, self.base_dir)
+        self.assertIn("Symlink", str(cm.exception))
+
+    def test_rejects_path_escape(self):
+        """Path that resolves outside base_dir is rejected."""
+        outside = Path(self.temp_dir) / "outside.md"
+        outside.touch()
+        with self.assertRaises(ValueError):
+            _ensure_within_dir(outside, self.base_dir)
+
+    def test_base_dir_itself_is_accepted(self):
+        """The base directory path itself should not be rejected."""
+        resolved = _ensure_within_dir(self.base_dir, self.base_dir)
+        self.assertEqual(resolved, self.base_dir.resolve())
+
+
+class TestSectionReplacement(unittest.TestCase):
+    """Test section replacement correctness in execute_update."""
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        self.mementos_dir = Path(self.temp_dir) / "memento"
+        self.archive_dir = self.mementos_dir / ".completed"
+        self.mementos_dir.mkdir(parents=True)
+        self.project_ctx = {
+            "name": "test-proj",
+            "path": "/tmp/test-proj",
+            "repo": "",
+            "branch": "main",
+        }
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def _create_memento(self, mock_ctx, mock_dir, mock_archive):
+        mock_ctx.return_value = self.project_ctx
+        mock_dir.return_value = self.mementos_dir
+        mock_archive.return_value = self.archive_dir
+        result = execute({
+            "operation": "create",
+            "slug": "section-test",
+            "description": "Section replacement test",
+            "source": "manual",
+            "problem": "Testing sections",
+            "template": "work-session",
+        })
+        self.assertTrue(result["success"], result.get("message"))
+        return result
+
+    @patch("memento.get_user_archive_dir")
+    @patch("memento.get_user_mementos_dir")
+    @patch("memento.get_project_context")
+    def test_progress_replaces_not_appends(
+        self, mock_ctx, mock_dir, mock_archive
+    ):
+        """Old progress content is replaced, not duplicated."""
+        self._create_memento(mock_ctx, mock_dir, mock_archive)
+
+        # First update
+        execute({
+            "operation": "update",
+            "slug": "section-test",
+            "section": "progress",
+            "content": "- Step one done",
+        })
+
+        # Second update should replace, not append
+        execute({
+            "operation": "update",
+            "slug": "section-test",
+            "section": "progress",
+            "content": "- Step two done",
+        })
+
+        result = execute({
+            "operation": "read",
+            "slug": "section-test",
+        })
+        self.assertIn("Step two done", result["body"])
+        self.assertNotIn("Step one done", result["body"])
+
+    @patch("memento.get_user_archive_dir")
+    @patch("memento.get_user_mementos_dir")
+    @patch("memento.get_project_context")
+    def test_decisions_update_preserves_other_sections(
+        self, mock_ctx, mock_dir, mock_archive
+    ):
+        """Updating decisions doesn't corrupt adjacent sections."""
+        self._create_memento(mock_ctx, mock_dir, mock_archive)
+
+        execute({
+            "operation": "update",
+            "slug": "section-test",
+            "section": "decisions",
+            "content": "- Decided to use PyYAML",
+        })
+
+        result = execute({
+            "operation": "read",
+            "slug": "section-test",
+        })
+        body = result["body"]
+        self.assertIn("Decided to use PyYAML", body)
+        # Other sections still present
+        self.assertIn("## Problem", body)
+        self.assertIn("## Next Step", body)
+        self.assertIn("## Files", body)
+
+    @patch("memento.get_user_archive_dir")
+    @patch("memento.get_user_mementos_dir")
+    @patch("memento.get_project_context")
+    def test_next_step_update(self, mock_ctx, mock_dir, mock_archive):
+        """Next step section can be updated."""
+        self._create_memento(mock_ctx, mock_dir, mock_archive)
+
+        execute({
+            "operation": "update",
+            "slug": "section-test",
+            "section": "next_step",
+            "content": "Deploy to staging",
+        })
+
+        result = execute({
+            "operation": "read",
+            "slug": "section-test",
+        })
+        self.assertIn("Deploy to staging", result["body"])
+
+    @patch("memento.get_user_archive_dir")
+    @patch("memento.get_user_mementos_dir")
+    @patch("memento.get_project_context")
+    def test_backreference_in_content_not_interpreted(
+        self, mock_ctx, mock_dir, mock_archive
+    ):
+        r"""Content with \1 or \g<1> is treated literally."""
+        self._create_memento(mock_ctx, mock_dir, mock_archive)
+
+        result = execute({
+            "operation": "update",
+            "slug": "section-test",
+            "section": "progress",
+            "content": r"- Used \1 backreference pattern in regex",
+        })
+        self.assertTrue(result["success"])
+
+        result = execute({
+            "operation": "read",
+            "slug": "section-test",
+        })
+        self.assertIn(r"\1 backreference", result["body"])
+
+    @patch("memento.get_user_archive_dir")
+    @patch("memento.get_user_mementos_dir")
+    @patch("memento.get_project_context")
+    def test_unknown_section_appends(
+        self, mock_ctx, mock_dir, mock_archive
+    ):
+        """Unknown section name appends a new section."""
+        self._create_memento(mock_ctx, mock_dir, mock_archive)
+
+        result = execute({
+            "operation": "update",
+            "slug": "section-test",
+            "section": "custom_notes",
+            "content": "My custom content",
+        })
+        self.assertTrue(result["success"])
+
+        result = execute({
+            "operation": "read",
+            "slug": "section-test",
+        })
+        self.assertIn("## Custom_Notes", result["body"])
+        self.assertIn("My custom content", result["body"])
 
 
 if __name__ == "__main__":
-    result = run_tests()
-    sys.exit(0 if result.wasSuccessful() else 1)
+    unittest.main()
