@@ -11,7 +11,7 @@ mementos in the AIDA system.
 
 ## Overview
 
-Mementos are persistent context snapshots stored in `.claude/mementos/` that
+Mementos are persistent context snapshots stored in `~/.claude/memento/` that
 help Claude resume work after `/clear`, `/compact`, or in new conversations.
 
 ## Create Workflow
@@ -54,6 +54,7 @@ help Claude resume work after `/clear`, `/compact`, or in new conversations.
   ],
   "inferred": {
     "slug": "fix-auth-bug",
+    "project": "my-project",
     "description": "Fix auth bug",
     "source": "manual",
     "tags": []
@@ -80,10 +81,10 @@ help Claude resume work after `/clear`, `/compact`, or in new conversations.
 
 **Process:**
 
-1. Ensure `.claude/mementos/` exists
+1. Ensure `~/.claude/memento/` exists
 2. Check for slug conflicts
 3. Render template with provided data
-4. Write to `.claude/mementos/{slug}.md`
+4. Write to `~/.claude/memento/{project}--{slug}.md`
 5. Return success with path
 
 **Output:**
@@ -92,7 +93,8 @@ help Claude resume work after `/clear`, `/compact`, or in new conversations.
 {
   "success": true,
   "message": "Created memento 'fix-auth-bug'",
-  "path": ".claude/mementos/fix-auth-bug.md"
+  "project": "my-project",
+  "path": "~/.claude/memento/my-project--fix-auth-bug.md"
 }
 ```
 
@@ -109,7 +111,7 @@ help Claude resume work after `/clear`, `/compact`, or in new conversations.
 
 **Process:**
 
-1. Find memento in `.claude/mementos/`
+1. Find memento in `~/.claude/memento/`
 2. Parse YAML frontmatter
 3. Return full content + parsed frontmatter
 
@@ -119,6 +121,7 @@ help Claude resume work after `/clear`, `/compact`, or in new conversations.
 {
   "success": true,
   "slug": "fix-auth-bug",
+  "project": "my-project",
   "content": "Full markdown content...",
   "frontmatter": {
     "type": "memento",
@@ -138,14 +141,16 @@ help Claude resume work after `/clear`, `/compact`, or in new conversations.
 ```json
 {
   "operation": "list",
-  "filter": "active|completed|all"
+  "filter": "active|completed|all",
+  "project_filter": "optional-project-name",
+  "all_projects": false
 }
 ```
 
 **Process:**
 
-1. Scan `.claude/mementos/` for `.md` files
-2. Also scan `.archive/` if filter includes completed
+1. Scan `~/.claude/memento/` for `.md` files
+2. Also scan `.completed/` if filter includes completed
 3. Parse frontmatter of each file
 4. Filter by status
 5. Sort by updated date (most recent first)
@@ -158,11 +163,12 @@ help Claude resume work after `/clear`, `/compact`, or in new conversations.
   "mementos": [
     {
       "slug": "fix-auth-bug",
+      "project": "my-project",
       "description": "Fix auth bug",
       "status": "active",
       "created": "2025-01-15T10:00:00Z",
       "updated": "2025-01-15T14:00:00Z",
-      "path": ".claude/mementos/fix-auth-bug.md"
+      "path": "~/.claude/memento/my-project--fix-auth-bug.md"
     }
   ],
   "count": 1
@@ -233,7 +239,7 @@ help Claude resume work after `/clear`, `/compact`, or in new conversations.
 {
   "success": true,
   "message": "Updated progress section",
-  "path": ".claude/mementos/fix-auth-bug.md"
+  "path": "~/.claude/memento/my-project--fix-auth-bug.md"
 }
 ```
 
@@ -252,8 +258,8 @@ help Claude resume work after `/clear`, `/compact`, or in new conversations.
 
 1. Load memento
 2. Set `status: completed`
-3. Ensure `.archive/` directory exists
-4. Move file to `.claude/mementos/.archive/`
+3. Ensure `.completed/` directory exists
+4. Move to `~/.claude/memento/.completed/{project}--{slug}.md`
 5. Return success
 
 **Output:**
@@ -262,7 +268,7 @@ help Claude resume work after `/clear`, `/compact`, or in new conversations.
 {
   "success": true,
   "message": "Completed and archived memento 'fix-auth-bug'",
-  "path": ".claude/mementos/.archive/fix-auth-bug.md"
+  "path": "~/.claude/memento/.completed/my-project--fix-auth-bug.md"
 }
 ```
 
@@ -303,21 +309,25 @@ help Claude resume work after `/clear`, `/compact`, or in new conversations.
 
 ## Template Variables
 
-| Variable       | Type   | Description                       |
-| -------------- | ------ | --------------------------------- |
-| `slug`         | string | Unique identifier (kebab-case)    |
-| `description`  | string | Brief description of the memento  |
-| `status`       | string | active, completed, or archived    |
-| `created`      | string | ISO timestamp of creation         |
-| `updated`      | string | ISO timestamp of last update      |
-| `source`       | string | manual, from-pr, or from-changes  |
-| `tags`         | array  | Classification tags               |
-| `files`        | array  | Related file paths                |
-| `problem`      | string | Problem statement                 |
-| `approach`     | string | Solution approach                 |
-| `completed`    | string | Completed items                   |
-| `in_progress`  | string | Current work                      |
-| `pending`      | string | Future work                       |
-| `decisions`    | string | Key decisions made                |
-| `files_detail` | string | Detailed file descriptions        |
-| `next_step`    | string | Clear next action                 |
+| Variable         | Type   | Description                      |
+| ---------------- | ------ | -------------------------------- |
+| `slug`           | string | Unique identifier (kebab-case)   |
+| `description`    | string | Brief description of the memento |
+| `status`         | string | active, completed, or archived   |
+| `created`        | string | ISO timestamp of creation        |
+| `updated`        | string | ISO timestamp of last update     |
+| `source`         | string | manual, from-pr, or from-changes |
+| `tags`           | array  | Classification tags              |
+| `files`          | array  | Related file paths               |
+| `problem`        | string | Problem statement                |
+| `approach`       | string | Solution approach                |
+| `completed`      | string | Completed items                  |
+| `in_progress`    | string | Current work                     |
+| `pending`        | string | Future work                      |
+| `decisions`      | string | Key decisions made               |
+| `files_detail`   | string | Detailed file descriptions       |
+| `next_step`      | string | Clear next action                |
+| `project_name`   | string | Project name (auto-detected)     |
+| `project_path`   | string | Project root path                |
+| `project_repo`   | string | Git remote URL                   |
+| `project_branch` | string | Current git branch               |

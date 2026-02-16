@@ -1,13 +1,18 @@
 ---
 type: memento
-slug: {{ slug }}
-description: {{ description }}
-status: {{ status | default('active') }}
-created: {{ created }}
-updated: {{ updated }}
-source: {{ source | default('manual') }}
+slug: {{ slug | tojson }}
+description: {{ description | tojson }}
+status: {{ (status | default('active')) | tojson }}
+created: {{ created | tojson }}
+updated: {{ updated | tojson }}
+source: {{ (source | default('manual')) | tojson }}
 tags: {{ tags | default([]) | tojson }}
 files: {{ files | default([]) | tojson }}
+project:
+  name: {{ (project_name | default('')) | tojson }}
+  path: {{ (project_path | default('')) | tojson }}
+  repo: {{ (project_repo | default('')) | tojson }}
+  branch: {{ (project_branch | default('')) | tojson }}
 ---
 
 # {{ description }}

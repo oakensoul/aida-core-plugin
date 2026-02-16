@@ -12,10 +12,13 @@ Mementos capture session context for later resumption. A good memento lets you
 ## File Location
 
 ```text
-.claude/mementos/{slug}.md
+~/.claude/memento/{project}--{slug}.md
 ```
 
-Slugs are kebab-case, derived from the description (e.g., "fix auth bug" → `fix-auth-bug.md`).
+Filenames use a `{project}--{slug}` convention where `--` separates the
+project name from the memento slug. Slugs are kebab-case, derived from
+the description (e.g., "fix auth bug" in project "my-app" becomes
+`my-app--fix-auth-bug.md`).
 
 ## Required Structure
 
@@ -26,7 +29,11 @@ slug: fix-auth-bug
 description: Fixing authentication token expiry issue
 created: 2024-01-15T10:30:00Z
 status: active|completed
-branch: feature/fix-auth-bug
+project:
+  name: my-project
+  path: /path/to/project
+  repo: git@github.com:user/repo.git
+  branch: feature/fix-auth-bug
 issue: 123          # optional
 pr: 456             # optional
 ---

@@ -128,13 +128,13 @@ chmod +x skills/[skill-name]/scripts/*.py
 
 **Possible Causes:**
 
-1. `.claude/mementos/` directory doesn't exist
+1. `~/.claude/memento/` directory doesn't exist
 2. Memento file has invalid frontmatter
 3. File permissions
 
 **Diagnostic Steps:**
 
-1. Check `.claude/mementos/` exists
+1. Check `~/.claude/memento/` exists
 2. Validate memento YAML frontmatter
 3. Check file is readable
 
@@ -142,7 +142,7 @@ chmod +x skills/[skill-name]/scripts/*.py
 
 ```bash
 # Create directory
-mkdir -p .claude/mementos
+mkdir -p ~/.claude/memento
 
 # Validate memento
 /aida memento validate [slug]
