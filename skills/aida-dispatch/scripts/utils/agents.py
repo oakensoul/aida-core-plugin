@@ -125,7 +125,23 @@ def _parse_yaml_frontmatter(content: str) -> dict | None:
     if first_nl < 0:
         return None
 
-    end = content.find("\n---", first_nl)
+    # Find closing --- on its own line (not inside
+    # multi-line YAML values like block scalars).
+    end = -1
+    search_pos = first_nl
+    while True:
+        pos = content.find("\n---", search_pos)
+        if pos < 0:
+            break
+        after = pos + 4  # len("\n---") == 4
+        if after >= len(content) or content[after] in (
+            "\n",
+            "\r",
+        ):
+            end = pos
+            break
+        search_pos = after
+
     if end < 0:
         return None
 
@@ -559,7 +575,17 @@ def update_agent_routing(
             "path": None,
         }
 
-    write_file(claude_md_path, new_content)
+    try:
+        write_file(claude_md_path, new_content)
+    except OSError as exc:
+        return {
+            "success": False,
+            "message": (
+                f"Failed to write CLAUDE.md: {exc}"
+            ),
+            "agents_count": 0,
+            "path": None,
+        }
 
     count = len(agents)
     if count:

@@ -28,10 +28,12 @@ from utils.agents import (
     _BEGIN_MARKER,
     _END_MARKER,
     _SECTION_HEADER,
+    _ensure_list,
     _find_agents_in_directory,
     _find_plugin_agents,
     _parse_managed_section,
     _read_agent_frontmatter,
+    _safe_read_agent_file,
     discover_agents,
     generate_agent_routing_section,
     update_agent_routing,
@@ -365,6 +367,210 @@ class TestAgentDiscovery(unittest.TestCase):
 
         agents = discover_agents(self.temp_path)
         self.assertEqual(agents, [])
+
+    @patch("utils.agents.get_home_dir")
+    def test_plugin_invalid_aida_config_falls_back(
+        self, mock_home
+    ):
+        """Invalid JSON in aida-config falls back to scan."""
+        mock_home.return_value = self.temp_path
+
+        plugin_root = (
+            self.temp_path
+            / ".claude"
+            / "plugins"
+            / "cache"
+            / "owner"
+            / "bad-json"
+        )
+        meta_dir = plugin_root / ".claude-plugin"
+        meta_dir.mkdir(parents=True)
+
+        (meta_dir / "aida-config.json").write_text(
+            "{invalid json", encoding="utf-8"
+        )
+
+        agents_dir = plugin_root / "agents"
+        _write_agent(agents_dir, "fallback-agent")
+
+        result = _find_plugin_agents(
+            plugin_root, "bad-json"
+        )
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["name"], "fallback-agent")
+
+    @patch("utils.agents.get_home_dir")
+    def test_plugin_agents_key_not_list_falls_back(
+        self, mock_home
+    ):
+        """Non-list agents key falls back to dir scan."""
+        mock_home.return_value = self.temp_path
+
+        plugin_root = (
+            self.temp_path
+            / ".claude"
+            / "plugins"
+            / "cache"
+            / "owner"
+            / "bad-key"
+        )
+        meta_dir = plugin_root / ".claude-plugin"
+        meta_dir.mkdir(parents=True)
+
+        config = {"agents": "not-a-list"}
+        (meta_dir / "aida-config.json").write_text(
+            json.dumps(config), encoding="utf-8"
+        )
+
+        agents_dir = plugin_root / "agents"
+        _write_agent(agents_dir, "fallback-agent")
+
+        result = _find_plugin_agents(
+            plugin_root, "bad-key"
+        )
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["name"], "fallback-agent")
+
+    @patch("utils.agents.get_home_dir")
+    def test_plugin_non_string_agent_names_skipped(
+        self, mock_home
+    ):
+        """Non-string entries in agents list are skipped."""
+        mock_home.return_value = self.temp_path
+
+        plugin_root = (
+            self.temp_path
+            / ".claude"
+            / "plugins"
+            / "cache"
+            / "owner"
+            / "mixed"
+        )
+        meta_dir = plugin_root / ".claude-plugin"
+        meta_dir.mkdir(parents=True)
+
+        config = {"agents": ["valid", 123, None]}
+        (meta_dir / "aida-config.json").write_text(
+            json.dumps(config), encoding="utf-8"
+        )
+
+        agents_dir = plugin_root / "agents"
+        _write_agent(agents_dir, "valid")
+
+        result = _find_plugin_agents(
+            plugin_root, "mixed"
+        )
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["name"], "valid")
+
+    def test_single_string_tags_coerced_to_list(self):
+        """Single string tag is coerced to a list."""
+        agents_dir = self.temp_path / "agents" / "single"
+        agents_dir.mkdir(parents=True)
+        (agents_dir / "single.md").write_text(
+            "---\n"
+            "type: agent\n"
+            "name: single\n"
+            "description: Single tag agent\n"
+            "version: 0.1.0\n"
+            "tags: solo-tag\n"
+            "skills: solo-skill\n"
+            "---\n# Single\n",
+            encoding="utf-8",
+        )
+
+        result = _read_agent_frontmatter(
+            agents_dir / "single.md"
+        )
+        self.assertIsNotNone(result)
+        self.assertEqual(result["tags"], ["solo-tag"])
+        self.assertEqual(result["skills"], ["solo-skill"])
+
+    def test_optional_fields_default_correctly(self):
+        """Missing optional fields use defaults."""
+        agents_dir = self.temp_path / "agents" / "minimal"
+        agents_dir.mkdir(parents=True)
+        (agents_dir / "minimal.md").write_text(
+            "---\n"
+            "name: minimal\n"
+            "description: Minimal\n"
+            "version: 0.1.0\n"
+            "tags:\n"
+            "  - test\n"
+            "---\n# Minimal\n",
+            encoding="utf-8",
+        )
+
+        result = _read_agent_frontmatter(
+            agents_dir / "minimal.md"
+        )
+        self.assertIsNotNone(result)
+        self.assertEqual(result["skills"], [])
+        self.assertIsNone(result["model"])
+
+    def test_path_outside_root_rejected(self):
+        """Files outside resolved root are rejected."""
+        outside = self.temp_path / "outside.md"
+        outside.write_text(
+            _VALID_FRONTMATTER.format(
+                name="evil", description="Evil"
+            ),
+            encoding="utf-8",
+        )
+
+        safe_root = self.temp_path / "safe"
+        safe_root.mkdir()
+
+        result = _safe_read_agent_file(
+            outside,
+            "test",
+            resolved_root=safe_root.resolve(),
+        )
+        self.assertIsNone(result)
+
+    def test_frontmatter_delimiter_in_yaml_value(self):
+        """Closing --- inside YAML value is not a delimiter."""
+        agents_dir = self.temp_path / "agents" / "multi"
+        agents_dir.mkdir(parents=True)
+        (agents_dir / "multi.md").write_text(
+            "---\n"
+            "name: multi\n"
+            "description: |\n"
+            "  line one\n"
+            "  ---extra text\n"
+            "  line three\n"
+            "version: 0.1.0\n"
+            "tags:\n"
+            "  - test\n"
+            "---\n\n# Multi\n",
+            encoding="utf-8",
+        )
+
+        result = _read_agent_frontmatter(
+            agents_dir / "multi.md"
+        )
+        self.assertIsNotNone(result)
+        self.assertEqual(result["name"], "multi")
+        self.assertIn("---extra text", result["description"])
+
+
+class TestEnsureList(unittest.TestCase):
+    """Test _ensure_list helper."""
+
+    def test_list_passthrough(self):
+        self.assertEqual(_ensure_list([1, 2]), [1, 2])
+
+    def test_string_to_list(self):
+        self.assertEqual(_ensure_list("val"), ["val"])
+
+    def test_none_to_empty(self):
+        self.assertEqual(_ensure_list(None), [])
+
+    def test_int_to_empty(self):
+        self.assertEqual(_ensure_list(123), [])
+
+    def test_empty_list_passthrough(self):
+        self.assertEqual(_ensure_list([]), [])
 
 
 class TestRoutingGeneration(unittest.TestCase):
