@@ -1,6 +1,6 @@
 {
   "name": "aida-core",
-  "description": "Session memory, smart project auto-detection, and extension creation framework. Build custom agents and commands with guided templates.",
+  "description": "Foundation plugin for building your custom Claude Code experience. Extension scaffolding, multi-level configuration, and structured session context.",
   "version": "0.7.0",
   "author": {
     "name": "oakensoul",
