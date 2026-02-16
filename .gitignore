@@ -145,6 +145,10 @@ cython_debug/
 # Cursor
 .cursor/
 
+# Claude Code local files (settings.json is tracked intentionally)
+.claude/agents/
+.claude/settings.local.json
+
 # IntelliJ IDEA
 .idea/
 *.iml
