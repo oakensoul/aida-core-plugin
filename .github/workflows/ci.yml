@@ -44,8 +44,15 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install linters
-        run: pip install ruff
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-      - name: Run linter
-        run: ruff check skills/ tests/
+      - name: Install linters
+        run: |
+          pip install ruff yamllint -r requirements.txt
+          npm install -g markdownlint-cli
+
+      - name: Run all linters
+        run: make lint
