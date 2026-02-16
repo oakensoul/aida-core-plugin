@@ -135,6 +135,8 @@ For `memento` commands:
 /aida memento read my-memento        → memento skill
 /aida memento list                   → memento skill
 /aida memento list --filter active   → memento skill
+/aida memento list --all             → memento skill (all_projects=true)
+/aida memento list --project foo     → memento skill (project_filter=foo)
 /aida memento update my-memento      → memento skill
 /aida memento complete my-memento    → memento skill
 /aida memento remove my-memento      → memento skill
@@ -226,6 +228,8 @@ When displaying help (for `help` command or no arguments), show:
 - `/aida memento create from-changes` - Create from file changes
 - `/aida memento read <slug>` - Load memento into context
 - `/aida memento list` - List active mementos
+- `/aida memento list --all` - List mementos from all projects
+- `/aida memento list --project <name>` - List mementos for specific project
 - `/aida memento update <slug>` - Update memento sections
 - `/aida memento complete <slug>` - Archive completed memento
 
