@@ -2,18 +2,81 @@
 """Plugin permission scanner.
 
 Discovers recommended permissions from installed plugins by
-scanning the plugin cache directory for plugin.json manifests.
+scanning the plugin cache directory for aida-config.json files.
 """
 
 from __future__ import annotations
 
+import errno
 import json
 import logging
+import os
 from pathlib import Path
 
 from _paths import get_home_dir
 
 logger = logging.getLogger(__name__)
+
+# Maximum file size for plugin JSON files (1 MB).
+_MAX_FILE_SIZE = 1024 * 1024
+
+
+def _safe_read_json(file_path: Path, label: str) -> dict | None:
+    """Read and parse a JSON file with TOCTOU-safe security checks.
+
+    Uses ``O_NOFOLLOW`` to atomically reject symlinks during open,
+    eliminating race conditions between symlink/size checks and
+    file reads.
+
+    Args:
+        file_path: Path to the JSON file.
+        label: Human-readable label for log messages.
+
+    Returns:
+        Parsed dict, or ``None`` if the file is missing, invalid,
+        or fails security checks.
+    """
+    fd = -1
+    try:
+        fd = os.open(str(file_path), os.O_RDONLY | os.O_NOFOLLOW)
+        st = os.fstat(fd)
+        if st.st_size > _MAX_FILE_SIZE:
+            logger.warning("%s too large: %s", label, file_path)
+            return None
+        with os.fdopen(fd, "r", encoding="utf-8") as f:
+            fd = -1  # fd now owned by file object
+            content = f.read()
+        data = json.loads(content)
+        if not isinstance(data, dict):
+            logger.warning(
+                "%s is not an object: %s", label, file_path
+            )
+            return None
+        return data
+    except OSError as exc:
+        if exc.errno == errno.ELOOP:
+            logger.warning(
+                "Skipping symlink %s: %s", label, file_path
+            )
+        elif exc.errno != errno.ENOENT:
+            logger.warning(
+                "Failed to read %s %s: %s",
+                label,
+                file_path,
+                exc,
+            )
+        return None
+    except json.JSONDecodeError as exc:
+        logger.warning(
+            "Failed to parse %s %s: %s",
+            label,
+            file_path,
+            exc,
+        )
+        return None
+    finally:
+        if fd >= 0:
+            os.close(fd)
 
 
 def get_installed_plugin_dirs() -> list[Path]:
@@ -56,32 +119,37 @@ def get_installed_plugin_dirs() -> list[Path]:
 def read_plugin_manifest(plugin_dir: Path) -> dict | None:
     """Parse a plugin.json manifest safely.
 
+    Uses ``O_NOFOLLOW`` to atomically reject symlinks.
+
     Args:
         plugin_dir: Path to a ``.claude-plugin`` directory.
 
     Returns:
         Parsed manifest dict, or ``None`` on error.
     """
-    manifest_path = plugin_dir / "plugin.json"
-    if not manifest_path.is_file():
-        return None
-    try:
-        # Check file size before reading to prevent memory exhaustion
-        if manifest_path.stat().st_size > 1024 * 1024:
-            logger.warning(
-                "Plugin manifest too large: %s", manifest_path
-            )
-            return None
-        with open(manifest_path, encoding="utf-8") as f:
-            content = f.read()
-        return json.loads(content)
-    except (json.JSONDecodeError, OSError) as exc:
-        logger.warning(
-            "Failed to read plugin manifest %s: %s",
-            manifest_path,
-            exc,
-        )
-        return None
+    return _safe_read_json(
+        plugin_dir / "plugin.json", "plugin manifest"
+    )
+
+
+def read_aida_config(plugin_dir: Path) -> dict | None:
+    """Parse an aida-config.json file safely.
+
+    AIDA-specific fields (``config`` and ``recommendedPermissions``)
+    are stored separately from the standard Claude Code plugin
+    manifest in ``.claude-plugin/aida-config.json``.
+
+    Uses ``O_NOFOLLOW`` to atomically reject symlinks.
+
+    Args:
+        plugin_dir: Path to a ``.claude-plugin`` directory.
+
+    Returns:
+        Parsed config dict, or ``None`` on error.
+    """
+    return _safe_read_json(
+        plugin_dir / "aida-config.json", "aida-config.json"
+    )
 
 
 from rule_validation import validate_rule  # noqa: E402
@@ -147,8 +215,11 @@ def _validate_permission_rules(
 def scan_plugins() -> list[dict]:
     """Collect recommendedPermissions from all installed plugins.
 
-    Rules are validated at scan time so that malformed plugin
-    data is rejected early rather than propagating downstream.
+    Permissions are read from ``aida-config.json`` (not from
+    ``plugin.json``).  The manifest is still read for the plugin
+    ``name``.  Rules are validated at scan time so that malformed
+    plugin data is rejected early rather than propagating
+    downstream.
 
     Returns:
         List of dicts with ``name`` (str) and ``permissions``
@@ -160,7 +231,11 @@ def scan_plugins() -> list[dict]:
         if manifest is None:
             continue
 
-        permissions = manifest.get("recommendedPermissions")
+        aida_config = read_aida_config(plugin_dir)
+        if aida_config is None:
+            continue
+
+        permissions = aida_config.get("recommendedPermissions")
         if not permissions or not isinstance(permissions, dict):
             continue
 

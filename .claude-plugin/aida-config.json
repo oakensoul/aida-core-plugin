@@ -1,0 +1,48 @@
+{
+  "config": {
+    "label": "AIDA Core Configuration",
+    "description": "Configure AIDA workflow preferences",
+    "preferences": [
+      {
+        "key": "workflow.automation_level",
+        "type": "choice",
+        "label": "Workflow automation level",
+        "options": ["Manual", "Assisted", "Automatic"],
+        "default": "Assisted"
+      }
+    ]
+  },
+  "recommendedPermissions": {
+    "git-operations": {
+      "label": "Git Operations",
+      "description": "Commit, push, branch, and other git commands",
+      "rules": [
+        "Bash(git add:*)",
+        "Bash(git branch:*)",
+        "Bash(git checkout:*)",
+        "Bash(git commit:*)",
+        "Bash(git fetch:*)",
+        "Bash(git merge:*)",
+        "Bash(git pull:*)",
+        "Bash(git push:*)",
+        "Bash(git rebase:*)",
+        "Bash(git remote:*)",
+        "Bash(git reset:*)",
+        "Bash(git stash:*)"
+      ],
+      "suggested": "allow"
+    },
+    "github-cli": {
+      "label": "GitHub CLI",
+      "description": "Issue, PR, and repo management via gh",
+      "rules": [
+        "Bash(gh api:*)",
+        "Bash(gh issue:*)",
+        "Bash(gh label:*)",
+        "Bash(gh pr:*)",
+        "Bash(gh repo view:*)"
+      ],
+      "suggested": "allow"
+    }
+  }
+}

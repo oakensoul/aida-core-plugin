@@ -110,6 +110,32 @@ class TestGetInstalledPluginDirs(unittest.TestCase):
         self.assertEqual(dirs, [])
 
 
+    @patch("scanner.get_home_dir")
+    def test_symlink_plugin_dir_skipped(self, mock_home):
+        """Test that symlinked .claude-plugin directories are skipped."""
+        mock_home.return_value = self.temp_path
+
+        cache_dir = (
+            self.temp_path
+            / ".claude"
+            / "plugins"
+            / "cache"
+            / "owner1"
+            / "plugin1"
+        )
+        cache_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create a real .claude-plugin directory elsewhere
+        real_plugin_dir = self.temp_path / "real-plugin" / ".claude-plugin"
+        real_plugin_dir.mkdir(parents=True, exist_ok=True)
+
+        # Symlink .claude-plugin directory into cache
+        (cache_dir / ".claude-plugin").symlink_to(real_plugin_dir)
+
+        dirs = get_installed_plugin_dirs()
+        self.assertEqual(dirs, [])
+
+
 class TestReadPluginManifest(unittest.TestCase):
     """Test plugin manifest reading."""
 
@@ -168,6 +194,125 @@ class TestReadPluginManifest(unittest.TestCase):
         result = read_plugin_manifest(plugin_dir)
         self.assertIsNone(result)
 
+    def test_symlink_manifest_returns_none(self):
+        """Test that symlinked plugin.json is rejected."""
+        plugin_dir = self.temp_path / ".claude-plugin"
+        plugin_dir.mkdir(parents=True)
+
+        # Create real file elsewhere and symlink plugin.json to it
+        real_manifest = self.temp_path / "real-manifest.json"
+        with open(real_manifest, "w", encoding="utf-8") as f:
+            json.dump({"name": "evil-plugin"}, f)
+        (plugin_dir / "plugin.json").symlink_to(real_manifest)
+
+        result = read_plugin_manifest(plugin_dir)
+        self.assertIsNone(result)
+
+
+class TestReadAidaConfig(unittest.TestCase):
+    """Test AIDA config reading."""
+
+    def setUp(self):
+        """Set up temporary directory for tests."""
+        self.temp_dir = tempfile.mkdtemp()
+        self.temp_path = Path(self.temp_dir)
+
+    def tearDown(self):
+        """Clean up temporary directory."""
+        import shutil
+
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def test_valid_config(self):
+        """Test reading a valid aida-config.json."""
+        from scanner import read_aida_config
+
+        plugin_dir = self.temp_path / ".claude-plugin"
+        plugin_dir.mkdir(parents=True)
+
+        config = {
+            "config": {"label": "Test"},
+            "recommendedPermissions": {"cat": {"rules": ["Read(*)"]}},
+        }
+        with open(
+            plugin_dir / "aida-config.json", "w", encoding="utf-8"
+        ) as f:
+            json.dump(config, f)
+
+        result = read_aida_config(plugin_dir)
+        self.assertIsNotNone(result)
+        self.assertEqual(result["config"]["label"], "Test")
+
+    def test_missing_file_returns_none(self):
+        """Test that missing aida-config.json returns None."""
+        from scanner import read_aida_config
+
+        plugin_dir = self.temp_path / ".claude-plugin"
+        plugin_dir.mkdir(parents=True)
+
+        result = read_aida_config(plugin_dir)
+        self.assertIsNone(result)
+
+    def test_symlink_returns_none(self):
+        """Test that symlinked aida-config.json is rejected."""
+        from scanner import read_aida_config
+
+        plugin_dir = self.temp_path / ".claude-plugin"
+        plugin_dir.mkdir(parents=True)
+
+        real_config = self.temp_path / "real-config.json"
+        with open(real_config, "w", encoding="utf-8") as f:
+            json.dump({"config": {"label": "Evil"}}, f)
+        (plugin_dir / "aida-config.json").symlink_to(real_config)
+
+        result = read_aida_config(plugin_dir)
+        self.assertIsNone(result)
+
+    def test_invalid_json_returns_none(self):
+        """Test that invalid JSON returns None."""
+        from scanner import read_aida_config
+
+        plugin_dir = self.temp_path / ".claude-plugin"
+        plugin_dir.mkdir(parents=True)
+
+        with open(
+            plugin_dir / "aida-config.json", "w", encoding="utf-8"
+        ) as f:
+            f.write("{invalid json")
+
+        result = read_aida_config(plugin_dir)
+        self.assertIsNone(result)
+
+    def test_non_dict_returns_none(self):
+        """Test that non-dict JSON top-level value returns None."""
+        from scanner import read_aida_config
+
+        plugin_dir = self.temp_path / ".claude-plugin"
+        plugin_dir.mkdir(parents=True)
+
+        with open(
+            plugin_dir / "aida-config.json", "w", encoding="utf-8"
+        ) as f:
+            f.write('["not", "a", "dict"]')
+
+        result = read_aida_config(plugin_dir)
+        self.assertIsNone(result)
+
+    def test_large_file_returns_none(self):
+        """Test that aida-config.json over 1MB is rejected."""
+        from scanner import read_aida_config
+
+        plugin_dir = self.temp_path / ".claude-plugin"
+        plugin_dir.mkdir(parents=True)
+
+        with open(
+            plugin_dir / "aida-config.json", "w", encoding="utf-8"
+        ) as f:
+            f.write("{" + '"x": "' + ("a" * 1024 * 1024) + '"' + "}")
+
+        result = read_aida_config(plugin_dir)
+        self.assertIsNone(result)
+
 
 class TestScanPlugins(unittest.TestCase):
     """Test plugin permission scanning."""
@@ -206,14 +351,19 @@ class TestScanPlugins(unittest.TestCase):
         )
         plugin_dir.mkdir(parents=True)
 
-        manifest = {
-            "name": "test-plugin",
+        manifest = {"name": "test-plugin"}
+        with open(plugin_dir / "plugin.json", "w", encoding="utf-8") as f:
+            json.dump(manifest, f)
+
+        aida_config = {
             "recommendedPermissions": {
                 "file-read": {"rules": ["Read(*)"]}
             },
         }
-        with open(plugin_dir / "plugin.json", "w", encoding="utf-8") as f:
-            json.dump(manifest, f)
+        with open(
+            plugin_dir / "aida-config.json", "w", encoding="utf-8"
+        ) as f:
+            json.dump(aida_config, f)
 
         results = scan_plugins()
         self.assertEqual(len(results), 1)
@@ -259,8 +409,13 @@ class TestScanPlugins(unittest.TestCase):
         )
         plugin_dir.mkdir(parents=True)
 
-        manifest = {
-            "name": "bad-rules-plugin",
+        manifest = {"name": "bad-rules-plugin"}
+        with open(
+            plugin_dir / "plugin.json", "w", encoding="utf-8"
+        ) as f:
+            json.dump(manifest, f)
+
+        aida_config = {
             "recommendedPermissions": {
                 "file-read": {
                     "rules": ["Read(*)"],
@@ -273,9 +428,9 @@ class TestScanPlugins(unittest.TestCase):
             },
         }
         with open(
-            plugin_dir / "plugin.json", "w", encoding="utf-8"
+            plugin_dir / "aida-config.json", "w", encoding="utf-8"
         ) as f:
-            json.dump(manifest, f)
+            json.dump(aida_config, f)
 
         results = scan_plugins()
         self.assertEqual(len(results), 1)
@@ -299,13 +454,50 @@ class TestScanPlugins(unittest.TestCase):
         )
         plugin_dir.mkdir(parents=True)
 
-        manifest = {
-            "name": "all-bad-plugin",
+        manifest = {"name": "all-bad-plugin"}
+        with open(
+            plugin_dir / "plugin.json", "w", encoding="utf-8"
+        ) as f:
+            json.dump(manifest, f)
+
+        aida_config = {
             "recommendedPermissions": {
                 "dangerous": {
                     "rules": ["$(evil command)"],
                     "suggested": "deny",
                 },
+            },
+        }
+        with open(
+            plugin_dir / "aida-config.json", "w", encoding="utf-8"
+        ) as f:
+            json.dump(aida_config, f)
+
+        results = scan_plugins()
+        self.assertEqual(results, [])
+
+    @patch("scanner.get_home_dir")
+    def test_no_aida_config_skips_plugin(self, mock_home):
+        """Test that plugins without aida-config.json are skipped."""
+        mock_home.return_value = self.temp_path
+
+        plugin_dir = (
+            self.temp_path
+            / ".claude"
+            / "plugins"
+            / "cache"
+            / "owner1"
+            / "plugin1"
+            / ".claude-plugin"
+        )
+        plugin_dir.mkdir(parents=True)
+
+        # plugin.json has recommendedPermissions but there is no
+        # aida-config.json -- strict separation means we ignore it
+        manifest = {
+            "name": "test-plugin",
+            "recommendedPermissions": {
+                "file-read": {"rules": ["Read(*)"]}
             },
         }
         with open(
