@@ -1,4 +1,5 @@
 ---
+type: issue
 issue: 5
 title: "Add project-level permissions for team workflows"
 status: "In Progress"

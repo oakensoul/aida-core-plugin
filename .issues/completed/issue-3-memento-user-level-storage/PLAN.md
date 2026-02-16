@@ -1,3 +1,8 @@
+---
+type: reference
+title: "Plan: Move Memento Storage to User-Level (Issue #3)"
+---
+
 # Plan: Move Memento Storage to User-Level (Issue #3)
 
 ## Context

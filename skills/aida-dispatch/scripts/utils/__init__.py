@@ -71,6 +71,15 @@ from .inference import (
     detect_project_type,
 )
 
+# Plugin discovery
+from .plugins import (
+    discover_installed_plugins,
+    get_plugins_with_config,
+    validate_plugin_config,
+    generate_plugin_checklist,
+    generate_plugin_preference_questions,
+)
+
 # Template rendering
 from .template_renderer import (
     render_template,
@@ -136,6 +145,12 @@ __all__ = [
     "detect_coding_standards",
     "detect_testing_approach",
     "detect_project_type",
+    # Plugin discovery
+    "discover_installed_plugins",
+    "get_plugins_with_config",
+    "validate_plugin_config",
+    "generate_plugin_checklist",
+    "generate_plugin_preference_questions",
     # Template rendering
     "render_template",
     "render_filename",

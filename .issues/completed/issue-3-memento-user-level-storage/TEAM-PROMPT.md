@@ -1,3 +1,8 @@
+---
+type: reference
+title: "Team Prompt: Issue #3 - Move Memento Storage to User-Level"
+---
+
 # Team Prompt: Issue #3 - Move Memento Storage to User-Level
 
 ## How to Use

@@ -398,3 +398,54 @@ Return JSON format:
   "config_path": "/path/to/.claude"
 }
 ```
+
+---
+
+## Plugin Configuration Discovery
+
+During the configuration workflow, AIDA automatically discovers
+installed plugins that provide configurable preferences.
+
+### How It Works
+
+1. **Discovery**: The system scans
+   `~/.claude/plugins/cache/*/*/.claude-plugin/plugin.json`
+   for installed plugins with a `config` section
+2. **Plugin Checklist**: If configurable plugins are found, a
+   multi-select question is presented at the start of the wizard
+3. **Preference Questions**: For each selected plugin, its
+   preference questions (boolean, choice, string) are added
+4. **Storage**: Plugin preferences are saved under `plugins:`
+   in the YAML configuration
+
+### Plugin Checklist
+
+The checklist appears as the first question in the flow:
+
+```text
+Which plugins would you like to configure?
+[ ] Plugin A - Description of plugin A
+[ ] Plugin B - Description of plugin B
+```
+
+### Storage Format
+
+Plugin preferences are saved in `.claude/aida-project-context.yml`:
+
+```yaml
+plugins:
+  my-plugin:
+    enabled: true
+    feature.enabled: true
+    output.format: JSON
+  other-plugin:
+    enabled: false
+```
+
+Plugins not selected in the checklist are marked `enabled: false`.
+
+### Error Handling
+
+Plugin discovery is non-critical. If scanning fails, the
+configuration wizard continues normally without the plugin
+section. Warnings are logged for debugging.
