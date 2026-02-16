@@ -8,6 +8,7 @@ which validation rules apply. Supported types:
   - documentation, guide, reference, readme: require title
   - diagram: requires title, diagram-type
   - changelog: requires title
+  - issue: requires title, issue (number)
 
 Usage:
     python validate_frontmatter.py [--schema SCHEMA] [FILES...]

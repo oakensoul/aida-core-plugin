@@ -129,9 +129,122 @@ skills/
   "repository": "https://github.com/...",
   "license": "MIT",
   "keywords": ["keyword1", "keyword2"],
-  "dependencies": {}
+  "dependencies": {},
+  "config": { },
+  "recommendedPermissions": { }
 }
 ```
+
+### Plugin Config Section
+
+Plugins can declare user-configurable preferences via the `config` section:
+
+```json
+{
+  "config": {
+    "label": "My Plugin Configuration",
+    "description": "Configure plugin preferences",
+    "preferences": [
+      {
+        "key": "feature.enabled",
+        "type": "boolean",
+        "label": "Enable feature X",
+        "default": true
+      },
+      {
+        "key": "output.format",
+        "type": "choice",
+        "label": "Output format",
+        "options": ["JSON", "YAML", "Text"],
+        "default": "JSON"
+      },
+      {
+        "key": "custom.path",
+        "type": "string",
+        "label": "Custom output path",
+        "default": "./output"
+      }
+    ]
+  }
+}
+```
+
+#### Config Fields
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `config.label` | string | Yes | Display name for config section |
+| `config.description` | string | Yes | Help text for the config section |
+| `config.preferences` | array | Yes | List of preference definitions |
+
+#### Preference Types
+
+| Type | Fields | Description |
+| ---- | ------ | ----------- |
+| `boolean` | `key`, `label`, `default` | On/off toggle |
+| `choice` | `key`, `label`, `options`, `default` | Select from list |
+| `string` | `key`, `label`, `default` | Free-text input |
+
+#### Preference Fields
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `key` | string | Yes | Dot-notation identifier (e.g., `feature.enabled`) |
+| `type` | string | Yes | One of: `boolean`, `choice`, `string` |
+| `label` | string | Yes | Human-readable label |
+| `options` | array | For `choice` | Available options |
+| `default` | any | No | Default value |
+
+### Plugin Recommended Permissions Section
+
+Plugins can declare Claude Code permission recommendations via the
+`recommendedPermissions` section. Each category groups related
+permission rules:
+
+```json
+{
+  "recommendedPermissions": {
+    "git-operations": {
+      "label": "Git Operations",
+      "description": "Commit, push, branch, and other git commands",
+      "rules": [
+        "Bash(git add:*)",
+        "Bash(git commit:*)",
+        "Bash(git push:*)"
+      ],
+      "suggested": "allow"
+    },
+    "file-operations": {
+      "label": "File Operations",
+      "description": "Read and write project files",
+      "rules": [
+        "Bash(cat:*)",
+        "Bash(mkdir:*)"
+      ],
+      "suggested": "ask"
+    }
+  }
+}
+```
+
+#### Permission Category Fields
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `label` | string | Yes | Display name for the category |
+| `description` | string | Yes | What these permissions cover |
+| `rules` | array | Yes | Permission rule strings |
+| `suggested` | string | Yes | Default action: `allow`, `ask`, or `deny` |
+
+#### Rule Format Reference
+
+Rules follow the pattern `Tool(command:args)`:
+
+| Pattern | Example | Description |
+| ------- | ------- | ----------- |
+| `Bash(cmd:*)` | `Bash(git add:*)` | Allow cmd with any args |
+| `Bash(cmd:specific)` | `Bash(git push:origin)` | Allow specific args |
+| `Bash(cmd:prefix*)` | `Bash(npm:run *)` | Allow args with prefix |
 
 ### Plugin Directory Structure
 

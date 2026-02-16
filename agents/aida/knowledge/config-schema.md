@@ -66,6 +66,12 @@ preferences:
   issue_tracking: "GitHub Issues"|"Jira"|"Linear"|"None"|null
   commit_style: conventional|semantic|freeform|null
   pr_template: true|false|null
+
+# Plugin Preferences (populated by /aida config plugin discovery)
+plugins:
+  {plugin-name}:
+    enabled: true|false
+    {preference-key}: {value}
 ```
 
 ## Required Fields
@@ -82,6 +88,8 @@ These fields must be present:
 ## Optional Fields
 
 All other fields are optional and will use defaults or null.
+The `plugins` section is populated automatically by `/aida config plugin`
+discovery and stores per-plugin preferences.
 
 ## Defaults
 
@@ -176,4 +184,10 @@ preferences:
   issue_tracking: "GitHub Issues"
   commit_style: conventional
   pr_template: true
+
+plugins:
+  aida-core-plugin:
+    enabled: true
+    feature.enabled: true
+    output.format: "JSON"
 ```

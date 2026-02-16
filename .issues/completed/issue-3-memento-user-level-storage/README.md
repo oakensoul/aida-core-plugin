@@ -1,4 +1,5 @@
 ---
+type: issue
 issue: 3
 title: "Move memento storage from project-level to user-level"
 status: "Completed"
