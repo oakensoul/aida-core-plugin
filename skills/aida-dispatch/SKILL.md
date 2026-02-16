@@ -146,7 +146,7 @@ For `memento` commands:
 
 For `claude` commands:
 
-- **Invoke the `claude-md` skill** to handle these operations
+- **Invoke the `claude-code-management` skill** to handle these operations
 - Pass the full command arguments to the skill
 - The skill handles create, optimize, validate, and list operations
 

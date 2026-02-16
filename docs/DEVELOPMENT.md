@@ -43,18 +43,9 @@ gh --version
 ### Clone Repository
 
 ```bash
-# Clone the aida-development monorepo
-git clone git@github.com:oakensoul/aida-development.git
-cd aida-development
-
-# This is a monorepo with bare repository structure
-# See CLAUDE.md for details on worktree structure
-```
-
-### Install Dependencies
-
-```bash
-cd packages/aida-core-plugin
+# Clone the aida-core-plugin repository
+git clone git@github.com:oakensoul/aida-core-plugin.git
+cd aida-core-plugin
 
 # Create virtual environment (recommended)
 python3 -m venv venv

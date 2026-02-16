@@ -256,7 +256,7 @@ def update_settings_json() -> None:
 graph TB
     subgraph "configure.py"
         MainConfig[main<br/>Entry point]
-        CheckInstall[check_installation<br/>Verify /aida install run]
+        CheckInstall[check_installation<br/>Verify global setup complete]
         DetectProject[detect_project<br/>Language, framework, tools]
         CreateProjectSkills[create_project_skills<br/>Generate skills]
     end

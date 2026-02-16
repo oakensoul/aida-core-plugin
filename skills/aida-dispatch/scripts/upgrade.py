@@ -76,8 +76,8 @@ def compare_versions(current: str, latest: str) -> bool:
     """Compare version strings.
 
     Args:
-        current: Current version string (e.g., "0.1.0")
-        latest: Latest version string (e.g., "0.2.0")
+        current: Current version string (e.g., "0.7.0")
+        latest: Latest version string (e.g., "0.7.1")
 
     Returns:
         True if current < latest, False otherwise

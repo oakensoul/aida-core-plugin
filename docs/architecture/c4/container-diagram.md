@@ -214,7 +214,7 @@ Python script
 
 #### Entry Points
 
-- `/aida install` command
+- `/aida config` command (global setup)
 - Direct invocation: `python install.py`
 
 #### Outputs
@@ -249,7 +249,7 @@ Python script
 
 #### Entry Points
 
-- `/aida configure` command
+- `/aida config` command (project setup)
 
 #### Outputs
 
@@ -308,7 +308,7 @@ Python script
 
 #### Dependencies
 
-- stdlib only (own inline `safe_json_load()`)
+- yaml (PyYAML), jinja2 (conditional), own inline `safe_json_load()`
 
 #### Entry Points
 
@@ -614,7 +614,7 @@ File system
 
 #### Access Pattern
 
-- Written during `/aida install`
+- Written during `/aida config` (global setup)
 - Read at every Claude Code session
 
 ### Project Storage
@@ -634,7 +634,7 @@ File system
 
 #### Access Pattern
 
-- Written during `/aida configure`
+- Written during `/aida config` (project setup)
 - Read when Claude Code starts in project directory
 
 ## External Systems
