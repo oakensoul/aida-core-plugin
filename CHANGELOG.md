@@ -10,6 +10,42 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-02-16
+
+### Added
+
+#### Auto-generate Agent Routing Directives (#12)
+
+- Agent discovery scans three sources in priority order: project
+  (`{project}/.claude/agents/`), user (`~/.claude/agents/`), and
+  plugin-provided agents (via `aida-config.json` manifest)
+- YAML frontmatter parsing reads agent metadata (name, description,
+  version, tags, skills, model) with `yaml.safe_load()`
+- Auto-generates `## Available Agents` section in project CLAUDE.md
+  with routing directives for each discovered agent
+- Marker-based idempotent updates — re-running config replaces the
+  managed section without duplicating or losing manual content
+- Agent Teams guidance included so team leads and teammates know
+  when to consult domain-specific agents
+- First-found-wins deduplication (project > user > plugin priority)
+
+### Changed
+
+- `_safe_read_file` in plugins.py now accepts `max_size` parameter
+  (defaults to 1MB for backward compatibility, agents use 500KB)
+- `aida-config.json` supports `agents` key declaring plugin agent
+  names (falls back to directory scanning if absent)
+- Phase 1 (`get_questions`) discovers agents and returns metadata
+- Phase 2 (`configure`) updates CLAUDE.md with routing directives
+
+### Security
+
+- Agent file reading reuses TOCTOU-safe `_safe_read_file` with
+  `O_NOFOLLOW`, size limits, and path containment checks
+- Symlinked directories and files rejected during agent scanning
+
+---
+
 ## [0.6.1] - 2026-02-16
 
 ### Fixed
@@ -196,6 +232,7 @@ See git history for details on versions prior to 0.2.0.
 
 ---
 
+[0.7.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.7.0
 [0.6.1]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.6.1
 [0.6.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.6.0
 [0.2.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.2.0

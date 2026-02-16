@@ -80,6 +80,13 @@ from .plugins import (
     generate_plugin_preference_questions,
 )
 
+# Agent discovery
+from .agents import (
+    discover_agents,
+    generate_agent_routing_section,
+    update_agent_routing,
+)
+
 # Template rendering
 from .template_renderer import (
     render_template,
@@ -151,6 +158,10 @@ __all__ = [
     "validate_plugin_config",
     "generate_plugin_checklist",
     "generate_plugin_preference_questions",
+    # Agent discovery
+    "discover_agents",
+    "generate_agent_routing_section",
+    "update_agent_routing",
     # Template rendering
     "render_template",
     "render_filename",

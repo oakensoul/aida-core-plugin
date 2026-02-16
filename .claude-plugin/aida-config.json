@@ -44,5 +44,6 @@
       ],
       "suggested": "allow"
     }
-  }
+  },
+  "agents": ["aida", "claude-code-expert"]
 }

@@ -34,6 +34,7 @@ def _safe_read_file(
     file_path: Path,
     label: str,
     resolved_root: Path | None = None,
+    max_size: int | None = None,
 ) -> str | None:
     """Read a file with TOCTOU-safe security checks.
 
@@ -47,10 +48,15 @@ def _safe_read_file(
         label: Human-readable label for log messages.
         resolved_root: If provided, validate that the file's
             resolved path is within this root.
+        max_size: Maximum allowed file size in bytes.
+            Defaults to ``_MAX_FILE_SIZE`` (1 MB).
 
     Returns:
         File content as string, or ``None`` on error.
     """
+    if max_size is None:
+        max_size = _MAX_FILE_SIZE
+
     # Path containment check (catches non-symlink traversal
     # via ``..`` components that the glob might match)
     if resolved_root is not None:
@@ -70,7 +76,7 @@ def _safe_read_file(
             str(file_path), os.O_RDONLY | os.O_NOFOLLOW
         )
         st = os.fstat(fd)
-        if st.st_size > _MAX_FILE_SIZE:
+        if st.st_size > max_size:
             logger.warning(
                 "%s too large: %s", label, file_path
             )
