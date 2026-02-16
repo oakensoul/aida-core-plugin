@@ -727,6 +727,18 @@ class TestExecute(unittest.TestCase):
         self.assertFalse(result["success"])
         self.assertIn("Slug is required", result["message"])
 
+    def test_execute_update_missing_section(self):
+        """Test update operation without section fails."""
+        context = {
+            "operation": "update",
+            "slug": "some-slug",
+            "content": "some content",
+        }
+        result = execute(context)
+
+        self.assertFalse(result["success"])
+        self.assertIn("Section is required", result["message"])
+
     def test_execute_complete_missing_slug(self):
         """Test complete operation without slug fails."""
         context = {

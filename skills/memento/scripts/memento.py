@@ -1050,6 +1050,9 @@ def execute_update(context: Dict[str, Any]) -> Dict[str, Any]:
     if not slug:
         return {"success": False, "message": "Slug is required"}
 
+    if not section:
+        return {"success": False, "message": "Section is required for update"}
+
     memento = find_memento(slug)
     if not memento:
         return {"success": False, "message": f"Memento '{slug}' not found"}
