@@ -7,7 +7,6 @@ slug conversion, validation, frontmatter parsing, and memento operations.
 import sys
 import subprocess
 import unittest
-import unittest.mock
 import json
 import tempfile
 import shutil
@@ -15,7 +14,13 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 # Add scripts directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "skills" / "memento" / "scripts"))
+sys.path.insert(
+    0,
+    str(
+        Path(__file__).parent.parent.parent
+        / "skills" / "memento" / "scripts"
+    ),
+)
 
 from memento import (
     to_kebab_case,
@@ -29,8 +34,11 @@ from memento import (
     make_memento_filename,
     parse_memento_filename,
     get_project_context,
+    get_pr_context,
+    get_changes_context,
     list_mementos,
     render_template,
+    main,
     _atomic_write,
     _rebuild_file,
     _ensure_within_dir,
@@ -98,7 +106,10 @@ class TestValidateSlug(unittest.TestCase):
         ]
         for slug in valid_slugs:
             is_valid, error = validate_slug(slug)
-            self.assertTrue(is_valid, f"Slug '{slug}' should be valid, got error: {error}")
+            self.assertTrue(
+                is_valid,
+                f"Slug '{slug}' should be valid: {error}",
+            )
             self.assertIsNone(error)
 
     def test_empty_slug(self):
@@ -575,14 +586,16 @@ class TestGetQuestions(unittest.TestCase):
         self.assertIn("slug", result["inferred"])
         self.assertEqual(result["inferred"]["source"], "manual")
 
-    def test_create_from_pr_without_pr(self):
+    @patch("memento.get_pr_context", return_value={})
+    def test_create_from_pr_without_pr(self, mock_pr):
         """Test from-pr source when no PR exists."""
         context = {"operation": "create", "source": "from-pr"}
         result = get_questions(context)
 
-        # Should have validation error (no PR found)
-        # Note: This will fail if there's an active PR
-        self.assertIn("validation", result)
+        self.assertFalse(result["validation"]["valid"])
+        self.assertIn(
+            "No PR found", result["validation"]["errors"][0]
+        )
 
     def test_list_no_questions(self):
         """Test list operation doesn't need questions."""
@@ -776,44 +789,6 @@ class TestSafeJsonLoad(unittest.TestCase):
         self.assertIn("size limit", str(cm.exception).lower())
 
 
-class TestMementoOperationsWithTempDir(unittest.TestCase):
-    """Test memento operations using a temporary directory."""
-
-    def setUp(self):
-        """Set up temporary directory for testing."""
-        self.temp_dir = tempfile.mkdtemp()
-        self.mementos_dir = Path(self.temp_dir) / ".claude" / "mementos"
-        self.archive_dir = self.mementos_dir / ".completed"
-
-    def tearDown(self):
-        """Clean up temporary directory."""
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
-
-    def test_create_memento_validation(self):
-        """Test memento creation validation."""
-        # Valid slug
-        is_valid, error = validate_slug("test-memento")
-        self.assertTrue(is_valid)
-        self.assertIsNone(error)
-
-        # Test inferred slug from description
-        slug = to_kebab_case("Fix authentication token expiry")
-        self.assertEqual(slug, "fix-authentication-token-expiry")
-
-    def test_slug_generation_from_description(self):
-        """Test slug generation from various descriptions."""
-        test_cases = [
-            ("Fix auth bug", "fix-auth-bug"),
-            ("Add new feature", "add-new-feature"),
-            ("PR #123 Changes", "pr-123-changes"),
-            ("API Migration", "api-migration"),
-        ]
-
-        for description, expected_slug in test_cases:
-            slug = to_kebab_case(description)
-            self.assertEqual(slug, expected_slug, f"Failed for: {description}")
-
-
 class TestFrontmatterEdgeCases(unittest.TestCase):
     """Test edge cases in frontmatter parsing."""
 
@@ -894,7 +869,8 @@ class TestQuestionGeneration(unittest.TestCase):
         # Will ask for section if memento doesn't exist
         self.assertIn("validation", result)
 
-    def test_validation_errors_for_invalid_source(self):
+    @patch("memento.get_pr_context", return_value={})
+    def test_validation_errors_for_invalid_source(self, mock_pr):
         """Test validation errors for from-pr when no PR exists."""
         context = {
             "operation": "create",
@@ -902,8 +878,10 @@ class TestQuestionGeneration(unittest.TestCase):
         }
         result = get_questions(context)
 
-        # This may or may not have errors depending on if there's an active PR
-        self.assertIn("validation", result)
+        self.assertFalse(result["validation"]["valid"])
+        self.assertIn(
+            "No PR found", result["validation"]["errors"][0]
+        )
 
 
 class TestAtomicWrite(unittest.TestCase):
@@ -1300,6 +1278,170 @@ class TestSectionReplacement(unittest.TestCase):
         })
         self.assertIn("## Custom_Notes", result["body"])
         self.assertIn("My custom content", result["body"])
+
+
+class TestPrContext(unittest.TestCase):
+    """Test PR context extraction."""
+
+    @patch("memento.subprocess.run")
+    def test_successful_pr(self, mock_run):
+        pr_data = {
+            "number": 42,
+            "url": "https://github.com/org/repo/pull/42",
+            "title": "Fix auth bug",
+            "body": "Fixes token expiry",
+            "files": [
+                {"path": "src/auth.py"},
+                {"path": "tests/test_auth.py"},
+            ],
+        }
+        mock_result = MagicMock()
+        mock_result.returncode = 0
+        mock_result.stdout = json.dumps(pr_data)
+        mock_run.return_value = mock_result
+
+        ctx = get_pr_context()
+        self.assertEqual(ctx["pr_number"], 42)
+        self.assertEqual(ctx["title"], "Fix auth bug")
+        self.assertEqual(
+            ctx["files"],
+            ["src/auth.py", "tests/test_auth.py"],
+        )
+
+    @patch("memento.subprocess.run")
+    def test_no_pr(self, mock_run):
+        mock_result = MagicMock()
+        mock_result.returncode = 1
+        mock_run.return_value = mock_result
+
+        ctx = get_pr_context()
+        self.assertEqual(ctx, {})
+
+    @patch("memento.subprocess.run")
+    def test_timeout(self, mock_run):
+        mock_run.side_effect = subprocess.TimeoutExpired("gh", 30)
+
+        ctx = get_pr_context()
+        self.assertEqual(ctx, {})
+
+
+class TestChangesContext(unittest.TestCase):
+    """Test git changes context extraction."""
+
+    @patch("memento.subprocess.run")
+    def test_with_changes(self, mock_run):
+        diff_stat = MagicMock(
+            returncode=0, stdout="2 files changed"
+        )
+        diff_names = MagicMock(
+            returncode=0, stdout="src/main.py\nsrc/utils.py\n"
+        )
+        status = MagicMock(
+            returncode=0, stdout="?? new_file.py\n"
+        )
+        mock_run.side_effect = [diff_stat, diff_names, status]
+
+        ctx = get_changes_context()
+        self.assertIn("src/main.py", ctx["files"])
+        self.assertIn("src/utils.py", ctx["files"])
+        self.assertIn("new_file.py", ctx["files"])
+        self.assertEqual(ctx["summary"], "2 files changed")
+
+    @patch("memento.subprocess.run")
+    def test_no_changes(self, mock_run):
+        empty = MagicMock(returncode=0, stdout="")
+        mock_run.return_value = empty
+
+        ctx = get_changes_context()
+        self.assertEqual(ctx["files"], [])
+
+    @patch("memento.subprocess.run")
+    def test_subprocess_failure(self, mock_run):
+        mock_run.side_effect = subprocess.SubprocessError("fail")
+
+        ctx = get_changes_context()
+        self.assertEqual(ctx["files"], [])
+        self.assertEqual(ctx["summary"], "")
+
+
+class TestDuplicateSlug(unittest.TestCase):
+    """Test duplicate slug detection."""
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        self.mementos_dir = Path(self.temp_dir) / "memento"
+        self.archive_dir = self.mementos_dir / ".completed"
+        self.mementos_dir.mkdir(parents=True)
+        self.project_ctx = {
+            "name": "dup-proj",
+            "path": "/tmp/dup-proj",
+            "repo": "",
+            "branch": "main",
+        }
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    @patch("memento.get_user_archive_dir")
+    @patch("memento.get_user_mementos_dir")
+    @patch("memento.get_project_context")
+    def test_create_duplicate_slug_fails(
+        self, mock_ctx, mock_dir, mock_archive
+    ):
+        mock_ctx.return_value = self.project_ctx
+        mock_dir.return_value = self.mementos_dir
+        mock_archive.return_value = self.archive_dir
+
+        # First create succeeds
+        result = execute({
+            "operation": "create",
+            "slug": "dupe-test",
+            "description": "First memento",
+            "source": "manual",
+            "problem": "Testing duplicates",
+        })
+        self.assertTrue(result["success"])
+
+        # Second create with same slug fails
+        result = execute({
+            "operation": "create",
+            "slug": "dupe-test",
+            "description": "Second memento",
+            "source": "manual",
+            "problem": "Duplicate slug",
+        })
+        self.assertFalse(result["success"])
+        self.assertIn("already exists", result["message"])
+
+
+class TestCLI(unittest.TestCase):
+    """Test CLI entry point."""
+
+    def test_get_questions_returns_zero(self):
+        with patch(
+            "sys.argv",
+            ["memento.py", "--get-questions",
+             "--context", '{"operation": "list"}'],
+        ):
+            with patch("builtins.print"):
+                code = main()
+        self.assertEqual(code, 0)
+
+    def test_no_args_returns_one(self):
+        with patch("sys.argv", ["memento.py"]):
+            with patch("builtins.print"):
+                code = main()
+        self.assertEqual(code, 1)
+
+    def test_invalid_json_returns_one(self):
+        with patch(
+            "sys.argv",
+            ["memento.py", "--execute",
+             "--context", "{bad json}"],
+        ):
+            with patch("builtins.print"):
+                code = main()
+        self.assertEqual(code, 1)
 
 
 if __name__ == "__main__":

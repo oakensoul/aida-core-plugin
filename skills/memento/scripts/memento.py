@@ -109,7 +109,10 @@ def validate_slug(slug: str) -> Tuple[bool, Optional[str]]:
         return False, "Slug must be at most 50 characters"
 
     if not re.match(r'^[a-z][a-z0-9-]*$', slug):
-        return False, "Slug must start with lowercase letter and contain only lowercase letters, numbers, and hyphens"
+        return False, (
+            "Slug must start with lowercase letter and contain"
+            " only lowercase letters, numbers, and hyphens"
+        )
 
     return True, None
 
@@ -754,7 +757,11 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
             if existing:
                 result["questions"].append({
                     "id": "slug",
-                    "question": f"A memento named '{inferred_slug}' already exists. Choose a different name:",
+                    "question": (
+                        f"A memento named '{inferred_slug}'"
+                        " already exists."
+                        " Choose a different name:"
+                    ),
                     "type": "text",
                     "required": True,
                     "default": f"{inferred_slug}-2",
@@ -883,12 +890,19 @@ def execute_create(context: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Result dictionary
     """
-    slug = context.get("slug") or to_kebab_case(context.get("description", ""))
+    slug = context.get("slug") or to_kebab_case(
+        context.get("description", "")
+    )
     description = context.get("description", "")
     source = context.get("source", "manual")
     template_type = context.get("template", "work-session")
 
-    # Slug validation is handled centrally by execute()
+    # Centralized validation in execute() only fires when slug is
+    # already in the context dict. When we generate it here from
+    # the description, we must validate explicitly.
+    is_valid, error = validate_slug(slug)
+    if not is_valid:
+        return {"success": False, "message": f"Invalid slug: {error}"}
 
     # Get project context
     project_ctx = get_project_context()
@@ -935,6 +949,7 @@ def execute_create(context: Dict[str, Any]) -> Dict[str, Any]:
     # Ensure directory exists with restrictive permissions
     mementos_dir = get_user_mementos_dir()
     mementos_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chmod(str(mementos_dir), 0o700)
 
     # Write memento file atomically
     filename = make_memento_filename(project_name, slug)
@@ -1066,15 +1081,29 @@ def execute_update(context: Dict[str, Any]) -> Dict[str, Any]:
 
         pattern = section_patterns.get(section)
         if pattern:
-            body = re.sub(
+            new_body = re.sub(
                 pattern,
                 lambda m: m.group(1) + new_content + '\n' + m.group(3),
                 body,
                 flags=re.DOTALL,
             )
+            if new_body != body:
+                body = new_body
+            else:
+                # Section heading not found (e.g. freeform template);
+                # fall through to append
+                body = (
+                    body.rstrip()
+                    + f"\n\n## {section.title()}\n\n"
+                    + new_content + "\n"
+                )
         else:
-            # Append to end if section not recognized
-            body = body.rstrip() + f"\n\n## {section.title()}\n\n{new_content}\n"
+            # Section name not recognized; append new section
+            body = (
+                body.rstrip()
+                + f"\n\n## {section.title()}\n\n"
+                + new_content + "\n"
+            )
 
         _atomic_write(memento_path, _rebuild_file(frontmatter, body))
 
@@ -1124,6 +1153,7 @@ def execute_complete(context: Dict[str, Any]) -> Dict[str, Any]:
 
         # Ensure archive directory exists
         archive_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
+        os.chmod(str(archive_dir), 0o700)
 
         # Move to archive (preserve namespaced filename).
         # This is intentionally write-then-unlink rather than a single
