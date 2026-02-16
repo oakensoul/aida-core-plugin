@@ -16,7 +16,7 @@ graph TB
     Claude[Claude Code CLI]
 
     subgraph "AIDA Core Plugin"
-        Commands[Commands<br/>15 /aida commands<br/>Markdown files]
+        Commands[Commands<br/>/aida command<br/>Markdown files]
         Skills[Skills<br/>Auto-loaded context<br/>SKILL.md files]
 
         subgraph "Python Scripts"
@@ -34,6 +34,8 @@ graph TB
             PathsUtil[paths.py<br/>Path resolution]
             FilesUtil[files.py<br/>File operations]
             JsonUtil[json_utils.py<br/>Safe JSON parsing]
+            AgentsUtil[agents.py<br/>Agent discovery]
+            PluginsUtil[plugins.py<br/>Plugin discovery]
             QuestionnaireUtil[questionnaire.py<br/>Interactive Q&A]
             InferenceUtil[inference.py<br/>Project detection]
             TemplateUtil[template_renderer.py<br/>Jinja2 rendering]
@@ -68,13 +70,15 @@ graph TB
     InstallScript -->|Uses| QuestionnaireUtil
     InstallScript -->|Uses| TemplateUtil
 
+    ErrorsUtil -.->|Used by| InstallScript
+    ErrorsUtil -.->|Used by| ConfigScript
+
     ConfigScript -->|Uses| PathsUtil
     ConfigScript -->|Uses| FilesUtil
     ConfigScript -->|Uses| QuestionnaireUtil
     ConfigScript -->|Uses| InferenceUtil
     ConfigScript -->|Uses| TemplateUtil
 
-    MementoScript -->|Uses| JsonUtil
     UpgradeScript -->|Checks releases| GitHub
 
     QuestionnaireUtil -->|Loads| Templates
@@ -104,6 +108,8 @@ graph TB
     style PathsUtil fill:#c0d9eb
     style FilesUtil fill:#c0d9eb
     style JsonUtil fill:#c0d9eb
+    style AgentsUtil fill:#c0d9eb
+    style PluginsUtil fill:#c0d9eb
     style QuestionnaireUtil fill:#c0d9eb
     style InferenceUtil fill:#c0d9eb
     style TemplateUtil fill:#c0d9eb
@@ -128,7 +134,7 @@ Claude Code command system
 
 #### Location
 
-`.claude-plugin/commands/` (planned)
+`commands/`
 
 #### Responsibilities
 
@@ -138,8 +144,8 @@ Claude Code command system
 
 #### Contents
 
-- 15 command markdown files
-- Each defines usage, arguments, examples
+- `aida.md` command entry point
+- Defines usage, arguments, examples
 
 #### Interactions
 
@@ -213,8 +219,7 @@ Python script
 
 #### Outputs
 
-- `~/.claude/skills/personal-preferences/`
-- `~/.claude/skills/work-patterns/`
+- `~/.claude/skills/user-context/`
 - `~/.claude/settings.json` (updated)
 
 ### Configure Script
@@ -303,7 +308,7 @@ Python script
 
 #### Dependencies
 
-- utils.json_utils
+- stdlib only (own inline `safe_json_load()`)
 
 #### Entry Points
 
@@ -390,7 +395,7 @@ Python package
 
 #### Location
 
-`scripts/utils/`
+`skills/aida-dispatch/scripts/utils/`
 
 #### Purpose
 
@@ -525,6 +530,38 @@ class ConfigurationError(AidaError)
 class InstallationError(AidaError)
 ```
 
+#### agents.py
+
+##### Responsibilities
+
+- Discover agent definitions in agents/ directories
+- Parse YAML frontmatter for agent metadata
+- Generate routing directives for CLAUDE.md
+
+##### Key Functions
+
+```python
+discover_agents(search_dirs: List[Path]) -> List[Dict[str, Any]]
+generate_agent_routing_section(agents: List[Dict]) -> str
+update_agent_routing(claude_md_path: Path, agents: List[Dict]) -> None
+```
+
+#### plugins.py
+
+##### Responsibilities
+
+- Discover installed plugins via plugin.json
+- Read aida-config.json for plugin configuration
+- Validate plugin configuration schema
+
+##### Key Functions
+
+```python
+discover_installed_plugins(plugins_dir: Path) -> List[Dict[str, Any]]
+get_plugins_with_config() -> List[Dict[str, Any]]
+validate_plugin_config(config: dict) -> Tuple[bool, List[str]]
+```
+
 ### Templates Container
 
 #### Type
@@ -533,7 +570,7 @@ Files (Jinja2 .jinja2, YAML .yml)
 
 #### Location
 
-`templates/`
+`skills/aida-dispatch/templates/`
 
 #### Responsibilities
 
@@ -544,11 +581,9 @@ Files (Jinja2 .jinja2, YAML .yml)
 #### Contents
 
 ```text
-templates/
+skills/aida-dispatch/templates/
 ├── blueprints/
-│   ├── personal-preferences/
-│   │   └── SKILL.md.jinja2
-│   ├── work-patterns/
+│   ├── user-context/
 │   │   └── SKILL.md.jinja2
 │   ├── project-context/
 │   │   └── SKILL.md.jinja2

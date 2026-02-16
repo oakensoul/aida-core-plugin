@@ -2,7 +2,7 @@
 type: skill
 name: aida-dispatch
 description: This skill routes /aida commands to appropriate handlers - configuration, diagnostics, feedback, extension management, session persistence (memento operations), and CLAUDE.md management.
-version: 0.5.0
+version: 0.7.0
 tags:
   - core
   - dispatcher

@@ -177,10 +177,9 @@ Check if personal skills already exist
 ```python
 def is_already_installed() -> bool:
     claude_dir = get_claude_dir()
-    personal_prefs = claude_dir / "skills/personal-preferences"
-    work_patterns = claude_dir / "skills/work-patterns"
+    user_context = claude_dir / "skills/user-context"
 
-    return personal_prefs.exists() and work_patterns.exists()
+    return user_context.exists()
 ```
 
 ##### Returns
@@ -200,9 +199,7 @@ def create_directory_structure() -> None:
     claude_dir = get_claude_dir()
 
     ensure_directory(claude_dir / "skills")
-    ensure_directory(claude_dir / "skills/personal-preferences")
-    ensure_directory(claude_dir / "skills/work-patterns")
-    ensure_directory(claude_dir / "skills/aida-core")
+    ensure_directory(claude_dir / "skills/user-context")
 ```
 
 ##### Error Handling
@@ -218,9 +215,9 @@ Generate personal preferences skill from template
 ##### Algorithm
 
 ```python
-def render_personal_preferences(responses: dict) -> None:
-    template_dir = Path(__file__).parent.parent / "templates/blueprints/personal-preferences"
-    output_dir = get_claude_dir() / "skills/personal-preferences"
+def render_user_context(responses: dict) -> None:
+    template_dir = Path(__file__).parent.parent / "templates/blueprints/user-context"
+    output_dir = get_claude_dir() / "skills/user-context"
 
     variables = {
         "coding_standards": responses["coding_standards"],
@@ -273,7 +270,6 @@ graph TB
         MainConfig[main<br/>Entry point]
         CheckInstall[check_installation<br/>Verify /aida install run]
         DetectProject[detect_project<br/>Language, framework, tools]
-        PromptPKM[prompt_pkm_symlink<br/>Optional PKM integration]
         CreateProjectSkills[create_project_skills<br/>Generate skills]
     end
 
@@ -291,18 +287,15 @@ graph TB
     MainConfig --> DetectProject
     MainConfig --> Questionnaire2
     MainConfig --> CreateProjectSkills
-    MainConfig --> PromptPKM
 
     DetectProject --> Inference
     CreateProjectSkills --> TemplateRender2
     CreateProjectSkills --> PathsGet2
-    PromptPKM --> PathsGet2
 
     Questionnaire2 --> Templates2
     TemplateRender2 --> Templates2
 
     CreateProjectSkills --> ProjectFS
-    PromptPKM --> ProjectFS
 ```
 
 ### Feedback Script Components
@@ -318,11 +311,6 @@ graph TB
         SubmitIssue[submit_issue<br/>Call gh CLI]
     end
 
-    subgraph "Utils"
-        PathsUtil[paths.py]
-        FilesUtil[files.py]
-    end
-
     GitHub[GitHub API<br/>via gh CLI]
 
     MainFeedback --> CreateBugReport
@@ -331,9 +319,6 @@ graph TB
 
     CreateBugReport --> GetEnvironmentInfo
     CreateBugReport --> SubmitIssue
-
-    GetEnvironmentInfo --> PathsUtil
-    GetEnvironmentInfo --> FilesUtil
 
     SubmitIssue --> GitHub
 ```
@@ -904,12 +889,12 @@ install.yml (YAML)
 Question Definitions (dict)
     ↓ run_questionnaire()
 User Responses (dict)
-    ↓ render_personal_preferences()
+    ↓ render_skill_directory()
 Template Variables (dict)
     ↓ render_template()
 Rendered SKILL.md (str)
     ↓ write_file()
-~/.claude/skills/personal-preferences/SKILL.md
+~/.claude/skills/user-context/SKILL.md
 ```
 
 #### Configuration Data Flow
@@ -966,14 +951,13 @@ configure.py (skills/aida-dispatch/scripts/)
     └─→ errors.py
 
 feedback.py (skills/aida-dispatch/scripts/)
-    ├─→ paths.py
-    ├─→ files.py
-    └─→ errors.py
+    ├─→ subprocess (stdlib)
+    ├─→ pathlib (stdlib)
+    └─→ re (stdlib)
 
 memento.py (skills/memento/scripts/)
-    ├─→ paths.py
-    ├─→ files.py
-    ├─→ json_utils.py
+    ├─→ json (stdlib)
+    ├─→ pathlib (stdlib)
     ├─→ yaml (external)
     └─→ jinja2 (external)
 
@@ -1045,7 +1029,7 @@ Test full scripts:
 python install.py --test-mode
 
 # Verify outputs
-ls ~/.claude/skills/personal-preferences/
+ls ~/.claude/skills/user-context/
 cat ~/.claude/settings.json
 ```
 

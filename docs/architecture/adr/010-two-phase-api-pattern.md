@@ -568,7 +568,7 @@ python configure.py --execute \
 {
   "operation": "configure",
   "idempotency_token": "uuid-1234",
-  "responses": {...}
+  "responses": {"lang": "python", "framework": "flask"}
 }
 ```
 
