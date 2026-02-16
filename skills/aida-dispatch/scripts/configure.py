@@ -625,12 +625,29 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
             "help": "Examples:\n- \"Use Redux for state management\"\n- \"All API calls go in /services directory\"\n- \"Feature flags required for new features\"\n\nThis helps AIDA understand how to structure code for THIS specific project."
         })
 
+    # Plugin config discovery
+    config_plugins = []
+    try:
+        from utils.plugins import (
+            discover_installed_plugins,
+            get_plugins_with_config,
+            generate_plugin_checklist,
+        )
+        all_plugins = discover_installed_plugins()
+        config_plugins = get_plugins_with_config(all_plugins)
+        plugin_checklist = generate_plugin_checklist(config_plugins)
+        if plugin_checklist:
+            questions.insert(0, plugin_checklist)
+    except Exception as e:
+        logger.warning("Plugin discovery failed (non-critical): %s", e)
+
     # Return minimal question set
     return {
         "questions": questions,
         "inferred": project_config.get("inferred", {}),
         "project_info": project_config,  # Return full config for compatibility
         "template": "configure",
+        "config_plugins": config_plugins,
     }
 
 
@@ -762,6 +779,41 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
                 config["preferences"][key] = value
                 logger.info(f"Updated preference: {key} = {value}")
 
+        # Store plugin preferences
+        selected_plugins = responses.pop("selected_plugins", None)
+        plugin_prefs = {}
+        for key in list(responses.keys()):
+            if key.startswith("plugin_"):
+                value = responses.pop(key)
+                rest = key[len("plugin_"):]
+                sep_idx = rest.find("_")
+                if sep_idx > 0:
+                    p_name = rest[:sep_idx]
+                    p_key = rest[sep_idx + 1:].replace("_", ".")
+                    if p_name not in plugin_prefs:
+                        plugin_prefs[p_name] = {"enabled": True}
+                    plugin_prefs[p_name][p_key] = value
+
+        # Mark unselected plugins as disabled
+        if selected_plugins is not None:
+            try:
+                from utils.plugins import (
+                    discover_installed_plugins,
+                    get_plugins_with_config,
+                )
+                all_p = discover_installed_plugins()
+                cfg_p = get_plugins_with_config(all_p)
+                for plugin in cfg_p:
+                    pn = plugin["name"]
+                    if pn not in (selected_plugins or []):
+                        if pn not in plugin_prefs:
+                            plugin_prefs[pn] = {"enabled": False}
+            except Exception:
+                pass
+
+        if plugin_prefs:
+            config["plugins"] = plugin_prefs
+
         # Mark configuration as complete
         config["config_complete"] = True
         config["last_updated"] = datetime.now(timezone.utc).isoformat()
@@ -882,7 +934,12 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
         )
         files_created.append(str(project_context_output / "SKILL.md"))
 
-        message = "Project configuration complete! Created project-context skill in .claude/skills/"
+        message = (
+            "Project configuration complete! "
+            "Created project-context skill in .claude/skills/\n"
+            "Next step: Run /aida config permissions to "
+            "configure Claude Code permissions."
+        )
 
         return {
             "success": True,

@@ -126,6 +126,101 @@ my-plugin/
 | `keywords` | No | Search/discovery terms |
 | `dependencies` | No | Required plugins |
 | `engines` | No | Version constraints |
+| `config` | No | User-configurable preferences |
+| `recommendedPermissions` | No | Permission recommendations |
+
+### Config Declaration
+
+Plugins can declare user-configurable preferences in plugin.json.
+The `/aida config plugin` discovery flow reads these declarations and
+writes the user's choices into the project configuration file.
+
+```json
+{
+  "name": "my-plugin",
+  "version": "1.0.0",
+  "description": "Example plugin with config",
+  "config": {
+    "label": "My Plugin Settings",
+    "description": "Configure preferences for My Plugin",
+    "preferences": [
+      {
+        "key": "feature.enabled",
+        "type": "boolean",
+        "label": "Enable feature X",
+        "default": true
+      },
+      {
+        "key": "output.format",
+        "type": "choice",
+        "label": "Output format",
+        "options": ["JSON", "YAML", "Text"],
+        "default": "JSON"
+      },
+      {
+        "key": "custom.path",
+        "type": "string",
+        "label": "Custom output path",
+        "default": "./output"
+      }
+    ]
+  }
+}
+```
+
+**Supported preference types:**
+
+- `boolean` -- on/off toggle (`default`: true or false)
+- `choice` -- select from a list (`options` array required)
+- `string` -- free-text input
+
+Each preference requires `key` (dot-notation identifier), `type`,
+and `label`. The `default` field is optional but recommended.
+
+### Recommended Permissions Declaration
+
+Plugins can declare Claude Code permission recommendations so that
+users get a curated set of tool permissions when they install the
+plugin. Permissions are grouped into named categories.
+
+```json
+{
+  "name": "my-plugin",
+  "version": "1.0.0",
+  "description": "Example plugin with permissions",
+  "recommendedPermissions": {
+    "git-operations": {
+      "label": "Git Operations",
+      "description": "Commit, push, branch, and other git commands",
+      "rules": [
+        "Bash(git add:*)",
+        "Bash(git commit:*)",
+        "Bash(git push:*)"
+      ],
+      "suggested": "allow"
+    },
+    "file-operations": {
+      "label": "File Operations",
+      "description": "Read and write project files",
+      "rules": [
+        "Bash(cat:*)",
+        "Bash(mkdir:*)"
+      ],
+      "suggested": "ask"
+    }
+  }
+}
+```
+
+**Category fields:**
+
+- `label` -- display name for the permission group
+- `description` -- what the permissions cover
+- `rules` -- array of permission rule strings
+- `suggested` -- default action: `allow`, `ask`, or `deny`
+
+**Rule format:** Rules follow the pattern `Tool(command:args)`.
+Use `*` for wildcard arguments (e.g., `Bash(git add:*)`).
 
 ## marketplace.json Schema
 
