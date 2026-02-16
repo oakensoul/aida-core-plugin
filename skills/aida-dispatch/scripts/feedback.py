@@ -37,6 +37,10 @@ MAX_INPUT_LENGTH = 5000  # Maximum characters for feedback/description
 MIN_INPUT_LENGTH = 10    # Minimum characters to prevent spam
 MIN_SUBMISSION_INTERVAL = 60  # Minimum seconds between submissions
 RATE_LIMIT_FILE = Path.home() / ".claude" / ".aida_feedback_last"
+FEEDBACK_REPO = "oakensoul/aida-marketplace"  # GitHub repository for feedback issues
+
+# Allowed GitHub label characters (alphanumeric, hyphen, space, colon, slash)
+ALLOWED_LABEL_PATTERN = re.compile(r'^[a-zA-Z0-9\s\-:\/]+$')
 
 
 def detect_system_context() -> Dict[str, str]:
@@ -70,14 +74,15 @@ def detect_system_context() -> Dict[str, str]:
                                   capture_output=True, text=True, timeout=2)
             if result.returncode == 0:
                 context['git_version'] = result.stdout.strip()
-        except Exception:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
             context['git_version'] = 'not installed'
 
         # AIDA version (if available)
         context['aida_version'] = get_aida_version()
 
-    except Exception as e:
-        # Best effort - don't fail if we can't detect
+    except (OSError, RuntimeError, KeyError) as e:
+        # Best effort - don't fail if we can't detect system context
+        # Covers platform info, environment vars, and path operations
         context['detection_error'] = str(e)
 
     return context
@@ -154,6 +159,25 @@ def sanitize_gh_input(text: str, max_length: int = MAX_INPUT_LENGTH,
     return '\n'.join(sanitized_lines)
 
 
+def validate_labels(labels: List[str]) -> Tuple[bool, Optional[str]]:
+    """Validate GitHub labels against allowlist.
+
+    Args:
+        labels: List of label strings to validate
+
+    Returns:
+        Tuple of (is_valid, error_message)
+
+    Security:
+        - Prevents command injection via malicious label values
+        - Only allows safe characters in labels
+    """
+    for label in labels:
+        if not label or not ALLOWED_LABEL_PATTERN.match(label):
+            return False, f"Invalid label '{label}': labels must contain only alphanumeric characters, hyphens, spaces, colons, and slashes"
+    return True, None
+
+
 def sanitize_paths(text: str) -> str:
     """Replace sensitive paths in text.
 
@@ -176,8 +200,8 @@ def sanitize_paths(text: str) -> str:
         import os
         username = os.getlogin()
         text = text.replace(username, "<user>")
-    except Exception:
-        # Best effort sanitization
+    except (OSError, AttributeError):
+        # Best effort sanitization - getlogin() can fail in non-interactive contexts
         pass
 
     return text
@@ -207,8 +231,8 @@ def check_rate_limit() -> bool:
             return False
 
         return True
-    except Exception:
-        # If we can't read the file, allow submission
+    except (FileNotFoundError, PermissionError, ValueError):
+        # If we can't read the file or parse the timestamp, allow submission
         return True
 
 
@@ -218,8 +242,8 @@ def record_submission() -> None:
         # Ensure parent directory exists
         RATE_LIMIT_FILE.parent.mkdir(parents=True, exist_ok=True)
         RATE_LIMIT_FILE.write_text(str(time.time()))
-    except Exception:
-        # Best effort - don't fail if we can't record
+    except (OSError, PermissionError):
+        # Best effort - don't fail if we can't record timestamp
         pass
 
 
@@ -286,6 +310,11 @@ def create_github_issue_json(title: str, body: str, labels: List[str]) -> Tuple[
     if not check_gh_auth():
         return (False, "GitHub CLI not authenticated. Run: gh auth login", None, None)
 
+    # Security: Validate labels
+    is_valid, error_msg = validate_labels(labels)
+    if not is_valid:
+        return (False, error_msg, None, None)
+
     # Security: Sanitize inputs
     try:
         sanitized_title = sanitize_gh_input(title, max_length=200, allow_multiline=False)
@@ -299,7 +328,7 @@ def create_github_issue_json(title: str, body: str, labels: List[str]) -> Tuple[
         result = subprocess.run(
             [
                 "gh", "issue", "create",
-                "--repo", "oakensoul/aida-marketplace",
+                "--repo", FEEDBACK_REPO,
                 "--title", sanitized_title,
                 "--body", sanitized_body,
                 "--label", ",".join(labels)
@@ -336,8 +365,10 @@ def create_github_issue_json(title: str, body: str, labels: List[str]) -> Tuple[
 
     except subprocess.TimeoutExpired:
         return (False, "GitHub CLI timed out. Check your internet connection.", None, None)
-    except Exception as e:
-        return (False, f"Unexpected error: {str(e)}", None, None)
+    except subprocess.SubprocessError as e:
+        return (False, f"Subprocess error: {str(e)}", None, None)
+    except (ValueError, json.JSONDecodeError) as e:
+        return (False, f"Response parsing error: {str(e)}", None, None)
 
 
 def submit_feedback_json(json_str: str) -> int:
@@ -805,6 +836,12 @@ def create_github_issue(title: str, body: str, labels: List[str]) -> int:
         - Shows PII warning
         - Sanitizes paths in output
     """
+    # Security: Validate labels
+    is_valid, error_msg = validate_labels(labels)
+    if not is_valid:
+        print(f"\n❌ {error_msg}")
+        return 1
+
     # Security: Check rate limit
     if not check_rate_limit():
         return 1
@@ -853,7 +890,7 @@ def create_github_issue(title: str, body: str, labels: List[str]) -> int:
         result = subprocess.run(
             [
                 "gh", "issue", "create",
-                "--repo", "oakensoul/aida-marketplace",
+                "--repo", FEEDBACK_REPO,
                 "--title", sanitized_title,
                 "--body", sanitized_body,
                 "--label", ",".join(labels)
@@ -893,8 +930,11 @@ def create_github_issue(title: str, body: str, labels: List[str]) -> int:
     except subprocess.TimeoutExpired:
         print("\n❌ Error: Request timed out. Please check your network connection.")
         return 1
-    except Exception as e:
-        print(f"\n❌ Error creating issue: {e}")
+    except subprocess.SubprocessError as e:
+        print(f"\n❌ Subprocess error: {e}")
+        return 1
+    except (ValueError, TypeError) as e:
+        print(f"\n❌ Invalid data error: {e}")
         return 1
 
 
@@ -920,7 +960,7 @@ def check_gh_auth() -> bool:
             timeout=5
         )
         return result.returncode == 0
-    except Exception:
+    except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
         return False
 
 
@@ -931,7 +971,7 @@ def get_aida_version() -> str:
         if plugin_json.exists():
             data = json.loads(plugin_json.read_text())
             return data.get("version", "unknown")
-    except Exception:
+    except (FileNotFoundError, PermissionError, json.JSONDecodeError, OSError):
         # If reading or parsing plugin.json fails, return "unknown" version
         pass
 

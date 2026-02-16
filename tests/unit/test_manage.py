@@ -399,8 +399,31 @@ class TestSafeJsonLoad(unittest.TestCase):
 class TestCreateComponent(unittest.TestCase):
     """Test component creation in temporary directory."""
 
+    def setUp(self):
+        """Set up temporary directory for tests."""
+        import tempfile
+        self.temp_dir = tempfile.mkdtemp()
+        self.temp_path = Path(self.temp_dir)
+        self.original_cwd = Path.cwd()
+
+    def tearDown(self):
+        """Clean up temporary directory."""
+        import os
+        import shutil
+        os.chdir(self.original_cwd)
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
     def test_create_agent(self):
-        """Test creating an agent - verify validation passes."""
+        """Test creating an agent with filesystem operations."""
+        import os
+        from unittest.mock import patch
+
+        # Change to temp directory
+        os.chdir(self.temp_path)
+
+        # Create .git to simulate project root
+        (self.temp_path / ".git").mkdir()
+
         context = {
             "operation": "create",
             "type": "agent",
@@ -411,16 +434,24 @@ class TestCreateComponent(unittest.TestCase):
             "location": "project",
         }
 
-        # We can't easily test this without mocking paths
-        # So we just verify the validation passes
-        is_valid, error = validate_name(context["name"])
-        self.assertTrue(is_valid)
+        # Mock get_project_root to return our temp directory
+        with patch('operations.utils.get_project_root', return_value=self.temp_path):
+            result = execute(context, {})
 
-        is_valid, error = validate_description(context["description"])
-        self.assertTrue(is_valid)
+        # Verify success
+        self.assertTrue(result["success"], f"Execute failed: {result.get('message', 'unknown error')}")
 
-        is_valid, error = validate_version(context["version"])
-        self.assertTrue(is_valid)
+        # Verify the result contains expected info
+        self.assertIn("path", result)
+        self.assertIn("files_created", result)
+
+        # Verify the path indicates the agent was created
+        component_path = Path(result["path"])
+        self.assertEqual(component_path.name, "test-agent.md")
+        self.assertIn("test-agent", str(component_path))
+
+        # Verify at least one file was created
+        self.assertGreater(len(result["files_created"]), 0)
 
 
 def run_tests():

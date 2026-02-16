@@ -65,7 +65,7 @@ logger = logging.getLogger(__name__)
 
 
 # Constants
-AIDA_VERSION = "0.2.0"
+AIDA_VERSION = "0.7.0"
 AIDA_MARKER_FILE = "aida.yml"
 USER_CONTEXT_SKILL_DIR = "skills/user-context"
 SETTINGS_FILE = "settings.json"

@@ -340,6 +340,91 @@ class TestCreateGitHubIssue(unittest.TestCase):
 
         self.assertEqual(result, 1)
 
+    @patch('builtins.input', return_value='yes')
+    @patch('feedback.check_rate_limit', return_value=True)
+    @patch('feedback.check_gh_cli', return_value=True)
+    @patch('subprocess.run')
+    def test_create_issue_command_structure(self, mock_run, mock_check, mock_rate, mock_input):
+        """Test that subprocess command has correct structure."""
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout='https://github.com/oakensoul/aida-marketplace/issues/1\n',
+            stderr=''
+        )
+
+        feedback.create_github_issue(
+            title='Test Title',
+            body='Test body content for structure verification test',
+            labels=['label1', 'label2']
+        )
+
+        # Get the actual issue creation call (second call)
+        self.assertEqual(mock_run.call_count, 2)
+        call_args = mock_run.call_args_list[1][0][0]
+
+        # Verify command structure
+        self.assertEqual(call_args[0], 'gh')
+        self.assertEqual(call_args[1], 'issue')
+        self.assertEqual(call_args[2], 'create')
+        self.assertIn('--repo', call_args)
+        self.assertIn('oakensoul/aida-marketplace', call_args)
+        self.assertIn('--title', call_args)
+        self.assertIn('Test Title', call_args)
+        self.assertIn('--body', call_args)
+        self.assertIn('--label', call_args)
+        # Verify labels are in the command (may be comma-separated)
+        labels_str = ','.join(call_args)
+        self.assertIn('label1', labels_str)
+        self.assertIn('label2', labels_str)
+
+    @patch('feedback.create_github_issue', return_value=0)
+    @patch('builtins.input', side_effect=[
+        'y',  # confirm
+        'A' * 200,  # very long title
+        '1',  # category
+        ''
+    ])
+    def test_submit_feedback_very_long_title_truncated(self, mock_input, mock_create):
+        """Test feedback with very long title is truncated."""
+        result = feedback.submit_feedback()
+        self.assertEqual(result, 0)
+
+        call_args = mock_create.call_args
+        title = call_args[1]['title']
+        # Title should be truncated
+        self.assertLess(len(title), 100)
+        self.assertIn('...', title)
+
+    @patch('feedback.create_github_issue', return_value=0)
+    @patch('builtins.input', side_effect=[
+        'y',  # confirm
+        'Feedback with <script>alert("xss")</script>',  # special chars
+        '1',
+        'Context with "quotes" and \'apostrophes\''
+    ])
+    def test_submit_feedback_special_characters(self, mock_input, mock_create):
+        """Test feedback with special characters is handled."""
+        result = feedback.submit_feedback()
+        self.assertEqual(result, 0)
+
+        call_args = mock_create.call_args
+        # Verify body contains the special characters (not stripped)
+        self.assertIn('<script>', call_args[1]['body'])
+        self.assertIn('"quotes"', call_args[1]['body'])
+        self.assertIn("'apostrophes'", call_args[1]['body'])
+
+    @patch('feedback.create_github_issue', return_value=0)
+    @patch('builtins.input', side_effect=[
+        'y',
+        '',  # empty body - should cancel
+    ])
+    def test_submit_bug_empty_body_cancels(self, mock_input, mock_create):
+        """Test bug report with empty body cancels submission."""
+        result = feedback.submit_bug()
+        self.assertEqual(result, 0)
+        # Should not call create_github_issue
+        mock_create.assert_not_called()
+
 
 class TestCheckGhCli(unittest.TestCase):
     """Test check_gh_cli() function."""

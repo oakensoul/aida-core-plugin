@@ -166,7 +166,7 @@ See [C4 Diagrams](architecture/c4/) for visual representations.
 #### Layer 2: Python Scripts
 
 - **install.py**: Global setup wizard
-- **configure.py**: Project setup wizard (planned)
+- **configure.py**: Project setup wizard
 - **feedback.py**: GitHub issue creation
 - **utils/**: Shared utilities
 
@@ -192,7 +192,7 @@ See [C4 Diagrams](architecture/c4/) for visual representations.
 
 ## Component Architecture
 
-See [C4 Component Diagrams](architecture/c4/component-diagrams.md) for details.
+See [C4 Component Diagrams](architecture/c4/component-diagram.md) for details.
 
 ### Python Utilities Module
 
@@ -623,6 +623,11 @@ See [Architecture Decision Records](architecture/adr/) for detailed rationale.
 - [ADR-004: YAML for Questionnaires](architecture/adr/004-yaml-questionnaires.md)
 - [ADR-005: Local-First Storage](architecture/adr/005-local-first-storage.md)
 - [ADR-006: gh CLI for Feedback](architecture/adr/006-gh-cli-feedback.md)
+- [ADR-007: YAML Config as Single Source of Truth](architecture/adr/007-yaml-config-single-source-truth.md)
+- [ADR-008: Marketplace-Centric Distribution](architecture/adr/008-marketplace-centric-distribution.md)
+- [ADR-009: Input Validation and Path Security](architecture/adr/009-input-validation-path-security.md)
+- [ADR-010: Two-Phase API for LLM Integration](architecture/adr/010-two-phase-api-pattern.md)
+- [ADR-011: User-Level Memento Storage](architecture/adr/011-user-level-memento-storage.md)
 
 ### Key Decisions Summary
 

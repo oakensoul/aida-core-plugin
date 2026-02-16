@@ -173,9 +173,14 @@ def _ensure_within_dir(path: Path, base_dir: Path) -> Path:
         raise ValueError(f"Symlink detected at {path}")
     resolved = path.resolve()
     base_resolved = base_dir.resolve()
-    if not (resolved == base_resolved
-            or str(resolved).startswith(str(base_resolved) + os.sep)):
+
+    # Use Path.relative_to() for proper path containment validation
+    # This prevents bypasses that string-based startswith() is vulnerable to
+    try:
+        resolved.relative_to(base_resolved)
+    except ValueError:
         raise ValueError(f"Path escape detected: {resolved}")
+
     return resolved
 
 
@@ -1273,7 +1278,10 @@ def safe_json_load(json_str: Optional[str]) -> Dict[str, Any]:
     if not json_str:
         return {}
 
-    # Size limit: 100KB
+    # Size limit: 100KB for mementos
+    # Note: This is lower than the general 1MB limit in json_utils.py because
+    # mementos are session snapshots that should remain lightweight. Config
+    # files may legitimately be larger, so the general limit is higher.
     if len(json_str) > 100 * 1024:
         raise ValueError("JSON input exceeds size limit (100KB)")
 

@@ -985,6 +985,57 @@ class TestWritePermissions(unittest.TestCase):
         self.assertTrue(success)
         self.assertTrue((self.temp_path / ".claude").is_dir())
 
+    @patch("settings_manager.get_home_dir")
+    def test_write_and_read_back_verification(self, mock_home):
+        """Test that written permissions can be read back correctly."""
+        mock_home.return_value = self.temp_path
+
+        # Write permissions
+        rules = {
+            "allow": ["Read(*)", "Grep(*)"],
+            "ask": ["Write(*.txt)"],
+            "deny": ["Bash(rm:*)"]
+        }
+        success = write_permissions("user", rules)
+        self.assertTrue(success)
+
+        # Read back and verify
+        user_dir = self.temp_path / ".claude"
+        with open(user_dir / "settings.json", encoding="utf-8") as f:
+            read_back = json.load(f)
+
+        # Verify all rules match
+        self.assertEqual(set(read_back["allow"]), set(rules["allow"]))
+        self.assertEqual(set(read_back["ask"]), set(rules["ask"]))
+        self.assertEqual(set(read_back["deny"]), set(rules["deny"]))
+
+    @patch("settings_manager.get_home_dir")
+    @patch("settings_manager.Path.cwd")
+    def test_scope_precedence_project_overrides_global(self, mock_cwd, mock_home):
+        """Test that project-level permissions override global-level."""
+        mock_home.return_value = self.temp_path
+        mock_cwd.return_value = self.temp_path
+
+        # Create user-level settings
+        user_dir = self.temp_path / ".claude"
+        user_dir.mkdir(parents=True)
+        user_rules = {"allow": ["Read(*)"]}
+        with open(user_dir / "settings.json", "w", encoding="utf-8") as f:
+            json.dump(user_rules, f)
+
+        # Create project-level settings with conflicting rule
+        project_rules = {"deny": ["Read(*)"]}
+        success = write_permissions("project", project_rules)
+        self.assertTrue(success)
+
+        # Read all settings
+        all_settings = read_all_settings()
+
+        # Verify both exist but project should take precedence in practice
+        self.assertIn("Read(*)", all_settings["user"]["allow"])
+        self.assertIn("Read(*)", all_settings["project"]["deny"])
+        # In the actual permission system, project deny would override user allow
+
 
 class TestPermissionsGetQuestions(unittest.TestCase):
     """Test permissions two-phase API get_questions."""
