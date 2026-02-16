@@ -20,7 +20,7 @@ write the final configuration.
 ### Step 1: Scan Plugins
 
 The scanner examines all installed plugins in the cache directory
-for `recommendedPermissions` declarations.
+for `recommendedPermissions` declarations in `aida-config.json`.
 
 ### Step 2: Aggregate and Deduplicate
 

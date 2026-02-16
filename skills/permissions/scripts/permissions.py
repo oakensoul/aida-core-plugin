@@ -473,17 +473,18 @@ def _load_json_arg(value: str) -> dict:
     """
     path = Path(value)
     if path.is_file():
+        # Reject symlinks before stat to prevent following links
+        # to sensitive files (avoids TOCTOU between stat and open)
+        if path.is_symlink():
+            raise ValueError(
+                f"Refusing to read symlink: {path}"
+            )
         # Check file size before reading to prevent memory exhaustion
         file_size = path.stat().st_size
         if file_size > MAX_JSON_ARG_SIZE:
             raise ValueError(
                 f"JSON file too large: {file_size} bytes "
                 f"(max {MAX_JSON_ARG_SIZE})"
-            )
-        # Reject symlinks to prevent following links to sensitive files
-        if path.is_symlink():
-            raise ValueError(
-                f"Refusing to read symlink: {path}"
             )
         with open(path, encoding="utf-8") as f:
             content = f.read()

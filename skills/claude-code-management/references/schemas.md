@@ -119,6 +119,8 @@ skills/
 
 ## Plugin Schema (plugin.json)
 
+The `plugin.json` file contains only standard Claude Code fields:
+
 ```json
 {
   "name": "my-plugin",
@@ -129,7 +131,19 @@ skills/
   "repository": "https://github.com/...",
   "license": "MIT",
   "keywords": ["keyword1", "keyword2"],
-  "dependencies": {},
+  "dependencies": {}
+}
+```
+
+## AIDA Config Schema (aida-config.json)
+
+AIDA-specific fields (`config` and `recommendedPermissions`) live in
+a separate `aida-config.json` file inside `.claude-plugin/`. This
+avoids conflicts with the Claude Code plugin validator which rejects
+unrecognized keys in `plugin.json`.
+
+```json
+{
   "config": { },
   "recommendedPermissions": { }
 }
@@ -137,7 +151,8 @@ skills/
 
 ### Plugin Config Section
 
-Plugins can declare user-configurable preferences via the `config` section:
+Plugins can declare user-configurable preferences via the `config`
+section in `aida-config.json`:
 
 ```json
 {
@@ -198,8 +213,8 @@ Plugins can declare user-configurable preferences via the `config` section:
 ### Plugin Recommended Permissions Section
 
 Plugins can declare Claude Code permission recommendations via the
-`recommendedPermissions` section. Each category groups related
-permission rules:
+`recommendedPermissions` section in `aida-config.json`. Each category
+groups related permission rules:
 
 ```json
 {
@@ -251,13 +266,14 @@ Rules follow the pattern `Tool(command:args)`:
 ```text
 my-plugin/
 ├── .claude-plugin/
-│   └── plugin.json    # Plugin metadata
-├── agents/            # Plugin agents
-├── commands/          # Plugin commands
-├── skills/            # Plugin skills
-├── templates/         # Optional: shared templates
-├── README.md          # Plugin documentation
-└── .gitignore         # Git ignores
+│   ├── plugin.json       # Standard Claude Code metadata
+│   └── aida-config.json  # AIDA config + permissions
+├── agents/               # Plugin agents
+├── commands/             # Plugin commands
+├── skills/               # Plugin skills
+├── templates/            # Optional: shared templates
+├── README.md             # Plugin documentation
+└── .gitignore            # Git ignores
 ```
 
 ## Tag Conventions
