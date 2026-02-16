@@ -10,6 +10,43 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-02-15
+
+### Added
+
+#### User-Level Memento Storage (#3)
+
+- Mementos stored at `~/.claude/memento/` (user-level, branch-independent)
+- Project namespacing with `{project}--{slug}.md` filenames
+- Auto-detected `project:` frontmatter block (name, path, repo, branch)
+- List filtering: defaults to current project, `--all` for all projects,
+  `--project <name>` for a specific project
+- Completed mementos archived to `~/.claude/memento/.completed/`
+
+#### Project-Level Permissions (#6, #9)
+
+- Common development commands run without permission prompts
+- Destructive operations still require confirmation
+- Added Edit, Write, and NotebookEdit to allowed tools
+
+### Changed
+
+- Migrated from monorepo to standalone repository (#1)
+- Adopted marketplace-centric distribution strategy (#2)
+- Replaced custom YAML frontmatter parser with PyYAML `safe_load`
+
+### Security
+
+- Atomic file writes via tempfile + `os.replace` with 0o600 permissions
+- Path containment validation with symlink rejection
+- YAML injection prevention via `| tojson` in Jinja2 templates
+- Regex backreference injection prevention via lambda replacements
+- Git URL credential sanitization across all URL schemes
+- Directory permissions enforced via `os.chmod(0o700)` after `mkdir`
+- Input validation: slug format/length, project name, JSON size limits
+
+---
+
 ## [0.2.0] - 2025-11-05
 
 ### Added
@@ -137,5 +174,6 @@ See git history for details on versions prior to 0.2.0.
 
 ---
 
+[0.6.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.6.0
 [0.2.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.2.0
 [0.1.8]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.1.8
