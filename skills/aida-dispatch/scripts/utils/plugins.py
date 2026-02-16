@@ -6,8 +6,10 @@ interactive questions for the setup wizard.
 
 from __future__ import annotations
 
+import errno
 import glob
 import logging
+import os
 from pathlib import Path
 
 from .errors import ConfigurationError
@@ -15,6 +17,9 @@ from .json_utils import safe_json_load
 from .paths import get_home_dir
 
 logger = logging.getLogger(__name__)
+
+# Maximum file size for plugin JSON files (1 MB).
+_MAX_FILE_SIZE = 1024 * 1024
 
 VALID_PREFERENCE_TYPES = {"boolean", "choice", "string"}
 
@@ -25,11 +30,126 @@ PREFERENCE_TYPE_MAP = {
 }
 
 
+def _safe_read_file(
+    file_path: Path,
+    label: str,
+    resolved_root: Path | None = None,
+) -> str | None:
+    """Read a file with TOCTOU-safe security checks.
+
+    Uses ``O_NOFOLLOW`` to atomically reject symlinks during open,
+    eliminating race conditions between symlink/size checks and
+    file reads.  Optionally validates the resolved path stays
+    within a cache root directory.
+
+    Args:
+        file_path: Path to the file.
+        label: Human-readable label for log messages.
+        resolved_root: If provided, validate that the file's
+            resolved path is within this root.
+
+    Returns:
+        File content as string, or ``None`` on error.
+    """
+    # Path containment check (catches non-symlink traversal
+    # via ``..`` components that the glob might match)
+    if resolved_root is not None:
+        try:
+            file_path.resolve().relative_to(resolved_root)
+        except ValueError:
+            logger.warning(
+                "%s path outside cache root: %s",
+                label,
+                file_path,
+            )
+            return None
+
+    fd = -1
+    try:
+        fd = os.open(
+            str(file_path), os.O_RDONLY | os.O_NOFOLLOW
+        )
+        st = os.fstat(fd)
+        if st.st_size > _MAX_FILE_SIZE:
+            logger.warning(
+                "%s too large: %s", label, file_path
+            )
+            return None
+        with os.fdopen(fd, "r", encoding="utf-8") as f:
+            fd = -1  # fd now owned by file object
+            return f.read()
+    except OSError as exc:
+        if exc.errno == errno.ELOOP:
+            logger.warning(
+                "Skipping symlink %s: %s", label, file_path
+            )
+        elif exc.errno != errno.ENOENT:
+            logger.warning(
+                "Failed to read %s %s: %s",
+                label,
+                file_path,
+                exc,
+            )
+        return None
+    finally:
+        if fd >= 0:
+            os.close(fd)
+
+
+def _read_aida_config(
+    plugin_dir: Path, resolved_root: Path | None
+) -> dict | None:
+    """Read AIDA-specific configuration from aida-config.json.
+
+    AIDA fields (``config`` and ``recommendedPermissions``) are
+    stored separately from the standard Claude Code plugin manifest
+    in ``.claude-plugin/aida-config.json``.
+
+    Uses ``O_NOFOLLOW`` to atomically reject symlinks.
+
+    Args:
+        plugin_dir: Path to the ``.claude-plugin`` directory.
+        resolved_root: Resolved cache root for path validation,
+            or ``None`` if the cache root does not exist.
+
+    Returns:
+        Parsed dict from ``aida-config.json``, or ``None`` if
+        the file is missing, invalid, or fails security checks.
+    """
+    config_path = plugin_dir / "aida-config.json"
+    raw = _safe_read_file(
+        config_path, "aida-config.json", resolved_root
+    )
+    if raw is None:
+        return None
+
+    try:
+        data = safe_json_load(raw)
+        if not isinstance(data, dict):
+            logger.warning(
+                "aida-config.json is not an object: %s",
+                config_path,
+            )
+            return None
+        return data
+    except Exception:
+        logger.warning(
+            "Failed to read aida-config.json: %s",
+            config_path,
+            exc_info=True,
+        )
+        return None
+
+
 def discover_installed_plugins() -> list[dict]:
     """Scan installed plugins and return their metadata.
 
     Looks for plugin.json files in the standard plugin cache
     directory (~/.claude/plugins/cache/*/*/.claude-plugin/plugin.json).
+
+    AIDA-specific fields (``config`` and ``recommendedPermissions``)
+    are read from a separate ``aida-config.json`` in the same
+    directory. These fields are never read from ``plugin.json``.
 
     Returns:
         List of dicts with keys: name, version, config,
@@ -49,39 +169,25 @@ def discover_installed_plugins() -> list[dict]:
     for manifest_path in sorted(glob.glob(pattern)):
         try:
             manifest_file = Path(manifest_path)
+            plugin_dir_path = manifest_file.parent
 
-            # Reject symlinks to prevent following links outside
-            # the plugin cache (consistent with scanner.py)
-            if manifest_file.is_symlink():
+            # Reject symlinked .claude-plugin directories
+            if plugin_dir_path.is_symlink():
                 logger.warning(
-                    "Skipping symlink plugin manifest: %s",
-                    manifest_path,
+                    "Skipping symlink plugin directory: %s",
+                    plugin_dir_path,
                 )
                 continue
 
-            # Validate resolved path stays within cache root
-            if resolved_root is not None:
-                try:
-                    manifest_file.resolve().relative_to(
-                        resolved_root
-                    )
-                except ValueError:
-                    logger.warning(
-                        "Plugin path outside cache root: %s",
-                        manifest_path,
-                    )
-                    continue
-
-            # Check file size before reading to prevent memory
-            # exhaustion (safe_json_load checks after read)
-            if manifest_file.stat().st_size > 1024 * 1024:
-                logger.warning(
-                    "Plugin manifest too large: %s",
-                    manifest_path,
-                )
+            # Read manifest with TOCTOU-safe security checks
+            raw = _safe_read_file(
+                manifest_file,
+                "plugin manifest",
+                resolved_root,
+            )
+            if raw is None:
                 continue
-            with open(manifest_path, encoding="utf-8") as f:
-                raw = f.read()
+
             data = safe_json_load(raw)
             if not isinstance(data, dict):
                 logger.warning(
@@ -89,16 +195,30 @@ def discover_installed_plugins() -> list[dict]:
                     manifest_path,
                 )
                 continue
-            plugin_dir = str(Path(manifest_path).parent.parent)
+
+            aida_config = _read_aida_config(
+                plugin_dir_path, resolved_root
+            )
+
             plugins.append(
                 {
                     "name": data.get("name", "unknown"),
                     "version": data.get("version", "0.0.0"),
-                    "config": data.get("config", {}),
-                    "recommendedPermissions": data.get(
-                        "recommendedPermissions", {}
+                    "config": (
+                        aida_config.get("config", {})
+                        if aida_config
+                        else {}
                     ),
-                    "plugin_dir": plugin_dir,
+                    "recommendedPermissions": (
+                        aida_config.get(
+                            "recommendedPermissions", {}
+                        )
+                        if aida_config
+                        else {}
+                    ),
+                    "plugin_dir": str(
+                        plugin_dir_path.parent
+                    ),
                 }
             )
         except Exception:
@@ -126,7 +246,7 @@ def validate_plugin_config(config: dict, plugin_name: str) -> None:
     """Validate a plugin's config section structure.
 
     Args:
-        config: The config dict from plugin.json.
+        config: The config dict from aida-config.json.
         plugin_name: Plugin name for error messages.
 
     Raises:

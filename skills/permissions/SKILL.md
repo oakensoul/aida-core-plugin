@@ -44,7 +44,8 @@ the plugin root.
 
 ### Phase 1: `get_questions(context)`
 
-1. Scans installed plugins for `recommendedPermissions`
+1. Scans installed plugins for `recommendedPermissions` in
+   `aida-config.json`
 2. Deduplicates and categorizes discovered rules
 3. Reads current permissions from all settings scopes
 4. Detects conflicts between current and proposed rules

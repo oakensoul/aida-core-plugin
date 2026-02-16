@@ -10,6 +10,28 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] - 2026-02-16
+
+### Fixed
+
+#### Plugin Validator Compatibility (#13)
+
+- Moved `config` and `recommendedPermissions` from `plugin.json` to new
+  `aida-config.json` to resolve Claude Code plugin validator rejecting
+  unrecognized keys
+- Plugin discovery reads AIDA-specific fields from `aida-config.json`
+  (strict separation, no fallback to `plugin.json`)
+
+### Security
+
+- TOCTOU-safe file reading with `O_NOFOLLOW` in plugin discovery and
+  permission scanner (eliminates symlink race conditions)
+- Directory-level symlink rejection for `.claude-plugin` directories
+- Consistent `isinstance(data, dict)` validation at all JSON parse boundaries
+- Reordered symlink check before `stat()` in permissions CLI
+
+---
+
 ## [0.6.0] - 2026-02-15
 
 ### Added
@@ -174,6 +196,7 @@ See git history for details on versions prior to 0.2.0.
 
 ---
 
+[0.6.1]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.6.1
 [0.6.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.6.0
 [0.2.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.2.0
 [0.1.8]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.1.8

@@ -90,6 +90,8 @@ my-plugin/
 
 ### Complete Schema
 
+The `plugin.json` file contains only standard Claude Code fields:
+
 ```json
 {
   "name": "my-plugin",
@@ -126,20 +128,23 @@ my-plugin/
 | `keywords` | No | Search/discovery terms |
 | `dependencies` | No | Required plugins |
 | `engines` | No | Version constraints |
-| `config` | No | User-configurable preferences |
-| `recommendedPermissions` | No | Permission recommendations |
+
+## aida-config.json Schema
+
+AIDA-specific fields (`config` and `recommendedPermissions`) live
+in a separate `aida-config.json` inside `.claude-plugin/`. This
+keeps the standard `plugin.json` clean for the Claude Code plugin
+validator.
 
 ### Config Declaration
 
-Plugins can declare user-configurable preferences in plugin.json.
-The `/aida config plugin` discovery flow reads these declarations and
-writes the user's choices into the project configuration file.
+Plugins can declare user-configurable preferences in
+`aida-config.json`. The `/aida config plugin` discovery flow reads
+these declarations and writes the user's choices into the project
+configuration file.
 
 ```json
 {
-  "name": "my-plugin",
-  "version": "1.0.0",
-  "description": "Example plugin with config",
   "config": {
     "label": "My Plugin Settings",
     "description": "Configure preferences for My Plugin",
@@ -179,15 +184,13 @@ and `label`. The `default` field is optional but recommended.
 
 ### Recommended Permissions Declaration
 
-Plugins can declare Claude Code permission recommendations so that
-users get a curated set of tool permissions when they install the
-plugin. Permissions are grouped into named categories.
+Plugins can declare Claude Code permission recommendations in
+`aida-config.json` so that users get a curated set of tool
+permissions when they install the plugin. Permissions are grouped
+into named categories.
 
 ```json
 {
-  "name": "my-plugin",
-  "version": "1.0.0",
-  "description": "Example plugin with permissions",
   "recommendedPermissions": {
     "git-operations": {
       "label": "Git Operations",

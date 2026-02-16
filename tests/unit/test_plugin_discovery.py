@@ -74,20 +74,212 @@ class TestDiscoverInstalledPlugins(unittest.TestCase):
         manifest = {
             "name": "test-plugin",
             "version": "1.0.0",
+        }
+        with open(plugin_dir / "plugin.json", "w", encoding="utf-8") as f:
+            json.dump(manifest, f)
+
+        aida_config = {
             "config": {"label": "Test", "description": "Test plugin"},
             "recommendedPermissions": {"file-read": {"rules": ["Read(*)"]}},
         }
-
-        with open(plugin_dir / "plugin.json", "w", encoding="utf-8") as f:
-            json.dump(manifest, f)
+        with open(
+            plugin_dir / "aida-config.json", "w", encoding="utf-8"
+        ) as f:
+            json.dump(aida_config, f)
 
         plugins = discover_installed_plugins()
         self.assertEqual(len(plugins), 1)
         self.assertEqual(plugins[0]["name"], "test-plugin")
         self.assertEqual(plugins[0]["version"], "1.0.0")
         self.assertIn("config", plugins[0])
+        self.assertEqual(plugins[0]["config"]["label"], "Test")
         self.assertIn("recommendedPermissions", plugins[0])
+        self.assertIn(
+            "file-read", plugins[0]["recommendedPermissions"]
+        )
         self.assertIn("plugin_dir", plugins[0])
+
+    @patch("utils.plugins.get_home_dir")
+    def test_no_aida_config_returns_empty_fields(self, mock_home):
+        """Test that missing aida-config.json yields empty config."""
+        mock_home.return_value = self.temp_path
+
+        plugin_dir = (
+            self.temp_path
+            / ".claude"
+            / "plugins"
+            / "cache"
+            / "owner1"
+            / "plugin1"
+            / ".claude-plugin"
+        )
+        plugin_dir.mkdir(parents=True, exist_ok=True)
+
+        manifest = {"name": "test-plugin", "version": "1.0.0"}
+        with open(plugin_dir / "plugin.json", "w", encoding="utf-8") as f:
+            json.dump(manifest, f)
+
+        plugins = discover_installed_plugins()
+        self.assertEqual(len(plugins), 1)
+        self.assertEqual(plugins[0]["config"], {})
+        self.assertEqual(plugins[0]["recommendedPermissions"], {})
+
+    @patch("utils.plugins.get_home_dir")
+    def test_aida_config_symlink_skipped(self, mock_home):
+        """Test that symlinked aida-config.json is ignored."""
+        mock_home.return_value = self.temp_path
+
+        plugin_dir = (
+            self.temp_path
+            / ".claude"
+            / "plugins"
+            / "cache"
+            / "owner1"
+            / "plugin1"
+            / ".claude-plugin"
+        )
+        plugin_dir.mkdir(parents=True, exist_ok=True)
+
+        manifest = {"name": "test-plugin", "version": "1.0.0"}
+        with open(plugin_dir / "plugin.json", "w", encoding="utf-8") as f:
+            json.dump(manifest, f)
+
+        # Create a real file and symlink aida-config.json to it
+        real_config = self.temp_path / "real-config.json"
+        with open(real_config, "w", encoding="utf-8") as f:
+            json.dump(
+                {"config": {"label": "Evil", "description": "Bad"}}, f
+            )
+        (plugin_dir / "aida-config.json").symlink_to(real_config)
+
+        plugins = discover_installed_plugins()
+        self.assertEqual(len(plugins), 1)
+        self.assertEqual(plugins[0]["config"], {})
+        self.assertEqual(plugins[0]["recommendedPermissions"], {})
+
+    @patch("utils.plugins.get_home_dir")
+    def test_aida_config_too_large_skipped(self, mock_home):
+        """Test that oversized aida-config.json is ignored."""
+        mock_home.return_value = self.temp_path
+
+        plugin_dir = (
+            self.temp_path
+            / ".claude"
+            / "plugins"
+            / "cache"
+            / "owner1"
+            / "plugin1"
+            / ".claude-plugin"
+        )
+        plugin_dir.mkdir(parents=True, exist_ok=True)
+
+        manifest = {"name": "test-plugin", "version": "1.0.0"}
+        with open(plugin_dir / "plugin.json", "w", encoding="utf-8") as f:
+            json.dump(manifest, f)
+
+        # Create oversized aida-config.json (>1MB)
+        with open(
+            plugin_dir / "aida-config.json", "w", encoding="utf-8"
+        ) as f:
+            f.write("{" + '"x": "' + ("a" * 1024 * 1024) + '"' + "}")
+
+        plugins = discover_installed_plugins()
+        self.assertEqual(len(plugins), 1)
+        self.assertEqual(plugins[0]["config"], {})
+        self.assertEqual(plugins[0]["recommendedPermissions"], {})
+
+    @patch("utils.plugins.get_home_dir")
+    def test_aida_config_non_dict_skipped(self, mock_home):
+        """Test that aida-config.json with non-dict JSON is ignored."""
+        mock_home.return_value = self.temp_path
+
+        plugin_dir = (
+            self.temp_path
+            / ".claude"
+            / "plugins"
+            / "cache"
+            / "owner1"
+            / "plugin1"
+            / ".claude-plugin"
+        )
+        plugin_dir.mkdir(parents=True, exist_ok=True)
+
+        manifest = {"name": "test-plugin", "version": "1.0.0"}
+        with open(plugin_dir / "plugin.json", "w", encoding="utf-8") as f:
+            json.dump(manifest, f)
+
+        # Write valid JSON that is an array, not an object
+        with open(
+            plugin_dir / "aida-config.json", "w", encoding="utf-8"
+        ) as f:
+            f.write('["config", "permissions"]')
+
+        plugins = discover_installed_plugins()
+        self.assertEqual(len(plugins), 1)
+        self.assertEqual(plugins[0]["config"], {})
+        self.assertEqual(plugins[0]["recommendedPermissions"], {})
+
+    @patch("utils.plugins.get_home_dir")
+    def test_aida_config_path_escape_rejected(self, mock_home):
+        """Test that aida-config.json outside cache root is rejected."""
+        mock_home.return_value = self.temp_path
+
+        plugin_dir = (
+            self.temp_path
+            / ".claude"
+            / "plugins"
+            / "cache"
+            / "owner1"
+            / "plugin1"
+            / ".claude-plugin"
+        )
+        plugin_dir.mkdir(parents=True, exist_ok=True)
+
+        manifest = {"name": "test-plugin", "version": "1.0.0"}
+        with open(plugin_dir / "plugin.json", "w", encoding="utf-8") as f:
+            json.dump(manifest, f)
+
+        # Create config outside cache and symlink to it
+        evil_config = self.temp_path / "evil-config.json"
+        with open(evil_config, "w", encoding="utf-8") as f:
+            json.dump({"config": {"label": "Evil"}}, f)
+        (plugin_dir / "aida-config.json").symlink_to(evil_config)
+
+        plugins = discover_installed_plugins()
+        # Symlink is rejected before path containment is even checked
+        self.assertEqual(len(plugins), 1)
+        self.assertEqual(plugins[0]["config"], {})
+        self.assertEqual(plugins[0]["recommendedPermissions"], {})
+
+    @patch("utils.plugins.get_home_dir")
+    def test_symlink_plugin_dir_skipped(self, mock_home):
+        """Test that symlinked .claude-plugin directory is skipped."""
+        mock_home.return_value = self.temp_path
+
+        cache_dir = (
+            self.temp_path
+            / ".claude"
+            / "plugins"
+            / "cache"
+            / "owner1"
+            / "plugin1"
+        )
+        cache_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create a real .claude-plugin directory elsewhere
+        real_plugin_dir = self.temp_path / "real-plugin" / ".claude-plugin"
+        real_plugin_dir.mkdir(parents=True, exist_ok=True)
+        manifest = {"name": "evil-plugin", "version": "1.0.0"}
+        with open(
+            real_plugin_dir / "plugin.json", "w", encoding="utf-8"
+        ) as f:
+            json.dump(manifest, f)
+
+        # Symlink .claude-plugin directory into cache
+        (cache_dir / ".claude-plugin").symlink_to(real_plugin_dir)
+
+        plugins = discover_installed_plugins()
+        self.assertEqual(plugins, [])
 
     @patch("utils.plugins.get_home_dir")
     def test_invalid_json_skipped(self, mock_home):
