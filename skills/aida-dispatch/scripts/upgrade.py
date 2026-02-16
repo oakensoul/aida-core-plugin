@@ -22,7 +22,7 @@ from typing import Tuple, Optional, Dict, Any
 
 def get_current_version() -> str:
     """Get current plugin version."""
-    plugin_json = Path(__file__).parent.parent / ".claude-plugin" / "plugin.json"
+    plugin_json = Path(__file__).parent.parent.parent.parent / ".claude-plugin" / "plugin.json"
     try:
         with open(plugin_json, 'r') as f:
             data = json.load(f)

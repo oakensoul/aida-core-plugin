@@ -92,7 +92,7 @@ def sanitize_gh_input(text, max_length, allow_multiline):
 **Label Validation** (allowlist pattern):
 
 ```python
-ALLOWED_LABEL_PATTERN = re.compile(r'^[a-zA-Z0-9\s\-:\/]+$')
+ALLOWED_LABEL_PATTERN = re.compile(r'^[a-zA-Z0-9 \-:\/]+$')
 
 def validate_labels(labels):
     for label in labels:
@@ -338,7 +338,7 @@ ensure_directory(Path("/tmp/link"))  # REJECT
 sanitize_gh_input("title; rm -rf /")  # SANITIZE
 
 # JSON bomb
-safe_json_load("{"*1000000)  # REJECT (size limit)
+safe_json_load("{" * 1000000)  # REJECT (size limit)
 
 # Deep nesting
 safe_json_load('{"a":' * 20 + '{}' + '}' * 20)  # REJECT (depth)

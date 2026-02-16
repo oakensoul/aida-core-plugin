@@ -410,8 +410,7 @@ python configure.py --execute \
   "inferred": {},
   "validation": {
     "valid": false,
-    "errors": ["Failed to detect project type: No package.json or
-    requirements.txt found"]
+    "errors": ["Failed to detect project type: No package.json or requirements.txt found"]
   }
 }
 ```

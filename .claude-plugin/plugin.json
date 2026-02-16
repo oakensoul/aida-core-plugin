@@ -1,6 +1,6 @@
 {
   "name": "aida-core",
-  "description": "Smart configuration with auto-detection, GitHub integration, and context management",
+  "description": "Session memory, smart project auto-detection, and extension creation framework. Build custom agents and commands with guided templates.",
   "version": "0.7.0",
   "author": {
     "name": "oakensoul",

@@ -235,6 +235,68 @@ class TestJsonInjectionAttempts(unittest.TestCase):
         self.assertEqual(nested["level"], deserialized["level"])
 
 
+class TestEnsureWithinDir(unittest.TestCase):
+    """Test _ensure_within_dir() from memento.py."""
+
+    def setUp(self):
+        """Set up temporary directory for tests."""
+        self.temp_dir = tempfile.mkdtemp()
+        self.temp_path = Path(self.temp_dir)
+
+    def tearDown(self):
+        """Clean up temporary directory."""
+        import shutil
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def test_valid_path_within_base(self):
+        """Test that valid paths within base are accepted."""
+        from memento import _ensure_within_dir
+
+        child = self.temp_path / "subdir"
+        child.mkdir()
+        result = _ensure_within_dir(child, self.temp_path)
+        self.assertEqual(result, child.resolve())
+
+    def test_parent_traversal_rejected(self):
+        """Test that parent directory traversal is rejected."""
+        from memento import _ensure_within_dir
+
+        # Create a path that traverses above the base directory
+        escape_path = self.temp_path / ".." / ".." / "etc"
+        with self.assertRaises(ValueError) as ctx:
+            _ensure_within_dir(escape_path, self.temp_path)
+        self.assertIn("Path escape detected", str(ctx.exception))
+
+    def test_absolute_path_outside_base_rejected(self):
+        """Test that absolute paths outside base are rejected."""
+        from memento import _ensure_within_dir
+
+        outside_path = Path("/tmp/outside-base")
+        outside_path.mkdir(exist_ok=True)
+        try:
+            with self.assertRaises(ValueError) as ctx:
+                _ensure_within_dir(outside_path, self.temp_path)
+            self.assertIn("Path escape detected", str(ctx.exception))
+        finally:
+            outside_path.rmdir()
+
+    def test_symlink_rejected(self):
+        """Test that symlinks are rejected."""
+        from memento import _ensure_within_dir
+
+        target = self.temp_path / "real-dir"
+        target.mkdir()
+        link = self.temp_path / "link-dir"
+        try:
+            link.symlink_to(target)
+        except OSError:
+            self.skipTest("Symlinks not supported on this platform")
+
+        with self.assertRaises(ValueError) as ctx:
+            _ensure_within_dir(link, self.temp_path)
+        self.assertIn("Symlink detected", str(ctx.exception))
+
+
 class TestSymlinkSecurity(unittest.TestCase):
     """Test security around symlinks."""
 

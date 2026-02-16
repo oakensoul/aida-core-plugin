@@ -21,6 +21,7 @@
         "Bash(git branch:*)",
         "Bash(git checkout:*)",
         "Bash(git commit:*)",
+        "Bash(git -C:*)",
         "Bash(git fetch:*)",
         "Bash(git merge:*)",
         "Bash(git pull:*)",
@@ -41,6 +42,14 @@
         "Bash(gh label:*)",
         "Bash(gh pr:*)",
         "Bash(gh repo view:*)"
+      ],
+      "suggested": "allow"
+    },
+    "filesystem-utilities": {
+      "label": "Filesystem Utilities",
+      "description": "File search and directory inspection commands",
+      "rules": [
+        "Bash(find:*)"
       ],
       "suggested": "allow"
     }
