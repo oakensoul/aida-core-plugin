@@ -44,6 +44,28 @@ For `config` command:
   - Minimal questions (0-3) for unknown preferences only
   - Automatic skill generation from YAML config
 
+### Permissions Commands
+
+For `config permissions` or `permissions` commands:
+
+- **Invoke the `permissions` skill** to handle these operations
+- The skill handles interactive permission setup and audit mode
+
+**Process:**
+
+1. Parse the command to detect:
+   - `--audit` flag for audit mode
+   - No flags for interactive setup
+
+2. Invoke `permissions` skill with the parsed context
+
+**Examples:**
+
+```text
+/aida config permissions           → permissions skill
+/aida config permissions --audit   → permissions skill (audit)
+```
+
 ### Feedback Commands
 
 For `feedback`, `bug`, or `feature-request` commands:
@@ -181,6 +203,7 @@ When displaying help (for `help` command or no arguments), show:
 
 ### Configuration & Setup
 - `/aida config` - Configure AIDA settings (global or project-level)
+- `/aida config permissions` - Configure Claude Code permissions from plugin recommendations
 - `/aida status` - Check AIDA installation and configuration status
 - `/aida doctor` - Run diagnostics to troubleshoot AIDA issues
 
