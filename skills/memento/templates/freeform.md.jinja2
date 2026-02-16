@@ -8,6 +8,11 @@ updated: {{ updated }}
 source: {{ source | default('manual') }}
 tags: {{ tags | default([]) | tojson }}
 files: {{ files | default([]) | tojson }}
+project:
+  name: {{ project_name | default('') }}
+  path: {{ project_path | default('') }}
+  repo: {{ project_repo | default('') }}
+  branch: {{ project_branch | default('') }}
 ---
 
 # {{ description }}

@@ -77,7 +77,7 @@ python {base_directory}/scripts/memento.py --execute \
 
 For `list` operations:
 
-1. Scan `.claude/mementos/` directory
+1. Scan `~/.claude/memento/` directory
 2. Parse frontmatter for metadata
 3. Return formatted list with status, description, dates
 
@@ -87,6 +87,11 @@ For `list` operations:
 python {base_directory}/scripts/memento.py --execute \
   --context='{"operation": "list", "filter": "active"}'
 ```
+
+**Filtering options:**
+
+- `--all` - List mementos from all projects
+- `--project <name>` - List mementos for a specific project
 
 ### Update Operations
 
@@ -114,7 +119,7 @@ python {base_directory}/scripts/memento.py --execute \
 For `complete` operations:
 
 1. Set status to `completed`
-2. Move file to `.claude/mementos/.archive/`
+2. Move file to `~/.claude/memento/.completed/`
 3. Report completion
 
 **Script invocation:**
@@ -165,8 +170,8 @@ python {base_directory}/scripts/memento.py --execute \
 **Memento Storage:**
 
 ```text
-{project_root}/.claude/mementos/          # Active mementos
-{project_root}/.claude/mementos/.archive/ # Completed mementos
+~/.claude/memento/            # Active mementos
+~/.claude/memento/.completed/ # Completed mementos
 ```
 
 ## Two-Phase API
@@ -202,7 +207,7 @@ User: /aida memento create "fix auth token expiry"
    - Question: "What's the core problem you're solving?"
 3. User provides problem description
 4. Run Phase 2:
-   - Create .claude/mementos/fix-auth-token-expiry.md
+   - Create ~/.claude/memento/fix-auth-token-expiry.md
 5. Report: "Created memento. Start working, then /aida memento update to track progress"
 ```
 
@@ -212,9 +217,16 @@ User: /aida memento create "fix auth token expiry"
 User: /aida memento read fix-auth-token-expiry
 
 1. Parse: operation=read, slug="fix-auth-token-expiry"
-2. Load .claude/mementos/fix-auth-token-expiry.md
+2. Load ~/.claude/memento/fix-auth-token-expiry.md
 3. Return full content
 4. Claude summarizes: "I see you were working on X. Next step was Y. Ready to continue?"
+```
+
+### Listing with Filters
+
+```text
+/aida memento list --all              # All projects
+/aida memento list --project my-proj  # Specific project
 ```
 
 ### Creating from PR
