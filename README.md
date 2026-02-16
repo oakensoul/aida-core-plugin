@@ -6,21 +6,28 @@ description: "Foundation plugin for AIDA"
 
 # AIDA Core Plugin
 
-> Your AI-powered development workflow, supercharged.
+> The foundation for building your custom Claude Code experience.
 
 ## Why AIDA?
 
-Claude Code is powerful, but it forgets everything between sessions. AIDA fixes that.
+Claude Code is extensible — but there's no scaffolding. Building agents, commands, and skills
+from scratch means reinventing structure, conventions, and patterns every time. AIDA gives you
+the foundation to build on.
 
-**Save context, restore later.** Working on a complex feature? Save your session state with
-`/aida memento create` and pick up exactly where you left off tomorrow.
+**A bootstrap, not a box.** AIDA provides the base layer — configuration management, extension
+scaffolding, session persistence — so you can focus on building the tools that matter to your
+workflow.
 
-**Smart project understanding.** AIDA auto-detects your tech stack, conventions, and patterns.
-Claude knows your project without you explaining it every time.
+**Standardized extension creation.** Create agents, commands, skills, and plugins with guided
+templates that follow consistent conventions. Run `/aida agent create` and get properly
+structured extensions without guessing at the format.
 
-**Build custom extensions.** Create specialized agents, commands, and skills with guided
-templates. Run `/aida agent create` and AIDA walks you through the process, generating
-properly structured extensions that follow best practices.
+**Configuration at every level.** User-level defaults, project-level overrides, auto-detected
+environment settings. Your setup stays consistent across projects and portable across machines.
+
+**Structured session context.** Mementos capture rich project state — not just facts, but the
+full context of what you're working on. Save mid-task, restore tomorrow, scoped to the project
+or your user profile.
 
 ## 30-Second Demo
 
