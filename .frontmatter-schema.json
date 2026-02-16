@@ -267,7 +267,7 @@
           },
           "status": {
             "type": "string",
-            "enum": ["Draft", "Ready", "In Progress", "In Review", "Done", "Closed"]
+            "enum": ["Draft", "Ready", "In Progress", "In Review", "Done", "Completed", "Closed"]
           },
           "branch": {
             "type": "string"
