@@ -160,8 +160,7 @@ If you've run `/aida config` before:
 
 ```text
 ⚠ Personal skills already exist at:
-  ~/.claude/skills/personal-preferences/
-  ~/.claude/skills/work-patterns/
+  ~/.claude/skills/user-context/
 
 Do you want to reinstall? This will overwrite your existing preferences.
 
@@ -197,8 +196,7 @@ After the questionnaire:
 ```text
 Creating your personal skills...
 
-✓ Created ~/.claude/skills/personal-preferences/SKILL.md
-✓ Created ~/.claude/skills/work-patterns/SKILL.md
+✓ Created ~/.claude/skills/user-context/SKILL.md
 ✓ Updated ~/.claude/settings.json
 
 ───────────────────────────────────────────────────────────
@@ -214,8 +212,7 @@ Creating your personal skills...
 ╚══════════════════════════════════════════════════════════╝
 
 Your personal skills have been created at:
-  ~/.claude/skills/personal-preferences/
-  ~/.claude/skills/work-patterns/
+  ~/.claude/skills/user-context/
 
 These skills will be active in all your Claude conversations,
 providing consistent context about your preferences.
@@ -389,36 +386,40 @@ After installation, AIDA creates these files and directories:
 ```text
 ~/.claude/
 ├── skills/
-│   ├── personal-preferences/
-│   │   └── SKILL.md                # Your coding standards
-│   ├── work-patterns/
-│   │   └── SKILL.md                # Your work habits
+│   ├── user-context/
+│   │   └── SKILL.md                # Your preferences and environment
 │   └── aida-core/
 │       └── SKILL.md                # AIDA management knowledge
 ├── settings.json                   # Claude Code settings
 └── plugins/
     └── aida-core/             # Plugin files
-        ├── commands/               # /aida commands (15 total)
+        ├── commands/               # /aida command entry point
         ├── scripts/                # Python utilities
         └── templates/              # Jinja2 templates
 ```
 
-### Personal Preferences Skill
+### User Context Skill
 
-**Location**: `~/.claude/skills/personal-preferences/SKILL.md`
+**Location**: `~/.claude/skills/user-context/SKILL.md`
 
 **Content** (example):
 
 ```markdown
 ---
-name: personal-preferences
-description: User's personal coding standards and preferences
+name: user-context
+description: User's environment, preferences, and coding standards
 ---
 
-# Personal Preferences
+# User Context
 
-This skill provides Claude with your personal coding standards and
-preferences that apply across all projects.
+This skill provides Claude with your personal coding standards,
+tools, and preferences that apply across all projects.
+
+## Environment
+
+- OS: macOS
+- Git user: developer@example.com
+- GitHub: @developer
 
 ## Coding Standards
 
@@ -426,11 +427,6 @@ I follow these coding standards and style guides:
 - PEP 8 for Python
 - Airbnb JavaScript Style Guide
 - ESLint with recommended config
-
-## Communication Style
-
-Preferred communication style: Balanced - detailed when needed,
-concise otherwise
 
 ## Primary Tools
 
@@ -440,48 +436,9 @@ My primary development tools:
 - Editor: VS Code
 - Version Control: Git, GitHub
 - Infrastructure: Docker, AWS
-
-## Decision Tracking
-
-Decision tracking level: Moderate - key decisions and trade-offs
 ```
 
-**Purpose**: Global preferences applied to all projects
-
-### Work Patterns Skill
-
-**Location**: `~/.claude/skills/work-patterns/SKILL.md`
-
-**Content** (example):
-
-```markdown
----
-name: work-patterns
-description: User's work habits and patterns
----
-
-# Work Patterns
-
-This skill provides Claude with information about your work habits
-and patterns.
-
-## Working Hours
-
-Schedule: Flexible hours with core overlap
-
-This means:
-- I work flexible hours but coordinate with team during core hours
-- I'm generally available for synchronous collaboration
-- I prefer async communication when possible
-
-## Work Style
-
-- Deep work: Protected focus time for complex tasks
-- Meetings: Scheduled during core overlap hours
-- Communication: Async-first, sync when needed
-```
-
-**Purpose**: Contextualizes timing and availability preferences
+**Purpose**: Global preferences and environment context applied to all projects
 
 ### Settings.json Updates
 
@@ -520,8 +477,7 @@ Installation: ✓ Installed
   gh CLI: 2.40.0
 
 Personal Skills:
-  ✓ personal-preferences
-  ✓ work-patterns
+  ✓ user-context
   ✓ aida-core
 
 Project Configuration: Not configured
@@ -534,14 +490,8 @@ Settings: ✓ Configured
 ### Step 2: Verify Skill Files
 
 ```bash
-# Check personal preferences exist
-ls -la ~/.claude/skills/personal-preferences/
-
-# Should show:
-# SKILL.md
-
-# Check work patterns exist
-ls -la ~/.claude/skills/work-patterns/
+# Check user context exists
+ls -la ~/.claude/skills/user-context/
 
 # Should show:
 # SKILL.md
@@ -587,8 +537,7 @@ Directories:
   ✓ ~/.claude/skills/ exists
 
 Skills:
-  ✓ personal-preferences (valid syntax)
-  ✓ work-patterns (valid syntax)
+  ✓ user-context (valid syntax)
   ✓ aida-core (valid syntax)
 
 Settings:

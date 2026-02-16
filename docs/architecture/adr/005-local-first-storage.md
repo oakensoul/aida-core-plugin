@@ -90,8 +90,7 @@ Markdown files (skills), JSON (settings)
 ```text
 ~/.claude/                  # Global config
 ├── skills/
-│   ├── personal-preferences/
-│   ├── work-patterns/
+│   ├── user-context/
 │   └── aida-core/
 └── settings.json
 

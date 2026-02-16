@@ -106,9 +106,7 @@ packages/aida-core-plugin/
 │       └── errors.py            # Error classes
 ├── templates/                    # Jinja2 templates
 │   ├── blueprints/              # Skill templates
-│   │   ├── personal-preferences/
-│   │   │   └── SKILL.md.jinja2
-│   │   └── work-patterns/
+│   │   └── user-context/
 │   │       └── SKILL.md.jinja2
 │   └── questionnaires/          # YAML questionnaires
 │       ├── install.yml
@@ -314,7 +312,7 @@ def test_full_installation(tmp_path, monkeypatch):
 
     # Verify results
     assert exit_code == 0
-    assert (tmp_path / "skills/personal-preferences/SKILL.md").exists()
+    assert (tmp_path / "skills/user-context/SKILL.md").exists()
     assert (tmp_path / "settings.json").exists()
 ```
 
@@ -575,7 +573,7 @@ questions:
 **Update template to use new variable**:
 
 ```jinja2
-<!-- templates/blueprints/personal-preferences/SKILL.md.jinja2 -->
+<!-- templates/blueprints/user-context/SKILL.md.jinja2 -->
 ## Preferred Editor
 
 {{ preferred_editor }}

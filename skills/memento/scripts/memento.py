@@ -1353,6 +1353,8 @@ def main() -> int:
         }))
         return 1
 
+    except (KeyboardInterrupt, SystemExit):
+        raise
     except Exception as e:
         logger.error(f"Unexpected error: {e}", exc_info=True)
         print(json.dumps({

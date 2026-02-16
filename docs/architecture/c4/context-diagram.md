@@ -205,7 +205,7 @@ Via `gh` CLI tool
 ```text
 User → Claude Code: Start session
 Claude Code → AIDA: Load plugin
-User → AIDA: /aida install
+User → AIDA: /aida config
 AIDA → User: Show questionnaire
 User → AIDA: Provide answers
 AIDA → File System: Create personal skills
@@ -216,7 +216,7 @@ AIDA → User: Success message
 ### Use Case 2: Project Configuration
 
 ```text
-User → AIDA: /aida configure
+User → AIDA: /aida config
 AIDA → File System: Detect project files
 AIDA → User: Show detected info
 AIDA → User: Show questionnaire

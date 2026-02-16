@@ -176,7 +176,7 @@ Claude Code skill system
 
 #### Contents
 
-- Personal skills (preferences, patterns)
+- Personal skills (user-context)
 - Project skills (context, documentation)
 - AIDA core skill (management knowledge)
 
@@ -312,8 +312,8 @@ Python script
 
 #### Entry Points
 
-- `/aida memento save` command
-- `/aida memento restore` command
+- `/aida memento create` command
+- `/aida memento read` command
 
 #### Outputs
 
@@ -608,7 +608,7 @@ File system
 
 #### Contents
 
-- Personal skills (preferences, patterns)
+- Personal skills (user-context)
 - Global settings.json
 - Plugin files
 

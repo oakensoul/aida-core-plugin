@@ -1004,6 +1004,8 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
             "config_path": str(config_path)
         }
 
+    except (KeyboardInterrupt, SystemExit):
+        raise
     except Exception as e:
         # Intentionally broad: top-level handler for any unexpected error during configuration
         # Ensures we always return a structured response even for unanticipated failures
@@ -1098,6 +1100,8 @@ def main() -> int:
         }))
         return 1
 
+    except (KeyboardInterrupt, SystemExit):
+        raise
     except Exception as e:
         # Intentionally broad: top-level CLI error handler catches any unexpected exceptions
         # Ensures the program always exits gracefully with a structured error response

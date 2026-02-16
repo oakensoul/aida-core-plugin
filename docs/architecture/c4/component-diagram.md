@@ -22,8 +22,7 @@ graph TB
         WelcomePrint[print_welcome<br/>Display welcome message]
         AlreadyInstalled[is_already_installed<br/>Check existing installation]
         CreateDirs[create_directory_structure<br/>Create skill directories]
-        RenderPrefs[render_personal_preferences<br/>Generate preferences skill]
-        RenderPatterns[render_work_patterns<br/>Generate patterns skill]
+        RenderUserContext[render_user_context<br/>Generate user-context skill]
         UpdateSettings[update_settings_json<br/>Update Claude settings]
         PrintSuccess[print_success<br/>Display success message]
         ErrorHandler[exception handler<br/>Handle errors & cleanup]
@@ -46,8 +45,7 @@ graph TB
     MainInstall --> AlreadyInstalled
     MainInstall --> Questionnaire
     MainInstall --> CreateDirs
-    MainInstall --> RenderPrefs
-    MainInstall --> RenderPatterns
+    MainInstall --> RenderUserContext
     MainInstall --> UpdateSettings
     MainInstall --> PrintSuccess
     MainInstall --> ErrorHandler
@@ -57,10 +55,8 @@ graph TB
 
     CreateDirs --> PathsGet
 
-    RenderPrefs --> TemplateRender
-    RenderPrefs --> PathsGet
-    RenderPatterns --> TemplateRender
-    RenderPatterns --> PathsGet
+    RenderUserContext --> TemplateRender
+    RenderUserContext --> PathsGet
 
     UpdateSettings --> FilesIO
     UpdateSettings --> PathsGet
@@ -73,16 +69,14 @@ graph TB
     TemplateRender -.->|Throws| ErrorClasses
 
     CreateDirs --> GlobalFS
-    RenderPrefs --> GlobalFS
-    RenderPatterns --> GlobalFS
+    RenderUserContext --> GlobalFS
     UpdateSettings --> GlobalFS
 
     style MainInstall fill:#438dd5
     style WelcomePrint fill:#85bbf0
     style AlreadyInstalled fill:#85bbf0
     style CreateDirs fill:#85bbf0
-    style RenderPrefs fill:#85bbf0
-    style RenderPatterns fill:#85bbf0
+    style RenderUserContext fill:#85bbf0
     style UpdateSettings fill:#85bbf0
     style PrintSuccess fill:#85bbf0
     style ErrorHandler fill:#85bbf0
@@ -206,26 +200,20 @@ def create_directory_structure() -> None:
 
 Raises FileOperationError if cannot create
 
-#### render_personal_preferences()
+#### render_user_context()
 
 ##### Responsibility
 
-Generate personal preferences skill from template
+Generate user-context skill from template using detected environment facts
 
 ##### Algorithm
 
 ```python
-def render_user_context(responses: dict) -> None:
+def render_user_context(inferred: dict) -> None:
     template_dir = Path(__file__).parent.parent / "templates/blueprints/user-context"
     output_dir = get_claude_dir() / "skills/user-context"
 
-    variables = {
-        "coding_standards": responses["coding_standards"],
-        "communication_style": responses["communication_style"],
-        "primary_tools": responses["primary_tools"],
-        "decision_tracking": responses["decision_tracking"]
-    }
-
+    variables = map_environment_to_template_vars(inferred)
     render_skill_directory(template_dir, output_dir, variables)
 ```
 

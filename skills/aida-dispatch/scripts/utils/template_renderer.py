@@ -325,11 +325,11 @@ def render_skill_directory(
         ValueError: If template rendering fails or undefined variable encountered
 
     Example:
-        >>> template_dir = Path("templates/blueprints/personal-preferences")
-        >>> output_dir = Path("~/.claude/skills/personal-preferences")
+        >>> template_dir = Path("templates/blueprints/user-context")
+        >>> output_dir = Path("~/.claude/skills/user-context")
         >>> variables = {
-        ...     "skill_name": "personal-preferences",
-        ...     "description": "Personal coding preferences",
+        ...     "skill_name": "user-context",
+        ...     "description": "User environment and preferences",
         ...     "coding_standards": "PEP 8"
         ... }
         >>> render_skill_directory(template_dir, output_dir, variables)
