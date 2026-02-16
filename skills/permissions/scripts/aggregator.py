@@ -227,7 +227,7 @@ def deduplicate_and_categorize(
                 all_rules.update(rl)
             cat["rules"] = sorted(all_rules)
             cat["suggestion_conflict"] = True
-            logger.info(
+            logger.warning(
                 "Category %r has conflicting suggestions %s; "
                 "skipping wildcard subsumption",
                 cat["label"],

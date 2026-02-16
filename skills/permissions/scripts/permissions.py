@@ -260,10 +260,18 @@ def execute(context: dict, responses: dict) -> dict:
     """
     preset = responses.get("preset", "developer-workstation")
     if preset not in PRESETS and preset != "custom":
+        logger.warning(
+            "Invalid preset %r, falling back to "
+            "'developer-workstation'",
+            preset,
+        )
         preset = "developer-workstation"
 
     scope = responses.get("scope", "user")
     if scope not in ("user", "project", "local"):
+        logger.warning(
+            "Invalid scope %r, falling back to 'user'", scope
+        )
         scope = "user"
 
     categories = context.get("categories", {})

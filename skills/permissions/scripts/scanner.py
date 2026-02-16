@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 import logging
-import re
 import sys
 from pathlib import Path
 
@@ -94,10 +93,7 @@ def read_plugin_manifest(plugin_dir: Path) -> dict | None:
         return None
 
 
-_RULE_PATTERN = re.compile(
-    r"^[A-Za-z]\w*\([A-Za-z0-9_.*:/ -]+\)$"
-)
-_MAX_RULE_LENGTH = 500
+from rule_validation import validate_rule  # noqa: E402
 
 
 def _validate_permission_rules(
@@ -136,12 +132,12 @@ def _validate_permission_rules(
 
         invalid_rules = []
         for rule in rules:
-            if not isinstance(rule, str):
-                invalid_rules.append(repr(rule))
-            elif len(rule) > _MAX_RULE_LENGTH:
-                invalid_rules.append(f"{rule[:50]!r}... (too long)")
-            elif not _RULE_PATTERN.match(rule):
-                invalid_rules.append(repr(rule))
+            ok, err = validate_rule(rule)
+            if not ok:
+                invalid_rules.append(
+                    repr(rule) if isinstance(rule, str)
+                    else repr(rule)
+                )
 
         if invalid_rules:
             logger.warning(

@@ -36,21 +36,44 @@ def discover_installed_plugins() -> list[dict]:
         recommendedPermissions, plugin_dir.
     """
     claude_dir = get_home_dir() / ".claude"
+    cache_root = claude_dir / "plugins" / "cache"
     pattern = str(
-        claude_dir
-        / "plugins"
-        / "cache"
+        cache_root
         / "*"
         / "*"
         / ".claude-plugin"
         / "plugin.json"
     )
+    resolved_root = cache_root.resolve() if cache_root.is_dir() else None
     plugins = []
     for manifest_path in sorted(glob.glob(pattern)):
         try:
+            manifest_file = Path(manifest_path)
+
+            # Reject symlinks to prevent following links outside
+            # the plugin cache (consistent with scanner.py)
+            if manifest_file.is_symlink():
+                logger.warning(
+                    "Skipping symlink plugin manifest: %s",
+                    manifest_path,
+                )
+                continue
+
+            # Validate resolved path stays within cache root
+            if resolved_root is not None:
+                try:
+                    manifest_file.resolve().relative_to(
+                        resolved_root
+                    )
+                except ValueError:
+                    logger.warning(
+                        "Plugin path outside cache root: %s",
+                        manifest_path,
+                    )
+                    continue
+
             # Check file size before reading to prevent memory
             # exhaustion (safe_json_load checks after read)
-            manifest_file = Path(manifest_path)
             if manifest_file.stat().st_size > 1024 * 1024:
                 logger.warning(
                     "Plugin manifest too large: %s",
@@ -60,6 +83,12 @@ def discover_installed_plugins() -> list[dict]:
             with open(manifest_path, encoding="utf-8") as f:
                 raw = f.read()
             data = safe_json_load(raw)
+            if not isinstance(data, dict):
+                logger.warning(
+                    "Plugin manifest is not an object: %s",
+                    manifest_path,
+                )
+                continue
             plugin_dir = str(Path(manifest_path).parent.parent)
             plugins.append(
                 {

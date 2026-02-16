@@ -11,7 +11,6 @@ import fcntl
 import json
 import logging
 import os
-import re
 import sys
 import tempfile
 from pathlib import Path
@@ -26,15 +25,12 @@ sys.path.append(
 )
 from utils import get_home_dir  # noqa: E402
 
+# Shared rule validation (same directory)
+from rule_validation import validate_rules  # noqa: E402
+
 logger = logging.getLogger(__name__)
 
 MAX_SETTINGS_SIZE = 1024 * 1024  # 1MB
-MAX_RULE_LENGTH = 500
-
-# Only allow safe characters inside rule patterns
-RULE_PATTERN = re.compile(
-    r"^[A-Za-z]\w*\([A-Za-z0-9_.*:/ -]+\)$"
-)
 
 VALID_ACTIONS = ("allow", "ask", "deny")
 
@@ -109,33 +105,6 @@ def read_all_settings() -> dict:
                 permissions[action] = data[action]
         result[scope] = permissions
     return result
-
-
-def validate_rules(rules: list[str]) -> tuple[bool, str | None]:
-    """Validate rule syntax matches Tool(command:args) pattern.
-
-    Args:
-        rules: List of permission rule strings to validate.
-
-    Returns:
-        Tuple of (is_valid, error_message).
-    """
-    for rule in rules:
-        if not isinstance(rule, str):
-            return False, f"Rule must be a string, got {type(rule)}"
-        if len(rule) > MAX_RULE_LENGTH:
-            return False, (
-                f"Rule too long ({len(rule)} chars, "
-                f"max {MAX_RULE_LENGTH}): {rule[:50]!r}..."
-            )
-        if not RULE_PATTERN.match(rule):
-            return False, (
-                f"Invalid rule syntax: {rule!r}. "
-                "Expected format: Tool(command:args) "
-                "with alphanumeric chars, spaces, "
-                "dots, stars, colons, slashes, and dashes"
-            )
-    return True, None
 
 
 def write_permissions(

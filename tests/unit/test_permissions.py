@@ -41,10 +41,10 @@ from scanner import (
     read_plugin_manifest,
     scan_plugins,
 )
+from rule_validation import validate_rules
 from settings_manager import (
     get_settings_path,
     read_all_settings,
-    validate_rules,
     write_permissions,
 )
 from permissions import audit, execute, get_questions
@@ -635,6 +635,30 @@ class TestValidateRules(unittest.TestCase):
         self.assertFalse(valid)
         self.assertIsNotNone(error)
         self.assertIn("must be a string", error)
+
+    def test_non_ascii_rejected(self):
+        """Test that non-ASCII characters are rejected."""
+        # Greek omicron instead of Latin 'o' (homoglyph)
+        rules = ["Bash(git c\u03bfmmit:*)"]
+        valid, error = validate_rules(rules)
+        self.assertFalse(valid)
+        self.assertIsNotNone(error)
+        self.assertIn("non-ASCII", error)
+
+    def test_rule_too_long_rejected(self):
+        """Test that rules exceeding max length are rejected."""
+        rules = ["Bash(" + "a" * 500 + ":*)"]
+        valid, error = validate_rules(rules)
+        self.assertFalse(valid)
+        self.assertIsNotNone(error)
+        self.assertIn("too long", error)
+
+    def test_error_message_includes_example(self):
+        """Test that error messages include format examples."""
+        rules = ["bad-rule"]
+        valid, error = validate_rules(rules)
+        self.assertFalse(valid)
+        self.assertIn("Bash(git commit:*)", error)
 
 
 class TestReadAllSettings(unittest.TestCase):
