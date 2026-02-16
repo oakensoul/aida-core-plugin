@@ -409,7 +409,7 @@ installed plugins that provide configurable preferences.
 ### How It Works
 
 1. **Discovery**: The system scans
-   `~/.claude/plugins/cache/*/*/.claude-plugin/plugin.json`
+   `~/.claude/plugins/cache/*/*/.claude-plugin/aida-config.json`
    for installed plugins with a `config` section
 2. **Plugin Checklist**: If configurable plugins are found, a
    multi-select question is presented at the start of the wizard
