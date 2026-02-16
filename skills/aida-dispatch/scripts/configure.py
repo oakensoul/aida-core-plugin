@@ -654,6 +654,16 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
     except Exception as e:
         logger.warning("Plugin discovery failed (non-critical): %s", e)
 
+    # Agent discovery
+    discovered_agents = []
+    try:
+        from utils.agents import discover_agents
+        discovered_agents = discover_agents(project_root)
+    except Exception as e:
+        logger.warning(
+            "Agent discovery failed (non-critical): %s", e
+        )
+
     # Return minimal question set
     return {
         "questions": questions,
@@ -661,6 +671,7 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
         "project_info": project_config,  # Return full config for compatibility
         "template": "configure",
         "config_plugins": config_plugins,
+        "discovered_agents": discovered_agents,
     }
 
 
@@ -951,6 +962,25 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
             template_vars
         )
         files_created.append(str(project_context_output / "SKILL.md"))
+
+        # Update CLAUDE.md with agent routing directives
+        try:
+            from utils.agents import update_agent_routing
+            routing_result = update_agent_routing(
+                project_root=project_root
+            )
+            if routing_result["success"]:
+                logger.info(routing_result["message"])
+                if routing_result.get("path"):
+                    files_created.append(
+                        routing_result["path"]
+                    )
+        except Exception as e:
+            logger.warning(
+                "Agent routing update failed"
+                " (non-critical): %s",
+                e,
+            )
 
         message = (
             "Project configuration complete! "
