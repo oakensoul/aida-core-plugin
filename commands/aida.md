@@ -2,7 +2,7 @@
 type: command
 name: aida
 description: AIDA command dispatcher - routes to aida-dispatch skill for configuration, diagnostics, feedback, extension management, session persistence, and CLAUDE.md management
-version: 0.5.1
+version: 0.7.0
 tags:
   - core
 args: ""

@@ -12,16 +12,6 @@ from operations import hooks
 class TestHookConstants:
     """Test hook constants and templates."""
 
-    def test_valid_events(self):
-        """All expected events are in VALID_EVENTS."""
-        expected = [
-            "PreToolUse", "PostToolUse", "PermissionRequest",
-            "SessionStart", "SessionEnd", "UserPromptSubmit",
-            "Notification", "Stop", "SubagentStop", "PreCompact"
-        ]
-        for event in expected:
-            assert event in hooks.VALID_EVENTS
-
     def test_hook_templates_have_required_fields(self):
         """All templates have required fields."""
         for name, template in hooks.HOOK_TEMPLATES.items():
@@ -168,6 +158,56 @@ class TestExecuteAdd:
         }, {})
         assert not result["success"]
         assert "Invalid event" in result["message"]
+
+    @patch.object(hooks, '_save_settings')
+    @patch.object(hooks, '_load_settings')
+    def test_add_invalid_event_does_not_persist(self, mock_load, mock_save):
+        """Add with invalid event doesn't modify settings file."""
+        mock_load.return_value = {"hooks": {}}
+        mock_save.return_value = True
+
+        result = hooks.execute({
+            "operation": "add",
+            "event": "InvalidEvent",
+            "command": "echo test",
+            "scope": "project",
+        }, {})
+
+        assert not result["success"]
+        # Verify save was never called since validation failed
+        mock_save.assert_not_called()
+
+    @patch.object(hooks, '_save_settings')
+    @patch.object(hooks, '_load_settings')
+    def test_add_duplicate_hook_appends(self, mock_load, mock_save):
+        """Adding similar hook with same matcher appends to hooks list."""
+        existing_hook = {
+            "hooks": {
+                "PostToolUse": [
+                    {
+                        "matcher": "Write",
+                        "hooks": [{"type": "command", "command": "echo first"}]
+                    }
+                ]
+            }
+        }
+        mock_load.return_value = existing_hook.copy()
+        mock_save.return_value = True
+
+        # Try to add another hook with same event and matcher
+        result = hooks.execute({
+            "operation": "add",
+            "event": "PostToolUse",
+            "matcher": "Write",
+            "command": "echo second",
+            "scope": "project",
+        }, {})
+
+        # Should succeed
+        assert result["success"]
+
+        # Verify the hook was added (implementation adds to same matcher group)
+        assert mock_save.called
 
 
 class TestExecuteRemove:

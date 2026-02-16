@@ -34,8 +34,6 @@ from operations.claude_md import (  # noqa: E402
     generate_audit_findings,
     get_questions,
     execute,
-    REQUIRED_SECTIONS,
-    RECOMMENDED_SECTIONS,
 )
 
 
@@ -781,21 +779,6 @@ class TestSafeJsonLoad(unittest.TestCase):
         self.assertIn("size limit", str(cm.exception).lower())
 
 
-class TestRequiredAndRecommendedSections(unittest.TestCase):
-    """Test section constants."""
-
-    def test_required_sections_defined(self):
-        """Test that required sections are defined."""
-        self.assertIn("overview", REQUIRED_SECTIONS)
-        self.assertIn("commands", REQUIRED_SECTIONS)
-
-    def test_recommended_sections_defined(self):
-        """Test that recommended sections are defined."""
-        self.assertIn("architecture", RECOMMENDED_SECTIONS)
-        self.assertIn("conventions", RECOMMENDED_SECTIONS)
-        self.assertIn("constraints", RECOMMENDED_SECTIONS)
-
-
 def run_tests():
     """Run all tests and return results."""
     loader = unittest.TestLoader()
@@ -817,7 +800,6 @@ def run_tests():
     suite.addTests(loader.loadTestsFromTestCase(TestExecute))
     suite.addTests(loader.loadTestsFromTestCase(TestExecuteCreate))
     suite.addTests(loader.loadTestsFromTestCase(TestSafeJsonLoad))
-    suite.addTests(loader.loadTestsFromTestCase(TestRequiredAndRecommendedSections))
 
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)

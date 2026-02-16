@@ -16,19 +16,26 @@ graph TB
     Claude[Claude Code CLI]
 
     subgraph "AIDA Core Plugin"
-        Commands[Commands<br/>15 /aida commands<br/>Markdown files]
+        Commands[Commands<br/>/aida command<br/>Markdown files]
         Skills[Skills<br/>Auto-loaded context<br/>SKILL.md files]
 
         subgraph "Python Scripts"
             InstallScript[install.py<br/>Global setup wizard]
+            ConfigScript[configure.py<br/>Project setup]
             FeedbackScript[feedback.py<br/>GitHub integration]
-            ConfigScript[configure.py<br/>Project setup<br/>PLANNED]
+            MementoScript[memento.py<br/>Session persistence]
+            UpgradeScript[upgrade.py<br/>Version management]
+            StatusScript[status.py<br/>System diagnostics]
+            DoctorScript[doctor.py<br/>Health checks]
         end
 
         subgraph "Utils Module"
             VersionUtil[version.py<br/>Python version check]
             PathsUtil[paths.py<br/>Path resolution]
             FilesUtil[files.py<br/>File operations]
+            JsonUtil[json_utils.py<br/>Safe JSON parsing]
+            AgentsUtil[agents.py<br/>Agent discovery]
+            PluginsUtil[plugins.py<br/>Plugin discovery]
             QuestionnaireUtil[questionnaire.py<br/>Interactive Q&A]
             InferenceUtil[inference.py<br/>Project detection]
             TemplateUtil[template_renderer.py<br/>Jinja2 rendering]
@@ -50,8 +57,12 @@ graph TB
     Claude -->|Executes| Commands
 
     Commands -->|Call| InstallScript
-    Commands -->|Call| FeedbackScript
     Commands -->|Call| ConfigScript
+    Commands -->|Call| FeedbackScript
+    Commands -->|Call| MementoScript
+    Commands -->|Call| UpgradeScript
+    Commands -->|Call| StatusScript
+    Commands -->|Call| DoctorScript
 
     InstallScript -->|Uses| VersionUtil
     InstallScript -->|Uses| PathsUtil
@@ -59,22 +70,25 @@ graph TB
     InstallScript -->|Uses| QuestionnaireUtil
     InstallScript -->|Uses| TemplateUtil
 
-    ConfigScript -.->|Uses| PathsUtil
-    ConfigScript -.->|Uses| FilesUtil
-    ConfigScript -.->|Uses| QuestionnaireUtil
-    ConfigScript -.->|Uses| InferenceUtil
-    ConfigScript -.->|Uses| TemplateUtil
+    ErrorsUtil -.->|Used by| InstallScript
+    ErrorsUtil -.->|Used by| ConfigScript
 
-    FeedbackScript -->|Uses| PathsUtil
-    FeedbackScript -->|Uses| FilesUtil
+    ConfigScript -->|Uses| PathsUtil
+    ConfigScript -->|Uses| FilesUtil
+    ConfigScript -->|Uses| QuestionnaireUtil
+    ConfigScript -->|Uses| InferenceUtil
+    ConfigScript -->|Uses| TemplateUtil
+
+    UpgradeScript -->|Checks releases| GitHub
 
     QuestionnaireUtil -->|Loads| Templates
     TemplateUtil -->|Loads| Templates
     InferenceUtil -->|Scans| ProjectFS
 
     InstallScript -->|Reads/Writes| GlobalFS
-    ConfigScript -.->|Reads/Writes| ProjectFS
+    ConfigScript -->|Reads/Writes| ProjectFS
     FeedbackScript -->|Creates issues| GitHub
+    MementoScript -->|Reads/Writes| GlobalFS
 
     Skills -->|Stored in| GlobalFS
     Skills -->|Stored in| ProjectFS
@@ -86,9 +100,16 @@ graph TB
     style InstallScript fill:#85bbf0
     style ConfigScript fill:#85bbf0
     style FeedbackScript fill:#85bbf0
+    style MementoScript fill:#85bbf0
+    style UpgradeScript fill:#85bbf0
+    style StatusScript fill:#85bbf0
+    style DoctorScript fill:#85bbf0
     style VersionUtil fill:#c0d9eb
     style PathsUtil fill:#c0d9eb
     style FilesUtil fill:#c0d9eb
+    style JsonUtil fill:#c0d9eb
+    style AgentsUtil fill:#c0d9eb
+    style PluginsUtil fill:#c0d9eb
     style QuestionnaireUtil fill:#c0d9eb
     style InferenceUtil fill:#c0d9eb
     style TemplateUtil fill:#c0d9eb
@@ -113,7 +134,7 @@ Claude Code command system
 
 #### Location
 
-`.claude-plugin/commands/` (planned)
+`commands/`
 
 #### Responsibilities
 
@@ -123,8 +144,8 @@ Claude Code command system
 
 #### Contents
 
-- 15 command markdown files
-- Each defines usage, arguments, examples
+- `aida.md` command entry point
+- Defines usage, arguments, examples
 
 #### Interactions
 
@@ -155,7 +176,7 @@ Claude Code skill system
 
 #### Contents
 
-- Personal skills (preferences, patterns)
+- Personal skills (user-context)
 - Project skills (context, documentation)
 - AIDA core skill (management knowledge)
 
@@ -173,7 +194,7 @@ Python script
 
 #### File
 
-`scripts/install.py`
+`skills/aida-dispatch/scripts/install.py`
 
 #### Responsibilities
 
@@ -193,16 +214,15 @@ Python script
 
 #### Entry Points
 
-- `/aida install` command
+- `/aida config` command (global setup)
 - Direct invocation: `python install.py`
 
 #### Outputs
 
-- `~/.claude/skills/personal-preferences/`
-- `~/.claude/skills/work-patterns/`
+- `~/.claude/skills/user-context/`
 - `~/.claude/settings.json` (updated)
 
-### Configure Script (Planned)
+### Configure Script
 
 #### Type
 
@@ -210,7 +230,7 @@ Python script
 
 #### File
 
-`scripts/configure.py` (planned M2)
+`skills/aida-dispatch/scripts/configure.py`
 
 #### Responsibilities
 
@@ -218,7 +238,6 @@ Python script
 - Project detection (language, framework)
 - Interactive questionnaire
 - Project skill creation
-- PKM symlink setup
 
 #### Dependencies
 
@@ -230,14 +249,13 @@ Python script
 
 #### Entry Points
 
-- `/aida configure` command
+- `/aida config` command (project setup)
 
 #### Outputs
 
 - `.claude/skills/project-context/`
 - `.claude/skills/project-documentation/`
 - `.claude/settings.json`
-- `.pkm/` symlink (optional)
 
 ### Feedback Script
 
@@ -247,7 +265,7 @@ Python script
 
 #### File
 
-`scripts/feedback.py`
+`skills/aida-dispatch/scripts/feedback.py`
 
 #### Responsibilities
 
@@ -255,11 +273,10 @@ Python script
 - Bug reports with template
 - Feature requests with template
 - General feedback
+- Input sanitization and label validation
 
 #### Dependencies
 
-- utils.paths
-- utils.files
 - External: `gh` CLI
 
 #### Entry Points
@@ -272,6 +289,104 @@ Python script
 
 - GitHub issues (via gh CLI)
 
+### Memento Script
+
+#### Type
+
+Python script
+
+#### File
+
+`skills/memento/scripts/memento.py`
+
+#### Responsibilities
+
+- Save session context as mementos
+- Restore context across /clear and /compact
+- Path containment validation
+- Atomic file writes
+
+#### Dependencies
+
+- yaml (PyYAML), jinja2 (conditional), own inline `safe_json_load()`
+
+#### Entry Points
+
+- `/aida memento create` command
+- `/aida memento read` command
+
+#### Outputs
+
+- `~/.claude/memento/{project}--{slug}.md`
+
+### Upgrade Script
+
+#### Type
+
+Python script
+
+#### File
+
+`skills/aida-dispatch/scripts/upgrade.py`
+
+#### Responsibilities
+
+- Check current plugin version
+- Query GitHub releases API for latest version
+- Compare versions and report status
+
+#### Dependencies
+
+- External: `gh` CLI
+
+#### Entry Points
+
+- `/aida upgrade` command
+
+#### Outputs
+
+- Version comparison results (stdout JSON)
+
+### Status Script
+
+#### Type
+
+Python script
+
+#### File
+
+`skills/aida-dispatch/scripts/status.py`
+
+#### Responsibilities
+
+- Display AIDA system status
+- Check configuration health
+- Report installed components
+
+#### Entry Points
+
+- `/aida status` command
+
+### Doctor Script
+
+#### Type
+
+Python script
+
+#### File
+
+`skills/aida-dispatch/scripts/doctor.py`
+
+#### Responsibilities
+
+- Run diagnostic checks
+- Verify dependencies
+- Check file permissions and paths
+
+#### Entry Points
+
+- `/aida doctor` command
+
 ### Utils Module
 
 #### Type
@@ -280,7 +395,7 @@ Python package
 
 #### Location
 
-`scripts/utils/`
+`skills/aida-dispatch/scripts/utils/`
 
 #### Purpose
 
@@ -415,6 +530,38 @@ class ConfigurationError(AidaError)
 class InstallationError(AidaError)
 ```
 
+#### agents.py
+
+##### Responsibilities
+
+- Discover agent definitions in agents/ directories
+- Parse YAML frontmatter for agent metadata
+- Generate routing directives for CLAUDE.md
+
+##### Key Functions
+
+```python
+discover_agents(search_dirs: List[Path]) -> List[Dict[str, Any]]
+generate_agent_routing_section(agents: List[Dict]) -> str
+update_agent_routing(claude_md_path: Path, agents: List[Dict]) -> None
+```
+
+#### plugins.py
+
+##### Responsibilities
+
+- Discover installed plugins via plugin.json
+- Read aida-config.json for plugin configuration
+- Validate plugin configuration schema
+
+##### Key Functions
+
+```python
+discover_installed_plugins(plugins_dir: Path) -> List[Dict[str, Any]]
+get_plugins_with_config() -> List[Dict[str, Any]]
+validate_plugin_config(config: dict) -> Tuple[bool, List[str]]
+```
+
 ### Templates Container
 
 #### Type
@@ -423,7 +570,7 @@ Files (Jinja2 .jinja2, YAML .yml)
 
 #### Location
 
-`templates/`
+`skills/aida-dispatch/templates/`
 
 #### Responsibilities
 
@@ -434,11 +581,9 @@ Files (Jinja2 .jinja2, YAML .yml)
 #### Contents
 
 ```text
-templates/
+skills/aida-dispatch/templates/
 ├── blueprints/
-│   ├── personal-preferences/
-│   │   └── SKILL.md.jinja2
-│   ├── work-patterns/
+│   ├── user-context/
 │   │   └── SKILL.md.jinja2
 │   ├── project-context/
 │   │   └── SKILL.md.jinja2
@@ -463,13 +608,13 @@ File system
 
 #### Contents
 
-- Personal skills (preferences, patterns)
+- Personal skills (user-context)
 - Global settings.json
 - Plugin files
 
 #### Access Pattern
 
-- Written during `/aida install`
+- Written during `/aida config` (global setup)
 - Read at every Claude Code session
 
 ### Project Storage
@@ -489,7 +634,7 @@ File system
 
 #### Access Pattern
 
-- Written during `/aida configure`
+- Written during `/aida config` (project setup)
 - Read when Claude Code starts in project directory
 
 ## External Systems
@@ -633,7 +778,7 @@ Exit with appropriate code
 ### Updates
 
 ```bash
-/aida upgrade  # (planned)
+/aida upgrade
 ```
 
 ### Dependencies

@@ -87,7 +87,7 @@ Before ending a session, save context for later:
 Resume later with:
 
 ```bash
-/aida memento restore
+/aida memento read
 ```
 
 ## Key Concepts
