@@ -2,17 +2,20 @@
 type: issue
 issue: 4
 title: "Plugin configuration discovery and permissions management for /aida config"
-status: "In Progress"
+status: "Done"
 github_url: "https://github.com/oakensoul/aida-core-plugin/issues/4"
 branch: "task/4-plugin-config-and-permissions"
 worktree: "issue-4-plugin-config-and-permissions"
 started: "2026-02-15"
+completed: "2026-02-15"
 assignee: "@me"
+actual_effort: "3h"
+pr: 11
 ---
 
 # Issue #4: Plugin configuration discovery and permissions management
 
-**Status**: In Progress
+**Status**: Done
 **Branch**: `task/4-plugin-config-and-permissions`
 **Worktree**: `issue-4-plugin-config-and-permissions`
 
@@ -142,36 +145,58 @@ Within a single file: deny > ask > allow.
 
 ### Config Discovery
 
-- [ ] Plugins can declare config capabilities in `plugin.json`
-- [ ] `/aida config` discovers installed plugins with config sections
-- [ ] Multi-select checklist of available plugin configs
-- [ ] Plugin preferences saved to `aida-project-context.yml`
+- [x] Plugins can declare config capabilities in `plugin.json`
+- [x] `/aida config` discovers installed plugins with config sections
+- [x] Multi-select checklist of available plugin configs
+- [x] Plugin preferences saved to `aida-project-context.yml`
 
 ### Permissions Management
 
-- [ ] Plugins can declare `recommendedPermissions` in `plugin.json`
-- [ ] `/aida config permissions` scans and aggregates recommendations
-- [ ] Interactive category-based setup with allow/ask/deny
-- [ ] User chooses scope (user vs project settings)
-- [ ] Rules written to correct `settings.json`
-- [ ] Integrates as optional step in `/aida config` flow
+- [x] Plugins can declare `recommendedPermissions` in `plugin.json`
+- [x] `/aida config permissions` scans and aggregates recommendations
+- [x] Interactive category-based setup with allow/ask/deny
+- [x] User chooses scope (user vs project settings)
+- [x] Rules written to correct `settings.json`
+- [x] Integrates as optional step in `/aida config` flow
 
 ### Shared
 
-- [ ] `plugin.json` schema documented for plugin authors
-- [ ] All linters pass (`make lint`)
-- [ ] All tests pass (`make test`)
+- [x] `plugin.json` schema documented for plugin authors
+- [x] All linters pass (`make lint`)
+- [x] All tests pass (`make test`)
+
+## Resolution
+
+**Completed**: 2026-02-15
+**Pull Request**: #11
+
+### Changes Made
+
+- Plugin config discovery with scanning, schema validation, and
+  multi-select checklist generation
+- Permissions management skill with two-phase interactive API,
+  presets (developer-workstation, ci-safe, locked-down), and audit mode
+- Scanner, aggregator, settings manager, and rule validation modules
+- 352 tests covering all components
+- Documentation for plugin authors (schemas, plugin development guide)
+- Frontmatter validation schema extended with `issue` type
+
+### Implementation Details
+
+- Two-phase API pattern: `get_questions(context)` then `execute(context, responses)`
+- Permission rules validated at scan time to reject malformed plugin data early
+- Settings written atomically with advisory file locking (`fcntl.flock`)
+- Symlink and path traversal protections in plugin cache scanning
+- Cross-skill `sys.path` manipulation removed in favor of local `_paths.py`
 
 ## Work Tracking
 
 - Started: 2026-02-15
+- Completed: 2026-02-15
+- Actual effort: ~3h
 - Branch: `task/4-plugin-config-and-permissions`
 - Worktree: `issue-4-plugin-config-and-permissions`
 
 ## Links
 
 - [GitHub Issue](https://github.com/oakensoul/aida-core-plugin/issues/4)
-
-## Notes
-
-Add your work notes here...
