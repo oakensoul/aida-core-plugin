@@ -348,9 +348,9 @@ class TestDeduplicateAndCategorize(unittest.TestCase):
         self.assertEqual(len(result["categories"]["file-read"]["rules"]), 2)
         self.assertIn("plugin1", result["categories"]["file-read"]["sources"])
         self.assertIn("plugin2", result["categories"]["file-read"]["sources"])
-        # Most permissive suggestion wins
+        # Least permissive suggestion wins (ask < allow)
         self.assertEqual(
-            result["categories"]["file-read"]["suggested"], "allow"
+            result["categories"]["file-read"]["suggested"], "ask"
         )
 
     def test_unknown_categories_get_default_metadata(self):
@@ -373,8 +373,8 @@ class TestDeduplicateAndCategorize(unittest.TestCase):
         self.assertEqual(cat["label"], "Custom Category")
         self.assertIn("Permissions for custom-category", cat["description"])
 
-    def test_most_permissive_suggestion_wins(self):
-        """Test that most permissive suggestion is chosen."""
+    def test_least_permissive_suggestion_wins(self):
+        """Test that least permissive suggestion is chosen."""
         plugin_permissions = [
             {
                 "name": "plugin1",
@@ -397,8 +397,8 @@ class TestDeduplicateAndCategorize(unittest.TestCase):
         ]
 
         result = deduplicate_and_categorize(plugin_permissions)
-        # allow < ask < deny in priority, so allow wins
-        self.assertEqual(result["categories"]["git"]["suggested"], "allow")
+        # deny > ask > allow in priority, so deny wins
+        self.assertEqual(result["categories"]["git"]["suggested"], "deny")
 
 
 class TestDetectConflicts(unittest.TestCase):

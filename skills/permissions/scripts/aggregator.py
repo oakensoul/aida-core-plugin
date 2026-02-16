@@ -182,7 +182,7 @@ def deduplicate_and_categorize(
                     "label": meta["label"],
                     "description": meta["description"],
                     "rules": [],
-                    "suggested": "ask",
+                    "suggested": None,
                     "sources": [],
                     "_rules_lists": [],
                 }
@@ -196,15 +196,25 @@ def deduplicate_and_categorize(
 
             suggested = cat_data.get("suggested", "ask")
             if isinstance(suggested, str):
-                priority = {"allow": 0, "ask": 1, "deny": 2}
-                current = priority.get(cat["suggested"], 1)
-                proposed = priority.get(suggested, 1)
-                if proposed < current:
+                if cat["suggested"] is None:
+                    # First plugin sets the initial suggestion
                     cat["suggested"] = suggested
+                else:
+                    # Least-permissive-wins: deny > ask > allow
+                    # This prevents a single malicious plugin from
+                    # escalating all categories to "allow".
+                    priority = {"deny": 0, "ask": 1, "allow": 2}
+                    current = priority.get(cat["suggested"], 1)
+                    proposed = priority.get(suggested, 1)
+                    if proposed < current:
+                        cat["suggested"] = suggested
 
     for cat in categories.values():
         cat["rules"] = merge_rules(cat.pop("_rules_lists", []))
         cat["sources"] = sorted(set(cat["sources"]))
+        # Default to "ask" if no plugin provided a suggestion
+        if cat["suggested"] is None:
+            cat["suggested"] = "ask"
 
     return {"categories": categories}
 

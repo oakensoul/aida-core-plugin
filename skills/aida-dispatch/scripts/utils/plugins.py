@@ -48,6 +48,15 @@ def discover_installed_plugins() -> list[dict]:
     plugins = []
     for manifest_path in sorted(glob.glob(pattern)):
         try:
+            # Check file size before reading to prevent memory
+            # exhaustion (safe_json_load checks after read)
+            manifest_file = Path(manifest_path)
+            if manifest_file.stat().st_size > 1024 * 1024:
+                logger.warning(
+                    "Plugin manifest too large: %s",
+                    manifest_path,
+                )
+                continue
             with open(manifest_path, encoding="utf-8") as f:
                 raw = f.read()
             data = safe_json_load(raw)

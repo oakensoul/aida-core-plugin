@@ -12,9 +12,8 @@ import logging
 import sys
 from pathlib import Path
 
-# Reuse utilities from aida-dispatch
-sys.path.insert(
-    0,
+# Reuse utilities from aida-dispatch (append to avoid shadowing stdlib)
+sys.path.append(
     str(
         Path(__file__).parent.parent.parent
         / "aida-dispatch"
@@ -40,10 +39,26 @@ def get_installed_plugin_dirs() -> list[Path]:
     if not cache_root.is_dir():
         return []
 
+    resolved_root = cache_root.resolve()
     plugin_dirs: list[Path] = []
     for manifest in cache_root.glob("*/*/.claude-plugin"):
-        if manifest.is_dir():
-            plugin_dirs.append(manifest)
+        if not manifest.is_dir():
+            continue
+        # Reject symlinks to prevent following links outside cache
+        if manifest.is_symlink():
+            logger.warning(
+                "Skipping symlink in plugin cache: %s", manifest
+            )
+            continue
+        # Validate resolved path stays within cache root
+        try:
+            manifest.resolve().relative_to(resolved_root)
+        except ValueError:
+            logger.warning(
+                "Plugin path outside cache root: %s", manifest
+            )
+            continue
+        plugin_dirs.append(manifest)
     return sorted(plugin_dirs)
 
 
@@ -60,13 +75,14 @@ def read_plugin_manifest(plugin_dir: Path) -> dict | None:
     if not manifest_path.is_file():
         return None
     try:
-        with open(manifest_path, encoding="utf-8") as f:
-            content = f.read()
-        if len(content) > 1024 * 1024:
+        # Check file size before reading to prevent memory exhaustion
+        if manifest_path.stat().st_size > 1024 * 1024:
             logger.warning(
                 "Plugin manifest too large: %s", manifest_path
             )
             return None
+        with open(manifest_path, encoding="utf-8") as f:
+            content = f.read()
         return json.loads(content)
     except (json.JSONDecodeError, OSError) as exc:
         logger.warning(

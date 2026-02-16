@@ -14,9 +14,8 @@ import logging
 import sys
 from pathlib import Path
 
-# Reuse utilities from aida-dispatch
-sys.path.insert(
-    0,
+# Reuse utilities from aida-dispatch (append to avoid shadowing stdlib)
+sys.path.append(
     str(
         Path(__file__).parent.parent.parent
         / "aida-dispatch"
@@ -260,7 +259,13 @@ def execute(context: dict, responses: dict) -> dict:
         ``rules_count``, and ``message`` keys.
     """
     preset = responses.get("preset", "developer-workstation")
+    if preset not in PRESETS and preset != "custom":
+        preset = "developer-workstation"
+
     scope = responses.get("scope", "user")
+    if scope not in ("user", "project", "local"):
+        scope = "user"
+
     categories = context.get("categories", {})
 
     rules: dict[str, list[str]] = {
@@ -452,6 +457,9 @@ def main() -> int:
     return 1
 
 
+MAX_JSON_ARG_SIZE = 1024 * 1024  # 1MB
+
+
 def _load_json_arg(value: str) -> dict:
     """Load JSON from a string or file path.
 
@@ -460,12 +468,34 @@ def _load_json_arg(value: str) -> dict:
 
     Returns:
         Parsed dict.
+
+    Raises:
+        ValueError: If the file is too large or contains invalid JSON.
     """
     path = Path(value)
     if path.is_file():
+        # Check file size before reading to prevent memory exhaustion
+        file_size = path.stat().st_size
+        if file_size > MAX_JSON_ARG_SIZE:
+            raise ValueError(
+                f"JSON file too large: {file_size} bytes "
+                f"(max {MAX_JSON_ARG_SIZE})"
+            )
+        # Reject symlinks to prevent following links to sensitive files
+        if path.is_symlink():
+            raise ValueError(
+                f"Refusing to read symlink: {path}"
+            )
         with open(path, encoding="utf-8") as f:
-            return json.load(f)
-    return json.loads(value)
+            content = f.read()
+        data = json.loads(content)
+        if not isinstance(data, dict):
+            raise ValueError("JSON file must contain an object")
+        return data
+    data = json.loads(value)
+    if not isinstance(data, dict):
+        raise ValueError("JSON argument must be an object")
+    return data
 
 
 if __name__ == "__main__":

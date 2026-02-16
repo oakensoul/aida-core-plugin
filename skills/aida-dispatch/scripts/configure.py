@@ -809,7 +809,10 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
                         if pn not in plugin_prefs:
                             plugin_prefs[pn] = {"enabled": False}
             except Exception:
-                pass
+                logger.warning(
+                    "Failed to mark unselected plugins (non-critical)",
+                    exc_info=True,
+                )
 
         if plugin_prefs:
             config["plugins"] = plugin_prefs

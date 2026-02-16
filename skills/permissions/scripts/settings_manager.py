@@ -9,14 +9,14 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 import sys
 import tempfile
 from pathlib import Path
 
-# Reuse utilities from aida-dispatch
-sys.path.insert(
-    0,
+# Reuse utilities from aida-dispatch (append to avoid shadowing stdlib)
+sys.path.append(
     str(
         Path(__file__).parent.parent.parent
         / "aida-dispatch"
@@ -27,7 +27,13 @@ from utils import get_home_dir  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
-RULE_PATTERN = re.compile(r"^[A-Za-z]\w*\(.+\)$")
+MAX_SETTINGS_SIZE = 1024 * 1024  # 1MB
+MAX_RULE_LENGTH = 500
+
+# Only allow safe characters inside rule patterns
+RULE_PATTERN = re.compile(
+    r"^[A-Za-z]\w*\([A-Za-z0-9_.*:/ -]+\)$"
+)
 
 VALID_ACTIONS = ("allow", "ask", "deny")
 
@@ -69,11 +75,12 @@ def _read_settings_file(path: Path) -> dict:
     if not path.is_file():
         return {}
     try:
-        with open(path, encoding="utf-8") as f:
-            content = f.read()
-        if len(content) > 1024 * 1024:
+        # Check file size before reading to prevent memory exhaustion
+        if path.stat().st_size > MAX_SETTINGS_SIZE:
             logger.warning("Settings file too large: %s", path)
             return {}
+        with open(path, encoding="utf-8") as f:
+            content = f.read()
         data = json.loads(content)
         if isinstance(data, dict):
             return data
@@ -115,10 +122,17 @@ def validate_rules(rules: list[str]) -> tuple[bool, str | None]:
     for rule in rules:
         if not isinstance(rule, str):
             return False, f"Rule must be a string, got {type(rule)}"
+        if len(rule) > MAX_RULE_LENGTH:
+            return False, (
+                f"Rule too long ({len(rule)} chars, "
+                f"max {MAX_RULE_LENGTH}): {rule[:50]!r}..."
+            )
         if not RULE_PATTERN.match(rule):
             return False, (
                 f"Invalid rule syntax: {rule!r}. "
-                "Expected format: Tool(command:args)"
+                "Expected format: Tool(command:args) "
+                "with alphanumeric chars, spaces, "
+                "dots, stars, colons, slashes, and dashes"
             )
     return True, None
 
@@ -178,20 +192,25 @@ def write_permissions(
         raise ValueError(msg)
 
     path.parent.mkdir(parents=True, exist_ok=True)
+    fd = None
+    tmp_path = None
     try:
         fd, tmp_path = tempfile.mkstemp(
             dir=str(path.parent), suffix=".tmp"
         )
-        try:
-            with open(fd, "w", encoding="utf-8") as f:
-                json.dump(existing, f, indent=2)
-                f.write("\n")
-            Path(tmp_path).replace(path)
-        except Exception:
-            Path(tmp_path).unlink(missing_ok=True)
-            raise
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            fd = None  # Prevent double-close
+            json.dump(existing, f, indent=2)
+            f.write("\n")
+        Path(tmp_path).replace(path)
+        tmp_path = None  # Prevent cleanup after success
     except OSError:
         return False
+    finally:
+        if fd is not None:
+            os.close(fd)
+        if tmp_path is not None:
+            Path(tmp_path).unlink(missing_ok=True)
 
     return True
 
