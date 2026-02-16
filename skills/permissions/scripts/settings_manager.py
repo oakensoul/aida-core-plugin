@@ -11,19 +11,10 @@ import fcntl
 import json
 import logging
 import os
-import sys
 import tempfile
 from pathlib import Path
 
-# Reuse utilities from aida-dispatch (append to avoid shadowing stdlib)
-sys.path.append(
-    str(
-        Path(__file__).parent.parent.parent
-        / "aida-dispatch"
-        / "scripts"
-    ),
-)
-from utils import get_home_dir  # noqa: E402
+from _paths import get_home_dir
 
 # Shared rule validation (same directory)
 from rule_validation import validate_rules  # noqa: E402

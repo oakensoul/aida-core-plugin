@@ -14,15 +14,6 @@ import logging
 import sys
 from pathlib import Path
 
-# Reuse utilities from aida-dispatch (append to avoid shadowing stdlib)
-sys.path.append(
-    str(
-        Path(__file__).parent.parent.parent
-        / "aida-dispatch"
-        / "scripts"
-    ),
-)
-
 # Local imports (same directory)
 _scripts_dir = str(Path(__file__).parent)
 if _scripts_dir not in sys.path:

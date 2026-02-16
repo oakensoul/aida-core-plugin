@@ -9,18 +9,9 @@ from __future__ import annotations
 
 import json
 import logging
-import sys
 from pathlib import Path
 
-# Reuse utilities from aida-dispatch (append to avoid shadowing stdlib)
-sys.path.append(
-    str(
-        Path(__file__).parent.parent.parent
-        / "aida-dispatch"
-        / "scripts"
-    ),
-)
-from utils import get_home_dir  # noqa: E402
+from _paths import get_home_dir
 
 logger = logging.getLogger(__name__)
 
