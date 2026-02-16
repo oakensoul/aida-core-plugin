@@ -25,8 +25,11 @@ properly structured extensions that follow best practices.
 ## 30-Second Demo
 
 ```bash
-# Install the plugin
-/plugin install oakensoul/aida-core-plugin
+# Add AIDA marketplace (one-time setup)
+/plugin marketplace add oakensoul/aida-marketplace
+
+# Install the core plugin
+/plugin install core@aida
 
 # Configure AIDA (auto-detects your environment)
 /aida config
@@ -49,19 +52,25 @@ properly structured extensions that follow best practices.
 
 ## Quick Start
 
-### Step 1: Install
+### Step 1: Add Marketplace
 
 ```bash
-/plugin install oakensoul/aida-core-plugin
+/plugin marketplace add oakensoul/aida-marketplace
 ```
 
-### Step 2: Configure
+### Step 2: Install
+
+```bash
+/plugin install core@aida
+```
+
+### Step 3: Configure
 
 ```bash
 /aida config
 ```
 
-### Step 3: Verify
+### Step 4: Verify
 
 ```bash
 /aida status
