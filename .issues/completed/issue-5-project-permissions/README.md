@@ -2,7 +2,7 @@
 type: issue
 issue: 5
 title: "Add project-level permissions for team workflows"
-status: "In Progress"
+status: "Completed"
 github_url: "https://github.com/oakensoul/aida-core-plugin/issues/5"
 branch: "task/5-project-permissions"
 worktree: "issue-5-project-permissions"
