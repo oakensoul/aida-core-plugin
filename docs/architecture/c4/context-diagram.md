@@ -20,15 +20,14 @@ graph TB
     end
 
     FS[File System<br/>~/.claude/ and .claude/]
-    GitHub[GitHub<br/>Issue tracking for feedback]
-    PKM[PKM System<br/>Obsidian, Logseq, etc.]
+    GitHub[GitHub<br/>Issue tracking & releases]
 
     User -->|Interacts with| Claude
     User -->|Runs commands| AIDA
     Claude -->|Loads plugin| AIDA
     AIDA -->|Reads/writes skills| FS
     AIDA -->|Creates issues via gh CLI| GitHub
-    AIDA -->|Optional symlink| PKM
+    AIDA -->|Checks releases via gh CLI| GitHub
     Claude -->|Reads skills| FS
 
     style User fill:#08427b
@@ -36,7 +35,6 @@ graph TB
     style AIDA fill:#438dd5
     style FS fill:#85bbf0
     style GitHub fill:#999
-    style PKM fill:#999
 ```
 
 ## Description
@@ -105,7 +103,7 @@ Skills-first architecture plugin
 
 ##### Key Features
 
-- 15 `/aida` commands
+- `/aida` command with subcommands
 - Interactive questionnaires
 - Template-based skill generation
 - Cross-platform support
@@ -162,30 +160,6 @@ Via `gh` CLI tool
 - Environment information (opt-in)
 - User-provided context
 
-#### PKM System (Optional)
-
-##### Type
-
-External system (optional)
-
-##### Description
-
-Personal Knowledge Management tools
-
-##### Examples
-
-Obsidian, Logseq, Notion, Foam
-
-##### Integration
-
-Symlink `.pkm/` → PKM vault directory
-
-##### Purpose
-
-- Claude can reference detailed project notes
-- Single source of truth for documentation
-- Bi-directional sync (future)
-
 ## Key Relationships
 
 ### User ↔ Claude Code
@@ -218,12 +192,6 @@ Symlink `.pkm/` → PKM vault directory
 - **Protocol**: `gh` CLI tool
 - **Frequency**: Ad-hoc when user reports issues
 
-### AIDA ↔ PKM
-
-- **Nature**: Optional documentation link
-- **Protocol**: Filesystem symlink
-- **Frequency**: One-time setup, then read-only
-
 ### Claude Code ↔ File System
 
 - **Nature**: Skill loading
@@ -237,7 +205,7 @@ Symlink `.pkm/` → PKM vault directory
 ```text
 User → Claude Code: Start session
 Claude Code → AIDA: Load plugin
-User → AIDA: /aida install
+User → AIDA: /aida config
 AIDA → User: Show questionnaire
 User → AIDA: Provide answers
 AIDA → File System: Create personal skills
@@ -248,13 +216,12 @@ AIDA → User: Success message
 ### Use Case 2: Project Configuration
 
 ```text
-User → AIDA: /aida configure
+User → AIDA: /aida config
 AIDA → File System: Detect project files
 AIDA → User: Show detected info
 AIDA → User: Show questionnaire
 User → AIDA: Provide answers
 AIDA → File System: Create project skills
-AIDA → PKM: Optional symlink
 AIDA → User: Success message
 ```
 
@@ -290,7 +257,6 @@ Claude Code → User: Suggestions based on skills
 
 - **git**: For project detection
 - **gh CLI**: For feedback system
-- **PKM System**: For documentation integration
 
 ## Security Boundaries
 

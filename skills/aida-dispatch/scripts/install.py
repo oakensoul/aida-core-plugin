@@ -65,7 +65,7 @@ logger = logging.getLogger(__name__)
 
 
 # Constants
-AIDA_VERSION = "0.2.0"
+AIDA_VERSION = "0.7.0"
 AIDA_MARKER_FILE = "aida.yml"
 USER_CONTEXT_SKILL_DIR = "skills/user-context"
 SETTINGS_FILE = "settings.json"
@@ -448,6 +448,8 @@ def install(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dict[
             "message": "AIDA installation complete! Restart Claude Code to load plugins."
         }
 
+    except (KeyboardInterrupt, SystemExit):
+        raise
     except Exception as e:
         # Log full error with traceback for debugging
         logger.error(f"Installation failed: {e}", exc_info=True)
@@ -599,6 +601,8 @@ def main() -> int:
         }))
         return 1
 
+    except (KeyboardInterrupt, SystemExit):
+        raise
     except Exception as e:
         # Log unexpected errors with full traceback
         logger.error(f"Unexpected error: {e}", exc_info=True)

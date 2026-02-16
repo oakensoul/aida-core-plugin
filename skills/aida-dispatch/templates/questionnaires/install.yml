@@ -1,9 +1,9 @@
 ---
 # AIDA Installation Questionnaire
 #
-# This questionnaire collects personal preferences and work patterns to customize
-# AIDA's behavior. These settings create your personal-preferences and work-patterns
-# skills that are active across all projects.
+# This questionnaire collects environment facts and preferences to customize
+# AIDA's behavior. These settings create your user-context skill that is
+# active across all projects.
 
 questions:
   - id: coding_standards

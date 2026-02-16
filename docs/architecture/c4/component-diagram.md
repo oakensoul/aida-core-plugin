@@ -22,8 +22,7 @@ graph TB
         WelcomePrint[print_welcome<br/>Display welcome message]
         AlreadyInstalled[is_already_installed<br/>Check existing installation]
         CreateDirs[create_directory_structure<br/>Create skill directories]
-        RenderPrefs[render_personal_preferences<br/>Generate preferences skill]
-        RenderPatterns[render_work_patterns<br/>Generate patterns skill]
+        RenderUserContext[render_user_context<br/>Generate user-context skill]
         UpdateSettings[update_settings_json<br/>Update Claude settings]
         PrintSuccess[print_success<br/>Display success message]
         ErrorHandler[exception handler<br/>Handle errors & cleanup]
@@ -46,8 +45,7 @@ graph TB
     MainInstall --> AlreadyInstalled
     MainInstall --> Questionnaire
     MainInstall --> CreateDirs
-    MainInstall --> RenderPrefs
-    MainInstall --> RenderPatterns
+    MainInstall --> RenderUserContext
     MainInstall --> UpdateSettings
     MainInstall --> PrintSuccess
     MainInstall --> ErrorHandler
@@ -57,10 +55,8 @@ graph TB
 
     CreateDirs --> PathsGet
 
-    RenderPrefs --> TemplateRender
-    RenderPrefs --> PathsGet
-    RenderPatterns --> TemplateRender
-    RenderPatterns --> PathsGet
+    RenderUserContext --> TemplateRender
+    RenderUserContext --> PathsGet
 
     UpdateSettings --> FilesIO
     UpdateSettings --> PathsGet
@@ -73,16 +69,14 @@ graph TB
     TemplateRender -.->|Throws| ErrorClasses
 
     CreateDirs --> GlobalFS
-    RenderPrefs --> GlobalFS
-    RenderPatterns --> GlobalFS
+    RenderUserContext --> GlobalFS
     UpdateSettings --> GlobalFS
 
     style MainInstall fill:#438dd5
     style WelcomePrint fill:#85bbf0
     style AlreadyInstalled fill:#85bbf0
     style CreateDirs fill:#85bbf0
-    style RenderPrefs fill:#85bbf0
-    style RenderPatterns fill:#85bbf0
+    style RenderUserContext fill:#85bbf0
     style UpdateSettings fill:#85bbf0
     style PrintSuccess fill:#85bbf0
     style ErrorHandler fill:#85bbf0
@@ -98,57 +92,73 @@ graph TB
 
 ### Install Script Components
 
-#### main()
+#### get_questions(context)
 
 ##### Responsibility
 
-Orchestrate installation process
+Phase 1 API: Detect environment facts and return questions (none for global
+install)
 
 ##### Pseudocode
 
 ```python
-def main() -> int:
+def get_questions(context: dict) -> dict:
+    # Detect environment facts
+    detected = {
+        "os": platform.system(),
+        "user": os.environ.get("USER"),
+        "git_name": subprocess.check_output(["git", "config", "user.name"]),
+        "git_email": subprocess.check_output(["git", "config", "user.email"]),
+    }
+
+    # Global install asks no questions
+    return {
+        "questions": [],
+        "inferred": detected,
+        "validation": {"valid": True, "errors": []},
+    }
+```
+
+#### install(responses, inferred)
+
+##### Responsibility
+
+Phase 2 API: Create global AIDA structure with detected facts
+
+##### Pseudocode
+
+```python
+def install(responses: dict, inferred: dict) -> dict:
     try:
         check_python_version()
 
-        if is_already_installed():
-            if not confirm_reinstall():
-                return 0
-            backup_existing_installation()
+        # Create ~/.claude structure
+        ensure_directory(get_claude_dir() / "skills")
 
-        print_welcome()
+        # Write aida.yml marker
+        write_aida_marker(inferred)
 
-        responses = run_questionnaire("install.yml")
+        # Generate user-context skill
+        render_skill_directory(
+            USER_CONTEXT_TEMPLATE,
+            get_claude_dir() / "skills/user-context",
+            inferred
+        )
 
-        create_directory_structure()
-
-        render_personal_preferences(responses)
-        render_work_patterns(responses)
-
-        update_settings_json()
-
-        print_success()
-
-        return 0
-
-    except KeyboardInterrupt:
-        print("\nInstallation cancelled")
-        return 130
+        return {"success": True, "message": "Global installation complete"}
 
     except Exception as e:
-        handle_error(e)
-        return 1
+        return {"success": False, "error": str(e)}
 ```
 
 ##### Dependencies
 
-- All utils modules
-- All other install.py functions
+- utils.version, utils.paths, utils.files, utils.template_renderer
+- Phase 1 inferred data
 
 ##### Error Handling
 
-- Catches KeyboardInterrupt → Exit 130
-- Catches all exceptions → Error message + Exit 1
+- Returns success dict with error details if failed
 
 #### is_already_installed()
 
@@ -161,10 +171,9 @@ Check if personal skills already exist
 ```python
 def is_already_installed() -> bool:
     claude_dir = get_claude_dir()
-    personal_prefs = claude_dir / "skills/personal-preferences"
-    work_patterns = claude_dir / "skills/work-patterns"
+    user_context = claude_dir / "skills/user-context"
 
-    return personal_prefs.exists() and work_patterns.exists()
+    return user_context.exists()
 ```
 
 ##### Returns
@@ -184,35 +193,27 @@ def create_directory_structure() -> None:
     claude_dir = get_claude_dir()
 
     ensure_directory(claude_dir / "skills")
-    ensure_directory(claude_dir / "skills/personal-preferences")
-    ensure_directory(claude_dir / "skills/work-patterns")
-    ensure_directory(claude_dir / "skills/aida-core")
+    ensure_directory(claude_dir / "skills/user-context")
 ```
 
 ##### Error Handling
 
 Raises FileOperationError if cannot create
 
-#### render_personal_preferences()
+#### render_user_context()
 
 ##### Responsibility
 
-Generate personal preferences skill from template
+Generate user-context skill from template using detected environment facts
 
 ##### Algorithm
 
 ```python
-def render_personal_preferences(responses: dict) -> None:
-    template_dir = Path(__file__).parent.parent / "templates/blueprints/personal-preferences"
-    output_dir = get_claude_dir() / "skills/personal-preferences"
+def render_user_context(inferred: dict) -> None:
+    template_dir = Path(__file__).parent.parent / "templates/blueprints/user-context"
+    output_dir = get_claude_dir() / "skills/user-context"
 
-    variables = {
-        "coding_standards": responses["coding_standards"],
-        "communication_style": responses["communication_style"],
-        "primary_tools": responses["primary_tools"],
-        "decision_tracking": responses["decision_tracking"]
-    }
-
+    variables = map_environment_to_template_vars(inferred)
     render_skill_directory(template_dir, output_dir, variables)
 ```
 
@@ -249,15 +250,14 @@ def update_settings_json() -> None:
 - Merges updates (doesn't overwrite existing)
 - Preserves other settings
 
-### Configure Script Components (Planned)
+### Configure Script Components
 
 ```mermaid
 graph TB
-    subgraph "configure.py (Planned)"
+    subgraph "configure.py"
         MainConfig[main<br/>Entry point]
-        CheckInstall[check_installation<br/>Verify /aida install run]
+        CheckInstall[check_installation<br/>Verify global setup complete]
         DetectProject[detect_project<br/>Language, framework, tools]
-        PromptPKM[prompt_pkm_symlink<br/>Optional PKM integration]
         CreateProjectSkills[create_project_skills<br/>Generate skills]
     end
 
@@ -275,18 +275,15 @@ graph TB
     MainConfig --> DetectProject
     MainConfig --> Questionnaire2
     MainConfig --> CreateProjectSkills
-    MainConfig --> PromptPKM
 
     DetectProject --> Inference
     CreateProjectSkills --> TemplateRender2
     CreateProjectSkills --> PathsGet2
-    PromptPKM --> PathsGet2
 
     Questionnaire2 --> Templates2
     TemplateRender2 --> Templates2
 
     CreateProjectSkills --> ProjectFS
-    PromptPKM --> ProjectFS
 ```
 
 ### Feedback Script Components
@@ -302,11 +299,6 @@ graph TB
         SubmitIssue[submit_issue<br/>Call gh CLI]
     end
 
-    subgraph "Utils"
-        PathsUtil[paths.py]
-        FilesUtil[files.py]
-    end
-
     GitHub[GitHub API<br/>via gh CLI]
 
     MainFeedback --> CreateBugReport
@@ -316,10 +308,146 @@ graph TB
     CreateBugReport --> GetEnvironmentInfo
     CreateBugReport --> SubmitIssue
 
-    GetEnvironmentInfo --> PathsUtil
-    GetEnvironmentInfo --> FilesUtil
-
     SubmitIssue --> GitHub
+```
+
+### Memento Script Components
+
+```mermaid
+graph TB
+    subgraph "memento.py"
+        MainMemento[main<br/>Entry point & CLI parsing]
+        GetQuestionsMemento[get_questions<br/>Phase 1: Infer metadata]
+        ExecuteMemento[execute<br/>Phase 2: Perform operation]
+        CreateMemento[execute_create<br/>Create new memento]
+        ReadMemento[execute_read<br/>Read memento]
+        ListMementos[execute_list<br/>List mementos]
+        UpdateMemento[execute_update<br/>Update sections]
+        CompleteMemento[execute_complete<br/>Mark complete/archive]
+        RemoveMemento[execute_remove<br/>Delete memento]
+        RenderTemplate[render_template<br/>Jinja2 rendering]
+        ParseFrontmatter[parse_frontmatter<br/>YAML extraction]
+    end
+
+    subgraph "Utils"
+        PathsMemento[paths.py<br/>get_user_mementos_dir]
+        FilesMemento[files.py<br/>atomic_write]
+        JsonMemento[json_utils.py<br/>safe_json_load]
+    end
+
+    MementoStorage[~/.claude/memento/<br/>{project}--{slug}.md]
+    Templates3[Templates<br/>work-session.md.jinja2<br/>freeform.md.jinja2]
+
+    MainMemento --> GetQuestionsMemento
+    MainMemento --> ExecuteMemento
+
+    ExecuteMemento --> CreateMemento
+    ExecuteMemento --> ReadMemento
+    ExecuteMemento --> ListMementos
+    ExecuteMemento --> UpdateMemento
+    ExecuteMemento --> CompleteMemento
+    ExecuteMemento --> RemoveMemento
+
+    CreateMemento --> RenderTemplate
+    CreateMemento --> ParseFrontmatter
+    UpdateMemento --> ParseFrontmatter
+
+    RenderTemplate --> Templates3
+    CreateMemento --> PathsMemento
+    CreateMemento --> FilesMemento
+    ReadMemento --> PathsMemento
+    ListMementos --> PathsMemento
+
+    GetQuestionsMemento --> JsonMemento
+
+    CreateMemento --> MementoStorage
+    UpdateMemento --> MementoStorage
+    ReadMemento --> MementoStorage
+```
+
+### Status Script Components
+
+```mermaid
+graph TB
+    subgraph "status.py"
+        MainStatus[main<br/>Entry point]
+        CheckGlobal[check_global_installation<br/>Verify ~/.claude/]
+        CheckProject[check_project_configuration<br/>Verify ./.claude/]
+        GetVersion[get_plugin_version<br/>Read plugin.json]
+        CountSkills[count_skills<br/>Count SKILL.md files]
+        ListSkills[list_skills<br/>List skill names]
+    end
+
+    GlobalFS2[~/.claude/]
+    ProjectFS2[./.claude/]
+    PluginJSON[.claude-plugin/plugin.json]
+
+    MainStatus --> CheckGlobal
+    MainStatus --> CheckProject
+    MainStatus --> GetVersion
+    MainStatus --> CountSkills
+    MainStatus --> ListSkills
+
+    CheckGlobal --> GlobalFS2
+    CheckProject --> ProjectFS2
+    GetVersion --> PluginJSON
+    CountSkills --> GlobalFS2
+    ListSkills --> GlobalFS2
+```
+
+### Upgrade Script Components
+
+```mermaid
+graph TB
+    subgraph "upgrade.py"
+        MainUpgrade[main<br/>Entry point]
+        GetCurrent[get_current_version<br/>Read plugin.json]
+        GetLatest[get_latest_version<br/>Query GitHub API]
+        CompareVersions[compare_versions<br/>Semver comparison]
+        FormatOutput[format_output<br/>JSON or text]
+    end
+
+    PluginJSON2[.claude-plugin/plugin.json]
+    GitHubAPI[GitHub API<br/>via gh CLI<br/>releases/latest]
+
+    MainUpgrade --> GetCurrent
+    MainUpgrade --> GetLatest
+    MainUpgrade --> CompareVersions
+    MainUpgrade --> FormatOutput
+
+    GetCurrent --> PluginJSON2
+    GetLatest --> GitHubAPI
+```
+
+### Doctor Script Components
+
+```mermaid
+graph TB
+    subgraph "doctor.py"
+        MainDoctor[main<br/>Entry point]
+        CheckPython[check_python_version<br/>Verify Python 3.8+]
+        CheckDir[check_directory<br/>Verify exists & writable]
+        CheckGit[check_git<br/>Verify git installed]
+        CheckGH[check_github_cli<br/>Verify gh installed]
+        CheckYAML[check_yaml<br/>Verify PyYAML installed]
+        CheckJinja[check_jinja2<br/>Verify Jinja2 installed]
+    end
+
+    GlobalFS3[~/.claude/]
+    ProjectFS3[./.claude/]
+    SystemTools[System<br/>git, gh, python]
+
+    MainDoctor --> CheckPython
+    MainDoctor --> CheckDir
+    MainDoctor --> CheckGit
+    MainDoctor --> CheckGH
+    MainDoctor --> CheckYAML
+    MainDoctor --> CheckJinja
+
+    CheckDir --> GlobalFS3
+    CheckDir --> ProjectFS3
+    CheckGit --> SystemTools
+    CheckGH --> SystemTools
 ```
 
 ## Utils Module Components
@@ -356,7 +484,7 @@ None (uses sys.version_info)
 
 #### Purpose
 
-Path resolution and directory management
+Path resolution and directory management with security validation
 
 #### Components
 
@@ -370,28 +498,49 @@ def get_claude_dir() -> Path:
 def get_aida_skills_dir() -> Path:
     """Returns ~/.claude/skills/"""
 
-def ensure_directory(path: Path) -> Path:
-    """Create directory if doesn't exist, returns path"""
+def get_aida_plugin_dirs() -> List[Path]:
+    """Returns all ~/.claude/skills/aida-* directories"""
 
-def resolve_path(path: str) -> Path:
-    """Expand ~, resolve relative paths"""
+def ensure_directory(path: Path, permissions: int = 0o755) -> Path:
+    """Create directory if doesn't exist, validates security"""
+
+def resolve_path(
+    path: Union[str, Path],
+    must_exist: bool = False,
+    allowed_base: Optional[Path] = None
+) -> Path:
+    """Expand ~, resolve relative paths, validate security"""
 
 def is_subdirectory(child: Path, parent: Path) -> bool:
     """Check if child is under parent"""
 
 def get_relative_path(path: Path, base: Path) -> Path:
     """Get path relative to base"""
+
+def safe_rglob(
+    directory: Path,
+    pattern: str,
+    max_depth: int = 10
+) -> List[Path]:
+    """Recursively glob with symlink protection"""
 ```
+
+#### Security Features
+
+- Validates against null bytes (path injection)
+- Rejects symlinks in critical paths
+- Prevents path traversal attacks
+- safe_rglob protects against symlink loops
 
 #### Dependencies
 
-pathlib, os
+pathlib, os, errors.py
 
 ### files.py
 
 #### Purpose
 
-File I/O operations
+File I/O operations with atomic writes and safety checks
 
 #### Components
 
@@ -402,11 +551,17 @@ def read_file(path: Path) -> str:
 def write_file(path: Path, content: str) -> None:
     """Write text file, creates parent dirs"""
 
+def atomic_write(path: Path, content: str) -> None:
+    """Atomic write using temp file + rename"""
+
 def read_json(path: Path) -> dict:
     """Read and parse JSON file"""
 
 def write_json(path: Path, data: dict) -> None:
     """Write dict as JSON with formatting"""
+
+def write_yaml(path: Path, data: dict) -> None:
+    """Write dict as YAML with formatting"""
 
 def update_json(path: Path, updates: dict) -> None:
     """Merge updates into existing JSON"""
@@ -423,7 +578,118 @@ def directory_exists(path: Path) -> bool:
 
 #### Dependencies
 
-json, pathlib, errors.py
+json, yaml, pathlib, tempfile, errors.py
+
+### json_utils.py
+
+#### Purpose
+
+Safe JSON operations with size and depth limits
+
+#### Components
+
+```python
+MAX_JSON_SIZE = 1024 * 1024  # 1MB
+MAX_JSON_DEPTH = 100
+
+def safe_json_load(
+    json_str: str,
+    max_size: int = MAX_JSON_SIZE,
+    max_depth: int = MAX_JSON_DEPTH
+) -> dict:
+    """Parse JSON with safety limits against DoS attacks"""
+
+def validate_json_depth(obj: Any, max_depth: int) -> bool:
+    """Recursively check JSON depth"""
+```
+
+#### Security Features
+
+- Size limit prevents memory exhaustion
+- Depth limit prevents stack overflow
+- Used for all untrusted JSON input
+
+#### Dependencies
+
+json, sys
+
+### agents.py
+
+#### Purpose
+
+Agent discovery and routing directive generation
+
+#### Components
+
+```python
+def discover_agents(
+    search_dirs: List[Path],
+    max_depth: int = 3
+) -> List[Dict[str, Any]]:
+    """Discover all agent definitions in search directories"""
+
+def generate_agent_routing_section(
+    agents: List[Dict[str, Any]]
+) -> str:
+    """Generate markdown routing section for CLAUDE.md"""
+
+def update_agent_routing(
+    claude_md_path: Path,
+    agents: List[Dict[str, Any]]
+) -> None:
+    """Update agent routing section in CLAUDE.md"""
+```
+
+#### Features
+
+- Scans agents/ directories for *.md agent definitions
+- Parses YAML frontmatter for agent metadata
+- Generates routing directives for CLAUDE.md
+- Auto-updates CLAUDE.md with agent routing
+
+#### Dependencies
+
+paths.py, files.py, yaml
+
+### plugins.py
+
+#### Purpose
+
+Plugin discovery and configuration management
+
+#### Components
+
+```python
+def discover_installed_plugins(
+    plugins_dir: Path
+) -> List[Dict[str, Any]]:
+    """Find all plugins with .claude-plugin/plugin.json"""
+
+def get_plugins_with_config() -> List[Dict[str, Any]]:
+    """Get plugins that have aida-config.json"""
+
+def validate_plugin_config(config: dict) -> Tuple[bool, List[str]]:
+    """Validate plugin configuration schema"""
+
+def generate_plugin_checklist(plugins: List[Dict]) -> str:
+    """Generate markdown checklist for plugins"""
+
+def generate_plugin_preference_questions(
+    plugins: List[Dict]
+) -> List[Dict]:
+    """Generate questions for plugin preferences"""
+```
+
+#### Features
+
+- Discovers plugins via .claude-plugin/plugin.json
+- Reads aida-config.json for plugin configuration
+- Validates permissions and recommendations
+- Generates setup checklists and questions
+
+#### Dependencies
+
+paths.py, files.py, json_utils.py
 
 ### questionnaire.py
 
@@ -611,15 +877,15 @@ install.yml (YAML)
 Question Definitions (dict)
     ↓ run_questionnaire()
 User Responses (dict)
-    ↓ render_personal_preferences()
+    ↓ render_skill_directory()
 Template Variables (dict)
     ↓ render_template()
 Rendered SKILL.md (str)
     ↓ write_file()
-~/.claude/skills/personal-preferences/SKILL.md
+~/.claude/skills/user-context/SKILL.md
 ```
 
-#### Configuration Data Flow (Planned)
+#### Configuration Data Flow
 
 ```text
 Project Directory
@@ -654,26 +920,47 @@ Exit with code 1
 ### Dependency Graph
 
 ```text
-install.py
+install.py (skills/aida-dispatch/scripts/)
     ├─→ version.py (no dependencies)
     ├─→ paths.py (depends on: errors.py)
     ├─→ files.py (depends on: errors.py, paths.py)
-    ├─→ questionnaire.py (depends on: files.py)
+    ├─→ json_utils.py (no dependencies)
+    ├─→ inference.py (depends on: files.py, paths.py)
     ├─→ template_renderer.py (depends on: files.py, errors.py)
     └─→ errors.py (no dependencies)
 
-configure.py (planned)
+configure.py (skills/aida-dispatch/scripts/)
     ├─→ paths.py
     ├─→ files.py
-    ├─→ questionnaire.py
+    ├─→ questionnaire.py (depends on: files.py)
     ├─→ inference.py (depends on: files.py, paths.py)
+    ├─→ json_utils.py
     ├─→ template_renderer.py
     └─→ errors.py
 
-feedback.py
-    ├─→ paths.py
-    ├─→ files.py
-    └─→ errors.py
+feedback.py (skills/aida-dispatch/scripts/)
+    ├─→ subprocess (stdlib)
+    ├─→ pathlib (stdlib)
+    └─→ re (stdlib)
+
+memento.py (skills/memento/scripts/)
+    ├─→ json (stdlib)
+    ├─→ pathlib (stdlib)
+    ├─→ yaml (external)
+    └─→ jinja2 (external)
+
+status.py (skills/aida-dispatch/scripts/)
+    ├─→ json (stdlib)
+    └─→ pathlib (stdlib)
+
+upgrade.py (skills/aida-dispatch/scripts/)
+    ├─→ json (stdlib)
+    ├─→ subprocess (stdlib)
+    └─→ pathlib (stdlib)
+
+doctor.py (skills/aida-dispatch/scripts/)
+    ├─→ subprocess (stdlib)
+    └─→ pathlib (stdlib)
 ```
 
 ### No Circular Dependencies
@@ -730,7 +1017,7 @@ Test full scripts:
 python install.py --test-mode
 
 # Verify outputs
-ls ~/.claude/skills/personal-preferences/
+ls ~/.claude/skills/user-context/
 cat ~/.claude/settings.json
 ```
 

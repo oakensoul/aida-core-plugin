@@ -2,7 +2,7 @@
 type: skill
 name: aida-dispatch
 description: This skill routes /aida commands to appropriate handlers - configuration, diagnostics, feedback, extension management, session persistence (memento operations), and CLAUDE.md management.
-version: 0.5.0
+version: 0.7.0
 tags:
   - core
   - dispatcher
@@ -146,7 +146,7 @@ For `memento` commands:
 
 For `claude` commands:
 
-- **Invoke the `claude-md` skill** to handle these operations
+- **Invoke the `claude-code-management` skill** to handle these operations
 - Pass the full command arguments to the skill
 - The skill handles create, optimize, validate, and list operations
 
@@ -156,18 +156,18 @@ For `claude` commands:
    - Operation: `create`, `optimize`, `validate`, `list`
    - Arguments: scope (project/user/plugin), path, options
 
-2. Invoke `claude-md` skill with the parsed context
+2. Invoke `claude-code-management` skill with the parsed context
 
 **Examples:**
 
 ```text
-/aida claude create                  → claude-md skill (auto-detect scope)
-/aida claude create --scope project  → claude-md skill (scope=project)
-/aida claude create --scope user     → claude-md skill (scope=user)
-/aida claude optimize                → claude-md skill (audit current)
-/aida claude optimize ./CLAUDE.md    → claude-md skill (audit specific)
-/aida claude validate                → claude-md skill
-/aida claude list                    → claude-md skill
+/aida claude create                  → claude-code-management skill (auto-detect scope)
+/aida claude create --scope project  → claude-code-management skill (scope=project)
+/aida claude create --scope user     → claude-code-management skill (scope=user)
+/aida claude optimize                → claude-code-management skill (audit current)
+/aida claude optimize ./CLAUDE.md    → claude-code-management skill (audit specific)
+/aida claude validate                → claude-code-management skill
+/aida claude list                    → claude-code-management skill
 ```
 
 ## Path Resolution

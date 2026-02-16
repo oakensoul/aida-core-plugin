@@ -21,6 +21,7 @@
         "Bash(git branch:*)",
         "Bash(git checkout:*)",
         "Bash(git commit:*)",
+        "Bash(git -C:*)",
         "Bash(git fetch:*)",
         "Bash(git merge:*)",
         "Bash(git pull:*)",
@@ -43,6 +44,14 @@
         "Bash(gh repo view:*)"
       ],
       "suggested": "allow"
+    },
+    "filesystem-utilities": {
+      "label": "Filesystem Utilities",
+      "description": "File search and directory inspection commands. Note: find supports -exec which can run arbitrary commands.",
+      "rules": [
+        "Bash(find:*)"
+      ],
+      "suggested": "ask"
     }
   },
   "agents": ["aida", "claude-code-expert"]

@@ -152,7 +152,7 @@ For negative consequences:
 
 **Manual Updates**:
 
-- Make `/aida configure` fast and easy
+- Make `/aida config` fast and easy
 - Provide smart defaults from inference
 - Future: Add auto-skill-update feature
 
@@ -193,8 +193,7 @@ Markdown content that Claude reads as context.
 
 **Personal Skills** (`~/.claude/skills/`):
 
-- `personal-preferences/` - Coding standards
-- `work-patterns/` - Work habits
+- `user-context/` - Environment, preferences, and coding standards
 - `aida-core/` - AIDA management knowledge
 
 **Project Skills** (`.claude/skills/`):
@@ -310,8 +309,8 @@ How to measure if this decision was right:
 
 ## References
 
-- [AIDA Blueprint](../../../../docs/BLUEPRINT.md)
-- [MLP Scope](.pkm/PRD/minimum-lovable-product.md)
+- [AIDA Architecture](../../ARCHITECTURE.md)
+- [MLP Scope](../../README.md#quick-start)
 - [The One Killer Use Case](../../README.md#use-cases)
 
 ---

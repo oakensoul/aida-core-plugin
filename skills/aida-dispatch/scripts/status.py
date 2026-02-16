@@ -13,26 +13,27 @@ Exit codes:
 import sys
 from pathlib import Path
 import json
+from typing import List
 
-def get_claude_dir():
+def get_claude_dir() -> Path:
     """Get ~/.claude/ directory path."""
     return Path.home() / ".claude"
 
-def get_project_claude_dir():
+def get_project_claude_dir() -> Path:
     """Get ./.claude/ directory in current working directory."""
     return Path.cwd() / ".claude"
 
-def check_global_installation():
+def check_global_installation() -> bool:
     """Check if AIDA is installed globally."""
     claude_dir = get_claude_dir()
     return claude_dir.exists() and claude_dir.is_dir()
 
-def check_project_configuration():
+def check_project_configuration() -> bool:
     """Check if current project has AIDA configured."""
     project_claude = get_project_claude_dir()
     return project_claude.exists() and project_claude.is_dir()
 
-def get_plugin_version():
+def get_plugin_version() -> str:
     """Get plugin version from plugin.json."""
     # Navigate from scripts/ -> aida-core/ -> skills/ -> aida-core/ -> .claude-plugin/plugin.json
     plugin_json = Path(__file__).parent.parent.parent.parent / ".claude-plugin" / "plugin.json"
@@ -45,7 +46,7 @@ def get_plugin_version():
         pass
     return 'unknown'
 
-def count_skills(claude_dir):
+def count_skills(claude_dir: Path) -> int:
     """Count active skills in a directory."""
     skills_dir = claude_dir / "skills"
     if not skills_dir.exists():
@@ -57,7 +58,7 @@ def count_skills(claude_dir):
             count += 1
     return count
 
-def list_skills(claude_dir):
+def list_skills(claude_dir: Path) -> List[str]:
     """List active skills in a directory."""
     skills_dir = claude_dir / "skills"
     if not skills_dir.exists():
@@ -69,7 +70,7 @@ def list_skills(claude_dir):
             skills.append(item.name)
     return sorted(skills)
 
-def main():
+def main() -> int:
     print("AIDA Status")
     print("=" * 40)
     print()

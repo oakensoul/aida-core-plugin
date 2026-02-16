@@ -38,7 +38,7 @@ properly structured extensions that follow best practices.
 /aida memento create "Implementing OAuth flow"
 
 # Tomorrow, restore where you left off
-/aida memento restore
+/aida memento read
 ```
 
 ## Features
@@ -134,19 +134,21 @@ See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed design.
 
 ## Roadmap
 
-### Current: v0.5.x - Extension Framework
+### Current: v0.7.x - Launch & Polish
 
 - Session persistence (mementos)
 - Smart configuration with auto-detection
 - Agent-based orchestration
 - Extension creation (`/aida agent|command|skill|plugin create`)
 - Hook management (`/aida hook`)
+- Marketplace integration
+- Security hardening and test coverage
 
-### Next: v0.6.x - Sharing & Collaboration
+### Next: Sharing & Collaboration
 
 - Export/import extensions for sharing
-- Extension marketplace integration
 - Team collaboration features
+- Advanced extension marketplace
 
 ## Contributing
 

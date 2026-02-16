@@ -43,18 +43,9 @@ gh --version
 ### Clone Repository
 
 ```bash
-# Clone the aida-development monorepo
-git clone git@github.com:oakensoul/aida-development.git
-cd aida-development
-
-# This is a monorepo with bare repository structure
-# See CLAUDE.md for details on worktree structure
-```
-
-### Install Dependencies
-
-```bash
-cd packages/aida-core-plugin
+# Clone the aida-core-plugin repository
+git clone git@github.com:oakensoul/aida-core-plugin.git
+cd aida-core-plugin
 
 # Create virtual environment (recommended)
 python3 -m venv venv
@@ -106,9 +97,7 @@ packages/aida-core-plugin/
 │       └── errors.py            # Error classes
 ├── templates/                    # Jinja2 templates
 │   ├── blueprints/              # Skill templates
-│   │   ├── personal-preferences/
-│   │   │   └── SKILL.md.jinja2
-│   │   └── work-patterns/
+│   │   └── user-context/
 │   │       └── SKILL.md.jinja2
 │   └── questionnaires/          # YAML questionnaires
 │       ├── install.yml
@@ -314,7 +303,7 @@ def test_full_installation(tmp_path, monkeypatch):
 
     # Verify results
     assert exit_code == 0
-    assert (tmp_path / "skills/personal-preferences/SKILL.md").exists()
+    assert (tmp_path / "skills/user-context/SKILL.md").exists()
     assert (tmp_path / "settings.json").exists()
 ```
 
@@ -575,7 +564,7 @@ questions:
 **Update template to use new variable**:
 
 ```jinja2
-<!-- templates/blueprints/personal-preferences/SKILL.md.jinja2 -->
+<!-- templates/blueprints/user-context/SKILL.md.jinja2 -->
 ## Preferred Editor
 
 {{ preferred_editor }}

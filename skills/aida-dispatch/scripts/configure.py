@@ -75,7 +75,7 @@ logger = logging.getLogger(__name__)
 
 
 # Constants
-AIDA_VERSION = "0.2.0"
+AIDA_VERSION = "0.7.0"
 AIDA_MARKER_FILE = "aida.yml"
 PROJECT_CONTEXT_FILE = "aida-project-context.yml"
 PROJECT_CONTEXT_SKILL_DIR = "skills/project-context"
@@ -127,11 +127,12 @@ def atomic_write(filepath: Path, content: str) -> None:
     # Atomic rename (replaces existing file if present)
     try:
         os.replace(tmp_path, filepath)
-    except Exception:
+    except OSError:
         # Clean up temp file on failure
         try:
             os.unlink(tmp_path)
-        except Exception:
+        except OSError:
+            # Best-effort cleanup on failure
             pass
         raise
 
@@ -244,7 +245,8 @@ def detect_vcs_info(project_root: Path) -> Dict[str, Any]:
                 vcs["remote_url"] = None
                 vcs["is_github"] = False
                 vcs["is_gitlab"] = False
-        except Exception:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
+            # Git command failed or not available
             vcs["remote_url"] = None
             vcs["is_github"] = False
             vcs["is_gitlab"] = False
@@ -375,7 +377,8 @@ def detect_project_info(project_root: Path) -> Dict[str, Any]:
                 doc_level = "Standard - README, API docs, inline comments"
             else:
                 doc_level = "Minimal - README and inline comments"
-        except Exception:
+        except (FileNotFoundError, PermissionError, UnicodeDecodeError):
+            # Can't read README to estimate documentation level
             pass
 
     # Infer team collaboration
@@ -572,7 +575,7 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
     try:
         write_yaml(config_path, project_config)
         logger.info(f"Saved project configuration to {config_path}")
-    except Exception as e:
+    except (OSError, PermissionError) as e:
         logger.warning(f"Could not save project config: {e}")
         # Continue anyway - not critical for this phase
 
@@ -651,7 +654,8 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
                 )}
                 pq.pop("_plugin_name", None)
             questions.extend(pref_questions)
-    except Exception as e:
+    except (ImportError, FileNotFoundError, ValueError) as e:
+        # Plugin discovery can fail if modules aren't available or config is invalid
         logger.warning("Plugin discovery failed (non-critical): %s", e)
 
     # Agent discovery
@@ -659,7 +663,8 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
     try:
         from utils.agents import discover_agents
         discovered_agents = discover_agents(project_root)
-    except Exception as e:
+    except (ImportError, FileNotFoundError, ValueError) as e:
+        # Agent discovery can fail if modules aren't available or config is invalid
         logger.warning(
             "Agent discovery failed (non-critical): %s", e
         )
@@ -696,7 +701,7 @@ def validate_responses(responses: Dict[str, Any]) -> None:
     # Load questionnaire to get valid options
     try:
         questions = load_questionnaire(CONFIGURE_QUESTIONNAIRE)
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, yaml.YAMLError) as e:
         logger.warning(f"Could not load questionnaire for validation: {e}")
         # If we can't load questionnaire, skip validation (graceful degradation)
         return
@@ -834,7 +839,8 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
                     if pn not in (selected_plugins or []):
                         if pn not in plugin_prefs:
                             plugin_prefs[pn] = {"enabled": False}
-            except Exception:
+            except (ImportError, ValueError):
+                # Plugin discovery or processing failed
                 logger.warning(
                     "Failed to mark unselected plugins (non-critical)",
                     exc_info=True,
@@ -934,7 +940,8 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
             readme_path = project_root / 'README.md'
             try:
                 template_vars['readme_length'] = str(len(readme_path.read_text(encoding='utf-8')))
-            except Exception:
+            except (FileNotFoundError, PermissionError, UnicodeDecodeError):
+                # Can't read README file
                 template_vars['readme_length'] = '0'
         else:
             template_vars['readme_length'] = '0'
@@ -975,7 +982,8 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
                     files_created.append(
                         routing_result["path"]
                     )
-        except Exception as e:
+        except (ImportError, FileNotFoundError, ValueError) as e:
+            # Agent routing can fail if modules aren't available or config is invalid
             logger.warning(
                 "Agent routing update failed"
                 " (non-critical): %s",
@@ -996,8 +1004,11 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
             "config_path": str(config_path)
         }
 
+    except (KeyboardInterrupt, SystemExit):
+        raise
     except Exception as e:
-        # Log full error with traceback for debugging
+        # Intentionally broad: top-level handler for any unexpected error during configuration
+        # Ensures we always return a structured response even for unanticipated failures
         logger.error(f"Configuration failed: {e}", exc_info=True)
 
         return {
@@ -1089,8 +1100,11 @@ def main() -> int:
         }))
         return 1
 
+    except (KeyboardInterrupt, SystemExit):
+        raise
     except Exception as e:
-        # Log unexpected errors with full traceback
+        # Intentionally broad: top-level CLI error handler catches any unexpected exceptions
+        # Ensures the program always exits gracefully with a structured error response
         logger.error(f"Unexpected error: {e}", exc_info=True)
         print(json.dumps({
             "success": False,
