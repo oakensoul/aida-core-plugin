@@ -920,7 +920,7 @@ Exit with code 1
 ### Dependency Graph
 
 ```text
-install.py (skills/aida-dispatch/scripts/)
+install.py (skills/aida/scripts/)
     ├─→ version.py (no dependencies)
     ├─→ paths.py (depends on: errors.py)
     ├─→ files.py (depends on: errors.py, paths.py)
@@ -929,7 +929,7 @@ install.py (skills/aida-dispatch/scripts/)
     ├─→ template_renderer.py (depends on: files.py, errors.py)
     └─→ errors.py (no dependencies)
 
-configure.py (skills/aida-dispatch/scripts/)
+configure.py (skills/aida/scripts/)
     ├─→ paths.py
     ├─→ files.py
     ├─→ questionnaire.py (depends on: files.py)
@@ -938,7 +938,7 @@ configure.py (skills/aida-dispatch/scripts/)
     ├─→ template_renderer.py
     └─→ errors.py
 
-feedback.py (skills/aida-dispatch/scripts/)
+feedback.py (skills/aida/scripts/)
     ├─→ subprocess (stdlib)
     ├─→ pathlib (stdlib)
     └─→ re (stdlib)
@@ -949,16 +949,16 @@ memento.py (skills/memento/scripts/)
     ├─→ yaml (external)
     └─→ jinja2 (external)
 
-status.py (skills/aida-dispatch/scripts/)
+status.py (skills/aida/scripts/)
     ├─→ json (stdlib)
     └─→ pathlib (stdlib)
 
-upgrade.py (skills/aida-dispatch/scripts/)
+upgrade.py (skills/aida/scripts/)
     ├─→ json (stdlib)
     ├─→ subprocess (stdlib)
     └─→ pathlib (stdlib)
 
-doctor.py (skills/aida-dispatch/scripts/)
+doctor.py (skills/aida/scripts/)
     ├─→ subprocess (stdlib)
     └─→ pathlib (stdlib)
 ```

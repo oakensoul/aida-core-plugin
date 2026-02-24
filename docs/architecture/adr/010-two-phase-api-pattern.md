@@ -312,7 +312,7 @@ def execute(context: Dict[str, Any],
 
 ### Scripts Using Two-Phase API
 
-**configure.py** (`skills/aida-dispatch/scripts/`):
+**configure.py** (`skills/aida/scripts/`):
 
 ```python
 # Phase 1: Infer project context
@@ -325,7 +325,7 @@ configure(responses, inferred)
 # Creates: .claude/skills/project-context/
 ```
 
-**install.py** (`skills/aida-dispatch/scripts/`):
+**install.py** (`skills/aida/scripts/`):
 
 ```python
 # Phase 1: Detect environment
@@ -338,7 +338,7 @@ install(responses, inferred)
 # Creates: ~/.claude/aida.yml, ~/.claude/skills/user-context/
 ```
 
-**feedback.py** (`skills/aida-dispatch/scripts/`):
+**feedback.py** (`skills/aida/scripts/`):
 
 ```python
 # Phase 1: Detect system context

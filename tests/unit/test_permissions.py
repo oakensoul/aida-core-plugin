@@ -26,7 +26,7 @@ sys.path.insert(
     str(
         Path(__file__).parent.parent.parent
         / "skills"
-        / "aida-dispatch"
+        / "aida"
         / "scripts"
     ),
 )
