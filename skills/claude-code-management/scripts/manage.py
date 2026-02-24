@@ -31,7 +31,7 @@ import json
 import argparse
 import logging
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 # Configure logging
 logging.basicConfig(
@@ -56,7 +56,7 @@ from operations import claude_md  # noqa: E402
 from operations import hooks  # noqa: E402
 
 
-def is_hook_operation(context: Dict[str, Any]) -> bool:
+def is_hook_operation(context: dict[str, Any]) -> bool:
     """Determine if this is a hook operation.
 
     Args:
@@ -76,7 +76,7 @@ def is_hook_operation(context: Dict[str, Any]) -> bool:
     return False
 
 
-def is_claude_md_operation(context: Dict[str, Any]) -> bool:
+def is_claude_md_operation(context: dict[str, Any]) -> bool:
     """Determine if this is a CLAUDE.md operation.
 
     Args:
@@ -102,7 +102,7 @@ def is_claude_md_operation(context: Dict[str, Any]) -> bool:
     return False
 
 
-def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
+def get_questions(context: dict[str, Any]) -> dict[str, Any]:
     """Route to appropriate get_questions based on context.
 
     Args:
@@ -119,7 +119,7 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
         return extensions.get_questions(context)
 
 
-def execute(context: Dict[str, Any], responses: Dict[str, Any]) -> Dict[str, Any]:
+def execute(context: dict[str, Any], responses: dict[str, Any]) -> dict[str, Any]:
     """Route to appropriate execute based on context.
 
     Args:

@@ -56,6 +56,10 @@ def validate_target_directory(path: str) -> tuple[bool, Optional[str]]:
     if not path:
         return False, "Target directory path cannot be empty"
 
+    # Reject symlinks to prevent writing through unexpected paths
+    if Path(path).is_symlink():
+        return False, f"Target path is a symbolic link: {path}"
+
     target = Path(path).resolve()
 
     # Check if directory already exists and is not empty
