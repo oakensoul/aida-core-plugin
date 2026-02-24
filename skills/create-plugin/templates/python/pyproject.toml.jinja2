@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "{{ plugin_name }}"
+version = "{{ version }}"
+description = "{{ description }}"
+readme = "README.md"
+license = "{{ license_id }}"
+requires-python = ">={{ python_version }}"
+authors = [
+    { name = "{{ author_name }}", email = "{{ author_email }}" },
+]
+keywords = {{ keywords | tojson }}
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.4.0",
+    "jinja2>=3.1",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py{{ python_version | replace('.', '') }}"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

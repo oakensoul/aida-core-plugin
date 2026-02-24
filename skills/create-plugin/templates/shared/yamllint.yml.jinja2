@@ -1,0 +1,32 @@
+---
+# YAML Lint Configuration
+
+extends: default
+
+rules:
+  line-length:
+    max: 120
+    allow-non-breakable-words: true
+    allow-non-breakable-inline-mappings: true
+  document-start:
+    present: true
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+  empty-values:
+    forbid-in-block-mappings: false
+    forbid-in-flow-mappings: false
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no']
+    check-keys: false
+  comments:
+    require-starting-space: true
+    ignore-shebangs: true
+    min-spaces-from-content: 1
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 0
