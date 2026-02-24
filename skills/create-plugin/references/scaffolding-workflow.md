@@ -35,8 +35,8 @@ All templates receive these variables:
 | `year` | string | Current year |
 | `language` | string | "python" or "typescript" |
 | `script_extension` | string | ".py" or ".ts" |
-| `python_version` | string | e.g. "3.11" |
-| `node_version` | string | e.g. "20" |
+| `python_version` | string | Python version, format "X.Y" (default: "3.11") |
+| `node_version` | string | Node.js major version (default: "22") |
 | `keywords` | list | Marketplace tags |
 | `repository_url` | string | GitHub URL or "" |
 | `include_agent_stub` | bool | Include agent stub |

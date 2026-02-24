@@ -23,6 +23,7 @@ def create_directory_structure(target: Path, language: str) -> list[str]:
     """
     dirs = [
         ".claude-plugin",
+        ".github/workflows",
         "agents",
         "skills",
         "docs",
@@ -100,6 +101,7 @@ def render_python_files(
         "python/pyproject.toml.jinja2": "pyproject.toml",
         "python/python-version.jinja2": ".python-version",
         "python/conftest.py.jinja2": "tests/conftest.py",
+        "python/ci.yml.jinja2": ".github/workflows/ci.yml",
     }
 
     created = []
@@ -133,6 +135,9 @@ def render_typescript_files(
         "typescript/prettierrc.json.jinja2": ".prettierrc.json",
         "typescript/nvmrc.jinja2": ".nvmrc",
         "typescript/vitest.config.ts.jinja2": "vitest.config.ts",
+        "typescript/index.ts.jinja2": "src/index.ts",
+        "typescript/index.test.ts.jinja2": "tests/index.test.ts",
+        "typescript/ci.yml.jinja2": ".github/workflows/ci.yml",
     }
 
     created = []
@@ -151,6 +156,7 @@ def render_stub_agent(
     name: str,
     description: str,
     ccm_templates_dir: Path,
+    timestamp: str = "",
 ) -> list[str]:
     """Render an agent stub using claude-code-management templates.
 
@@ -159,18 +165,21 @@ def render_stub_agent(
         name: Agent name (kebab-case)
         description: Agent description
         ccm_templates_dir: Path to claude-code-management templates directory
+        timestamp: ISO 8601 timestamp for generated metadata
 
     Returns:
         List of created file paths (relative to target)
     """
-    from datetime import datetime, timezone
+    if not timestamp:
+        from datetime import datetime, timezone
+        timestamp = datetime.now(timezone.utc).isoformat()
 
     variables = {
         "name": name,
         "description": description,
         "version": "0.1.0",
         "tags": ["custom"],
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": timestamp,
     }
 
     content = render_template(ccm_templates_dir, "agent/agent.md.jinja2", variables)
@@ -204,6 +213,7 @@ def render_stub_skill(
     description: str,
     language: str,
     ccm_templates_dir: Path,
+    timestamp: str = "",
 ) -> list[str]:
     """Render a skill stub using claude-code-management templates.
 
@@ -213,11 +223,14 @@ def render_stub_skill(
         description: Skill description
         language: "python" or "typescript"
         ccm_templates_dir: Path to claude-code-management templates directory
+        timestamp: ISO 8601 timestamp for generated metadata
 
     Returns:
         List of created file paths (relative to target)
     """
-    from datetime import datetime, timezone
+    if not timestamp:
+        from datetime import datetime, timezone
+        timestamp = datetime.now(timezone.utc).isoformat()
 
     script_extension = ".py" if language == "python" else ".ts"
 
@@ -226,7 +239,7 @@ def render_stub_skill(
         "description": description,
         "version": "0.1.0",
         "tags": ["custom"],
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": timestamp,
         "script_extension": script_extension,
     }
 

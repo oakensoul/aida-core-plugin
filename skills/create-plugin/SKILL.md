@@ -3,6 +3,7 @@ type: skill
 name: create-plugin
 description: Scaffolds a complete Claude Code plugin project as a new local git repository with language-specific tooling
 version: 0.1.0
+argument_hint: "[plugin-name]"
 tags:
   - scaffolding
   - plugin
@@ -25,6 +26,31 @@ This skill activates when:
 - User invokes `/aida plugin scaffold` or `/aida plugin new`
 - Routed from `aida-dispatch` for plugin scaffolding commands
 
+## Path Resolution
+
+**Base Directory:** Provided when skill loads via `<command-message>` tags
+containing the skill base directory.
+
+**Script Execution:** Construct full paths from base directory:
+
+```text
+{base_directory}/scripts/scaffold.py
+```
+
+**Templates:** Located in the templates subdirectory:
+
+```text
+{base_directory}/templates/shared/
+{base_directory}/templates/python/
+{base_directory}/templates/typescript/
+```
+
+**CCM Templates:** Agent and skill stubs reference templates from:
+
+```text
+{project_root}/skills/claude-code-management/templates/
+```
+
 ## Two-Phase Workflow
 
 ### Phase 1: Gather Context
@@ -42,8 +68,19 @@ The script returns a JSON object with:
 - `questions`: List of questions for missing context fields
 - `inferred`: Auto-detected values (author name/email from git config)
 
-Present the questions to the user, collecting answers. Merge answers with any
-inferred values into the full context object.
+Present the questions to the user, collecting answers. Merge answers with
+inferred values into the full context object. For example, if Phase 1 returns
+`inferred.author_name` and the user was not asked for `author_name`, include
+the inferred value in the context sent to Phase 2:
+
+```json
+{
+  "plugin_name": "my-plugin",
+  "author_name": "Jane Smith",
+  "author_email": "jane@example.com",
+  "language": "python"
+}
+```
 
 ### Phase 2: Execute Scaffolding
 
@@ -88,30 +125,12 @@ gh repo create my-plugin --public --source=. --push
 This step is LLM-orchestrated (not in the Python script) so the user can
 customize visibility, organization, etc.
 
-## Path Resolution
+## Error Handling
 
-**Base Directory:** Provided when skill loads via `<command-message>` tags
-containing the skill base directory.
-
-**Script Execution:** Construct full paths from base directory:
-
-```text
-{base_directory}/scripts/scaffold.py
-```
-
-**Templates:** Located in the templates subdirectory:
-
-```text
-{base_directory}/templates/shared/
-{base_directory}/templates/python/
-{base_directory}/templates/typescript/
-```
-
-**CCM Templates:** Agent and skill stubs reference templates from:
-
-```text
-{project_root}/skills/claude-code-management/templates/
-```
+If Phase 2 returns `{"success": false, ...}`, report the `message` field to
+the user and offer to retry. The response includes `path` and `files_created`
+for any partial output. Common causes and resolutions are documented in
+`references/scaffolding-workflow.md`.
 
 ## Resources
 

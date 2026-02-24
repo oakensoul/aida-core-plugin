@@ -342,5 +342,184 @@ class TestExecuteGitInit(unittest.TestCase):
             self.assertTrue(result["git_committed"])
 
 
+class TestPythonVersionNormalization(unittest.TestCase):
+    """Test python_version normalization to X.Y format."""
+
+    @patch.object(_scaffold_mod, "initialize_git", return_value=True)
+    @patch.object(_scaffold_mod, "create_initial_commit", return_value=True)
+    def test_strips_patch_version(self, mock_commit, mock_git):
+        """Should normalize 3.11.4 to 3.11 in pyproject.toml."""
+        with tempfile.TemporaryDirectory() as tmp:
+            target = str(Path(tmp) / "ver-plugin")
+
+            context = {
+                "plugin_name": "ver-plugin",
+                "description": "A plugin to test version normalization",
+                "license": "MIT",
+                "language": "python",
+                "target_directory": target,
+                "author_name": "Test",
+                "author_email": "test@test.com",
+                "python_version": "3.11.4",
+            }
+
+            result = execute(context)
+            self.assertTrue(result["success"], f"Execute failed: {result.get('message')}")
+
+            # The .python-version file should have X.Y format
+            target_path = Path(result["path"])
+            py_version = (target_path / ".python-version").read_text().strip()
+            self.assertEqual(py_version, "3.11")
+
+    @patch.object(_scaffold_mod, "initialize_git", return_value=True)
+    @patch.object(_scaffold_mod, "create_initial_commit", return_value=True)
+    def test_keeps_xy_format(self, mock_commit, mock_git):
+        """Should leave 3.12 as-is."""
+        with tempfile.TemporaryDirectory() as tmp:
+            target = str(Path(tmp) / "ver2-plugin")
+
+            context = {
+                "plugin_name": "ver2-plugin",
+                "description": "A plugin to test version normalization",
+                "license": "MIT",
+                "language": "python",
+                "target_directory": target,
+                "author_name": "Test",
+                "author_email": "test@test.com",
+                "python_version": "3.12",
+            }
+
+            result = execute(context)
+            self.assertTrue(result["success"], f"Execute failed: {result.get('message')}")
+
+            target_path = Path(result["path"])
+            py_version = (target_path / ".python-version").read_text().strip()
+            self.assertEqual(py_version, "3.12")
+
+
+class TestExecuteTypescriptFiles(unittest.TestCase):
+    """Test TypeScript scaffolding creates new files (index.ts, test, CI)."""
+
+    @patch.object(_scaffold_mod, "initialize_git", return_value=True)
+    @patch.object(_scaffold_mod, "create_initial_commit", return_value=True)
+    def test_creates_typescript_entry_point(self, mock_commit, mock_git):
+        """Should create src/index.ts and tests/index.test.ts."""
+        with tempfile.TemporaryDirectory() as tmp:
+            target = str(Path(tmp) / "ts-entry-plugin")
+
+            context = {
+                "plugin_name": "ts-entry-plugin",
+                "description": "A TypeScript plugin to test entry point files",
+                "license": "MIT",
+                "language": "typescript",
+                "target_directory": target,
+                "author_name": "Test",
+                "author_email": "test@test.com",
+            }
+
+            result = execute(context)
+            self.assertTrue(result["success"], f"Execute failed: {result.get('message')}")
+
+            target_path = Path(result["path"])
+            self.assertTrue(
+                (target_path / "src" / "index.ts").exists(),
+                "src/index.ts should exist",
+            )
+            self.assertTrue(
+                (target_path / "tests" / "index.test.ts").exists(),
+                "tests/index.test.ts should exist",
+            )
+
+    @patch.object(_scaffold_mod, "initialize_git", return_value=True)
+    @patch.object(_scaffold_mod, "create_initial_commit", return_value=True)
+    def test_creates_ci_workflow(self, mock_commit, mock_git):
+        """Should create .github/workflows/ci.yml for TypeScript."""
+        with tempfile.TemporaryDirectory() as tmp:
+            target = str(Path(tmp) / "ts-ci-plugin")
+
+            context = {
+                "plugin_name": "ts-ci-plugin",
+                "description": "A TypeScript plugin to test CI workflow",
+                "license": "MIT",
+                "language": "typescript",
+                "target_directory": target,
+                "author_name": "Test",
+                "author_email": "test@test.com",
+            }
+
+            result = execute(context)
+            self.assertTrue(result["success"], f"Execute failed: {result.get('message')}")
+
+            target_path = Path(result["path"])
+            ci_path = target_path / ".github" / "workflows" / "ci.yml"
+            self.assertTrue(ci_path.exists(), ".github/workflows/ci.yml should exist")
+
+            # Verify it's a valid YAML-like file with expected content
+            ci_content = ci_path.read_text()
+            self.assertIn("name:", ci_content)
+
+
+class TestExecutePythonCIWorkflow(unittest.TestCase):
+    """Test Python scaffolding creates CI workflow."""
+
+    @patch.object(_scaffold_mod, "initialize_git", return_value=True)
+    @patch.object(_scaffold_mod, "create_initial_commit", return_value=True)
+    def test_creates_ci_workflow(self, mock_commit, mock_git):
+        """Should create .github/workflows/ci.yml for Python."""
+        with tempfile.TemporaryDirectory() as tmp:
+            target = str(Path(tmp) / "py-ci-plugin")
+
+            context = {
+                "plugin_name": "py-ci-plugin",
+                "description": "A Python plugin to test CI workflow creation",
+                "license": "MIT",
+                "language": "python",
+                "target_directory": target,
+                "author_name": "Test",
+                "author_email": "test@test.com",
+            }
+
+            result = execute(context)
+            self.assertTrue(result["success"], f"Execute failed: {result.get('message')}")
+
+            target_path = Path(result["path"])
+            ci_path = target_path / ".github" / "workflows" / "ci.yml"
+            self.assertTrue(ci_path.exists(), ".github/workflows/ci.yml should exist")
+
+            ci_content = ci_path.read_text()
+            self.assertIn("name:", ci_content)
+
+
+class TestPartialFailureResponse(unittest.TestCase):
+    """Test that partial failure includes path and files_created."""
+
+    @patch.object(_scaffold_mod, "initialize_git", return_value=True)
+    @patch.object(_scaffold_mod, "create_initial_commit", return_value=True)
+    @patch.object(_scaffold_mod, "render_typescript_files", side_effect=RuntimeError("Template error"))
+    def test_includes_path_and_files_on_failure(self, mock_ts, mock_commit, mock_git):
+        """Should include path and files_created in error response."""
+        with tempfile.TemporaryDirectory() as tmp:
+            target = str(Path(tmp) / "fail-plugin")
+
+            context = {
+                "plugin_name": "fail-plugin",
+                "description": "A plugin that will fail during scaffolding",
+                "license": "MIT",
+                "language": "typescript",
+                "target_directory": target,
+                "author_name": "Test",
+                "author_email": "test@test.com",
+            }
+
+            result = execute(context)
+            self.assertFalse(result["success"])
+            self.assertIn("path", result)
+            self.assertIn("files_created", result)
+            self.assertIn("error_type", result)
+            self.assertEqual(result["error_type"], "RuntimeError")
+            # Some shared files should have been created before failure
+            self.assertIsInstance(result["files_created"], list)
+
+
 if __name__ == "__main__":
     unittest.main()

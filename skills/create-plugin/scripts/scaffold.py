@@ -16,6 +16,7 @@ Exit codes:
     1   - Error occurred
 """
 
+import shlex
 import sys
 import json
 import argparse
@@ -27,7 +28,8 @@ from typing import Any
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    stream=sys.stderr,
 )
 logger = logging.getLogger(__name__)
 
@@ -70,6 +72,7 @@ from scaffold_ops.generators import (  # noqa: E402
 )
 
 GENERATOR_VERSION = "0.9.0"
+SUPPORTED_LANGUAGES = ("python", "typescript")
 
 
 def get_questions(context: dict[str, Any]) -> dict[str, Any]:
@@ -128,7 +131,7 @@ def get_questions(context: dict[str, Any]) -> dict[str, Any]:
             "id": "language",
             "question": "Which language toolchain?",
             "type": "choice",
-            "options": ["python", "typescript"],
+            "options": list(SUPPORTED_LANGUAGES),
             "default": "python",
         })
 
@@ -238,7 +241,7 @@ def execute(context: dict[str, Any]) -> dict[str, Any]:
         return {"success": False, "message": f"Invalid version: {error}"}
 
     language = context.get("language", "python")
-    if language not in ("python", "typescript"):
+    if language not in SUPPORTED_LANGUAGES:
         return {"success": False, "message": f"Unsupported language: {language}"}
 
     license_id = context.get("license", "MIT")
@@ -294,8 +297,10 @@ def execute(context: dict[str, Any]) -> dict[str, Any]:
         "year": year,
         "language": language,
         "script_extension": script_extension,
-        "python_version": context.get("python_version", "3.11"),
-        "node_version": context.get("node_version", "20"),
+        "python_version": _normalize_python_version(
+            context.get("python_version", "3.11")
+        ),
+        "node_version": context.get("node_version", "22"),
         "keywords": keywords,
         "repository_url": context.get("repository_url", ""),
         "include_agent_stub": context.get("include_agent_stub", False),
@@ -349,6 +354,7 @@ def execute(context: dict[str, Any]) -> dict[str, Any]:
                 variables["agent_stub_name"],
                 variables["agent_stub_description"],
                 CCM_TEMPLATES_DIR,
+                timestamp=variables["timestamp"],
             )
             all_files.extend(stub_files)
 
@@ -359,6 +365,7 @@ def execute(context: dict[str, Any]) -> dict[str, Any]:
                 variables["skill_stub_description"],
                 language,
                 CCM_TEMPLATES_DIR,
+                timestamp=variables["timestamp"],
             )
             all_files.extend(stub_files)
 
@@ -369,11 +376,13 @@ def execute(context: dict[str, Any]) -> dict[str, Any]:
             git_committed = create_initial_commit(target)
 
     except Exception as e:
-        logger.error(f"Scaffolding failed: {e}", exc_info=True)
+        logger.error("Scaffolding failed: %s", e, exc_info=True)
         return {
             "success": False,
             "message": f"Scaffolding failed: {e}",
             "error_type": type(e).__name__,
+            "path": str(target),
+            "files_created": sorted(all_files),
         }
 
     return {
@@ -392,11 +401,19 @@ def execute(context: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _normalize_python_version(version: str) -> str:
+    """Normalize python version to X.Y format (strip patch component)."""
+    parts = version.split(".")
+    if len(parts) >= 2:
+        return f"{parts[0]}.{parts[1]}"
+    return version
+
+
 def _build_next_steps(
     plugin_name: str, target: Path, language: str, create_repo: bool
 ) -> list[str]:
     """Build list of suggested next steps after scaffolding."""
-    steps = [f"cd {target}"]
+    steps = [f"cd {shlex.quote(str(target))}"]
 
     if language == "python":
         steps.append('pip install -e ".[dev]"')
@@ -458,7 +475,7 @@ def main() -> int:
             return 1
 
     except ValueError as e:
-        logger.error(f"Validation error: {e}")
+        logger.error("Validation error: %s", e)
         print(json.dumps({
             "success": False,
             "message": f"Validation error: {e}"
@@ -466,7 +483,7 @@ def main() -> int:
         return 1
 
     except Exception as e:
-        logger.error(f"Unexpected error: {e}", exc_info=True)
+        logger.error("Unexpected error: %s", e, exc_info=True)
         print(json.dumps({
             "success": False,
             "message": f"Error: {e}",

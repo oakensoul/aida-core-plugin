@@ -9,7 +9,13 @@ from pathlib import Path
 
 # Add shared scripts to path
 _project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(_project_root / "scripts"))
+_scripts_path = _project_root / "scripts"
+if not (_scripts_path / "shared" / "utils.py").exists():
+    raise ImportError(
+        f"Cannot find shared utils at {_scripts_path}. "
+        "Verify operations/utils.py is in the expected directory depth."
+    )
+sys.path.insert(0, str(_scripts_path))
 
 from shared.utils import (  # noqa: E402, F401
     safe_json_load,

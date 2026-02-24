@@ -94,7 +94,10 @@ The `plugin.json` file contains only standard Claude Code fields:
   "name": "my-plugin",
   "version": "1.0.0",
   "description": "Brief description of what this plugin provides",
-  "author": "Your Name or Organization",
+  "author": {
+    "name": "Your Name or Organization",
+    "email": "author@example.com"
+  },
   "license": "MIT",
   "repository": "https://github.com/username/my-plugin",
   "homepage": "https://your-plugin-docs.example.com",
@@ -118,7 +121,7 @@ The `plugin.json` file contains only standard Claude Code fields:
 | `name` | Yes | Unique identifier (kebab-case) |
 | `version` | Yes | Semantic version (X.Y.Z) |
 | `description` | Yes | One-line description |
-| `author` | No | Creator name or organization |
+| `author` | No | Creator info (string or `{name, email}` object) |
 | `license` | No | SPDX license identifier |
 | `repository` | No | Source code URL |
 | `homepage` | No | Documentation URL |
@@ -224,23 +227,24 @@ Use `*` for wildcard arguments (e.g., `Bash(git add:*)`).
 
 ## marketplace.json Schema
 
-For plugins published to the marketplace:
+The AIDA marketplace listing format used by the scaffolding tool:
 
 ```json
 {
-  "displayName": "My Plugin",
-  "shortDescription": "A short tagline (max 100 chars)",
-  "longDescription": "Detailed description with markdown support...",
-  "category": "development",
-  "icon": "icon.png",
-  "screenshots": [
-    "screenshots/demo1.png"
-  ],
-  "pricing": "free",
-  "support": {
-    "email": "support@example.com",
-    "issues": "https://github.com/username/my-plugin/issues"
-  }
+  "name": "my-plugin",
+  "owner": {
+    "name": "Author Name",
+    "email": "author@example.com"
+  },
+  "description": "Brief description of the plugin",
+  "plugins": [
+    {
+      "name": "my-plugin",
+      "description": "Brief description",
+      "version": "0.1.0",
+      "source": "./"
+    }
+  ]
 }
 ```
 

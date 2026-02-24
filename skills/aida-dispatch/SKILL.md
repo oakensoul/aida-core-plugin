@@ -247,7 +247,7 @@ When displaying help (for `help` command or no arguments), show:
 - `/aida agent [create|validate|version|list]` - Manage agents
 - `/aida skill [create|validate|version|list]` - Manage skills
 - `/aida plugin [create|validate|version|list|add|remove]` - Manage plugins
-- `/aida plugin scaffold [name]` - Scaffold a new plugin project
+- `/aida plugin scaffold [name]` or `/aida plugin new [name]` - Scaffold a new plugin project
 - `/aida hook [list|add|remove|validate]` - Manage hooks (settings.json)
 
 ### Session Persistence

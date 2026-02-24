@@ -117,6 +117,17 @@ class TestValidateTargetDirectory(unittest.TestCase):
         self.assertFalse(is_valid)
         self.assertIn("Parent directory does not exist", error)
 
+    def test_rejects_symlink(self):
+        """Should reject a symlink target to prevent writing through unexpected paths."""
+        with tempfile.TemporaryDirectory() as tmp:
+            real_dir = os.path.join(tmp, "real-dir")
+            os.makedirs(real_dir)
+            link_path = os.path.join(tmp, "link-dir")
+            os.symlink(real_dir, link_path)
+            is_valid, error = validate_target_directory(link_path)
+            self.assertFalse(is_valid)
+            self.assertIn("symbolic link", error)
+
 
 class TestCheckGhAvailable(unittest.TestCase):
     """Test GitHub CLI availability check."""
