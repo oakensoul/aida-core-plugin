@@ -1,4 +1,4 @@
-"""Unit tests for create-plugin generator operations."""
+"""Unit tests for plugin-manager generator operations."""
 
 import sys
 import tempfile
@@ -8,11 +8,18 @@ from unittest.mock import patch, MagicMock
 
 # Add scripts directories to path
 _project_root = Path(__file__).parent.parent.parent
-_scaffold_scripts = _project_root / "skills" / "create-plugin" / "scripts"
+_plugin_scripts = _project_root / "skills" / "plugin-manager" / "scripts"
 sys.path.insert(0, str(_project_root / "scripts"))
-sys.path.insert(0, str(_scaffold_scripts))
+sys.path.insert(0, str(_plugin_scripts))
 
-from scaffold_ops.generators import (  # noqa: E402
+# Clear cached operations modules to avoid cross-manager conflicts in pytest
+for _mod_name in list(sys.modules):
+    if _mod_name == "operations" or _mod_name.startswith("operations."):
+        del sys.modules[_mod_name]
+
+import operations.scaffold_ops.generators as _generators_mod  # noqa: E402
+
+from operations.scaffold_ops.generators import (  # noqa: E402
     create_directory_structure,
     render_shared_files,
     assemble_gitignore,
@@ -21,7 +28,7 @@ from scaffold_ops.generators import (  # noqa: E402
     create_initial_commit,
 )
 
-TEMPLATES_DIR = _project_root / "skills" / "create-plugin" / "templates"
+TEMPLATES_DIR = _project_root / "skills" / "plugin-manager" / "templates" / "scaffold"
 
 
 class TestCreateDirectoryStructure(unittest.TestCase):
@@ -221,7 +228,7 @@ class TestAssembleMakefile(unittest.TestCase):
 class TestInitializeGit(unittest.TestCase):
     """Test git initialization."""
 
-    @patch("scaffold_ops.generators.subprocess.run")
+    @patch.object(_generators_mod.subprocess, "run")
     def test_success(self, mock_run):
         """Should return True on successful git init."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -229,7 +236,7 @@ class TestInitializeGit(unittest.TestCase):
             result = initialize_git(Path(tmp))
             self.assertTrue(result)
 
-    @patch("scaffold_ops.generators.subprocess.run")
+    @patch.object(_generators_mod.subprocess, "run")
     def test_failure(self, mock_run):
         """Should return False when git is not available."""
         mock_run.side_effect = FileNotFoundError("git not found")
@@ -241,7 +248,7 @@ class TestInitializeGit(unittest.TestCase):
 class TestCreateInitialCommit(unittest.TestCase):
     """Test initial commit creation."""
 
-    @patch("scaffold_ops.generators.subprocess.run")
+    @patch.object(_generators_mod.subprocess, "run")
     def test_success(self, mock_run):
         """Should return True when both add and commit succeed."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -249,14 +256,14 @@ class TestCreateInitialCommit(unittest.TestCase):
         self.assertTrue(result)
         self.assertEqual(mock_run.call_count, 2)
 
-    @patch("scaffold_ops.generators.subprocess.run")
+    @patch.object(_generators_mod.subprocess, "run")
     def test_failure_on_add(self, mock_run):
         """Should return False when git add fails."""
         mock_run.return_value = MagicMock(returncode=1)
         result = create_initial_commit(Path("/tmp/test"))
         self.assertFalse(result)
 
-    @patch("scaffold_ops.generators.subprocess.run")
+    @patch.object(_generators_mod.subprocess, "run")
     def test_failure_on_commit(self, mock_run):
         """Should return False when git commit fails after add succeeds."""
         add_result = MagicMock(returncode=0)
@@ -265,7 +272,7 @@ class TestCreateInitialCommit(unittest.TestCase):
         result = create_initial_commit(Path("/tmp/test"))
         self.assertFalse(result)
 
-    @patch("scaffold_ops.generators.subprocess.run")
+    @patch.object(_generators_mod.subprocess, "run")
     def test_failure_on_file_not_found(self, mock_run):
         """Should return False when git is not available."""
         mock_run.side_effect = FileNotFoundError("git not found")

@@ -1,4 +1,4 @@
-"""Unit tests for create-plugin license operations."""
+"""Unit tests for plugin-manager license operations."""
 
 import sys
 import unittest
@@ -6,11 +6,16 @@ from pathlib import Path
 
 # Add scripts directories to path
 _project_root = Path(__file__).parent.parent.parent
-_scaffold_scripts = _project_root / "skills" / "create-plugin" / "scripts"
+_plugin_scripts = _project_root / "skills" / "plugin-manager" / "scripts"
 sys.path.insert(0, str(_project_root / "scripts"))
-sys.path.insert(0, str(_scaffold_scripts))
+sys.path.insert(0, str(_plugin_scripts))
 
-from scaffold_ops.licenses import (  # noqa: E402
+# Clear cached operations modules to avoid cross-manager conflicts in pytest
+for _mod_name in list(sys.modules):
+    if _mod_name == "operations" or _mod_name.startswith("operations."):
+        del sys.modules[_mod_name]
+
+from operations.scaffold_ops.licenses import (  # noqa: E402
     get_license_text,
     LICENSES,
     SUPPORTED_LICENSES,

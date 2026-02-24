@@ -1,4 +1,4 @@
-"""Unit tests for create-plugin scaffold.py main entry point."""
+"""Unit tests for plugin-manager scaffold.py main entry point."""
 
 import sys
 import tempfile
@@ -8,11 +8,16 @@ from unittest.mock import patch
 
 # Add scripts directories to path
 _project_root = Path(__file__).parent.parent.parent
-_scaffold_scripts = _project_root / "skills" / "create-plugin" / "scripts"
+_plugin_scripts = _project_root / "skills" / "plugin-manager" / "scripts"
 sys.path.insert(0, str(_project_root / "scripts"))
-sys.path.insert(0, str(_scaffold_scripts))
+sys.path.insert(0, str(_plugin_scripts))
 
-import scaffold as _scaffold_mod  # noqa: E402
+# Clear cached operations modules to avoid cross-manager conflicts in pytest
+for _mod_name in list(sys.modules):
+    if _mod_name == "operations" or _mod_name.startswith("operations."):
+        del sys.modules[_mod_name]
+
+from operations import scaffold as _scaffold_mod  # noqa: E402
 
 get_questions = _scaffold_mod.get_questions
 execute = _scaffold_mod.execute

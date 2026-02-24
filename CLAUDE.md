@@ -19,9 +19,14 @@ aida-core-plugin/
 │   ├── aida/             # AIDA assistant subagent
 │   └── claude-code-expert/  # Extension design expert
 ├── skills/               # Process definitions + execution capabilities
-│   ├── aida/             # /aida skill - routing, scripts, references, templates
-│   ├── claude-code-management/  # Extension CRUD operations
-│   └── memento/          # Session persistence
+│   ├── aida/             # /aida skill - routing, scripts, references
+│   ├── agent-manager/    # Agent CRUD operations
+│   ├── claude-md-manager/  # CLAUDE.md management
+│   ├── hook-manager/     # Hook configuration management
+│   ├── memento/          # Session persistence
+│   ├── permissions/      # Permission management
+│   ├── plugin-manager/   # Plugin CRUD + scaffolding
+│   └── skill-manager/    # Skill CRUD operations
 ├── tests/                # Python tests
 └── docs/                 # Documentation
 ```
@@ -72,5 +77,9 @@ pytest tests/test_manage.py -v   # Run specific test file
 ## Key Files
 
 - `agents/claude-code-expert/knowledge/framework-design-principles.md` - Extension architecture reference
-- `skills/claude-code-management/SKILL.md` - How extensions are created/managed
-- `skills/aida/SKILL.md` - Main skill entry point
+- `skills/aida/SKILL.md` - Main skill entry point and command routing
+- `skills/agent-manager/SKILL.md` - Agent CRUD operations
+- `skills/skill-manager/SKILL.md` - Skill CRUD operations
+- `skills/plugin-manager/SKILL.md` - Plugin CRUD + scaffolding
+- `skills/hook-manager/SKILL.md` - Hook configuration management
+- `skills/claude-md-manager/SKILL.md` - CLAUDE.md management
