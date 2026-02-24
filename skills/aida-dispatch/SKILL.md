@@ -109,6 +109,31 @@ For `agent`, `skill`, `plugin`, or `hook` commands:
 /aida hook remove my-hook            → claude-code-management skill
 ```
 
+### Plugin Scaffolding
+
+For `plugin scaffold` or `plugin new` commands:
+
+- **Invoke the `create-plugin` skill** to handle project scaffolding
+- This creates a NEW plugin project (not an extension inside an existing project)
+- The skill uses a two-phase API: gather questions, then execute scaffolding
+
+**Process:**
+
+1. Parse the command to extract:
+   - Plugin name (if provided as argument)
+   - Any flags or options
+
+2. Invoke `create-plugin` skill with the parsed context
+
+**Examples:**
+
+```text
+/aida plugin scaffold "my-new-plugin"  → create-plugin skill
+/aida plugin scaffold                  → create-plugin skill (will ask for name)
+/aida plugin new                       → create-plugin skill
+/aida plugin new "my-plugin"           → create-plugin skill
+```
+
 ### Memento Commands
 
 For `memento` commands:
@@ -218,6 +243,7 @@ When displaying help (for `help` command or no arguments), show:
 - `/aida agent [create|validate|version|list]` - Manage agents
 - `/aida skill [create|validate|version|list]` - Manage skills
 - `/aida plugin [create|validate|version|list|add|remove]` - Manage plugins
+- `/aida plugin scaffold [name]` - Scaffold a new plugin project
 - `/aida hook [list|add|remove|validate]` - Manage hooks (settings.json)
 
 ### Session Persistence

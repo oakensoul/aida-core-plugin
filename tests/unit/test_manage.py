@@ -9,10 +9,12 @@ import unittest
 import json
 from pathlib import Path
 
-# Add scripts directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "skills" / "claude-code-management" / "scripts"))
+# Add scripts directories to path for imports
+_project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(_project_root / "scripts"))
+sys.path.insert(0, str(_project_root / "skills" / "claude-code-management" / "scripts"))
 
-from operations.utils import (
+from operations.utils import (  # noqa: E402
     to_kebab_case,
     validate_name,
     validate_description,
@@ -20,8 +22,8 @@ from operations.utils import (
     bump_version,
     safe_json_load,
 )
-from operations.extensions import infer_from_description
-from manage import get_questions, execute
+from operations.extensions import infer_from_description  # noqa: E402
+from manage import get_questions, execute  # noqa: E402
 
 
 class TestKebabCase(unittest.TestCase):

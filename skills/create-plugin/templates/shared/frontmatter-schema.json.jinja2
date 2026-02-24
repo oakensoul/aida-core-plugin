@@ -1,0 +1,119 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "{{ plugin_display_name }} Frontmatter",
+  "description": "Schema for validating YAML frontmatter in markdown files",
+  "type": "object",
+  "required": ["type"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Document type",
+      "enum": ["skill", "agent", "documentation", "guide", "reference", "readme"]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "type": { "const": "skill" } }
+      },
+      "then": {
+        "required": ["name", "description", "version", "tags"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "minLength": 2,
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "agent" } }
+      },
+      "then": {
+        "required": ["name", "description", "version", "tags"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "minLength": 2,
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "documentation" } }
+      },
+      "then": {
+        "required": ["title"],
+        "properties": {
+          "title": { "type": "string", "minLength": 3 }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "guide" } }
+      },
+      "then": {
+        "required": ["title"],
+        "properties": {
+          "title": { "type": "string", "minLength": 3 }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "reference" } }
+      },
+      "then": {
+        "required": ["title"],
+        "properties": {
+          "title": { "type": "string", "minLength": 3 }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "readme" } }
+      },
+      "then": {
+        "required": ["title"],
+        "properties": {
+          "title": { "type": "string", "minLength": 3 }
+        }
+      }
+    }
+  ],
+  "additionalProperties": true
+}

@@ -42,7 +42,7 @@ Description of operation 2.
 **Script Execution:** Construct full paths from base directory:
 
 ```text
-{base_directory}/scripts/script-name.py
+{base_directory}/scripts/script-name{{ script_extension | default('.py') }}
 ```
 
 **Reference Loading:** Reference files are located in `references/` subdirectory:
