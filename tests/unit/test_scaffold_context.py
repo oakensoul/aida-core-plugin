@@ -18,6 +18,8 @@ for _mod_name in list(sys.modules):
     if _mod_name == "operations" or _mod_name.startswith("operations."):
         del sys.modules[_mod_name]
 
+import operations.scaffold_ops.context as _context_mod  # noqa: E402
+
 from operations.scaffold_ops.context import (  # noqa: E402
     infer_git_config,
     validate_target_directory,
@@ -29,7 +31,7 @@ from operations.scaffold_ops.context import (  # noqa: E402
 class TestInferGitConfig(unittest.TestCase):
     """Test git config inference."""
 
-    @patch("operations.scaffold_ops.context.subprocess.run")
+    @patch.object(_context_mod.subprocess, "run")
     def test_success(self, mock_run):
         """Should return name and email from git config."""
         def side_effect(cmd, **kwargs):
@@ -46,7 +48,7 @@ class TestInferGitConfig(unittest.TestCase):
         self.assertEqual(config["author_name"], "Test User")
         self.assertEqual(config["author_email"], "test@example.com")
 
-    @patch("operations.scaffold_ops.context.subprocess.run")
+    @patch.object(_context_mod.subprocess, "run")
     def test_failure(self, mock_run):
         """Should return empty strings if git config fails."""
         mock_run.side_effect = FileNotFoundError("git not found")
@@ -54,7 +56,7 @@ class TestInferGitConfig(unittest.TestCase):
         self.assertEqual(config["author_name"], "")
         self.assertEqual(config["author_email"], "")
 
-    @patch("operations.scaffold_ops.context.subprocess.run")
+    @patch.object(_context_mod.subprocess, "run")
     def test_partial_failure(self, mock_run):
         """Should return partial results if one config fails."""
         def side_effect(cmd, **kwargs):
@@ -137,19 +139,19 @@ class TestValidateTargetDirectory(unittest.TestCase):
 class TestCheckGhAvailable(unittest.TestCase):
     """Test GitHub CLI availability check."""
 
-    @patch("operations.scaffold_ops.context.subprocess.run")
+    @patch.object(_context_mod.subprocess, "run")
     def test_available(self, mock_run):
         """Should return True when gh is available."""
         mock_run.return_value = MagicMock(returncode=0)
         self.assertTrue(check_gh_available())
 
-    @patch("operations.scaffold_ops.context.subprocess.run")
+    @patch.object(_context_mod.subprocess, "run")
     def test_not_available(self, mock_run):
         """Should return False when gh is not installed."""
         mock_run.side_effect = FileNotFoundError("gh not found")
         self.assertFalse(check_gh_available())
 
-    @patch("operations.scaffold_ops.context.subprocess.run")
+    @patch.object(_context_mod.subprocess, "run")
     def test_timeout(self, mock_run):
         """Should return False on timeout."""
         import subprocess
