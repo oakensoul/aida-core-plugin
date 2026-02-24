@@ -1,0 +1,81 @@
+---
+type: documentation
+title: {{ plugin_display_name }}
+---
+
+# {{ plugin_display_name }}
+
+{{ description }}
+
+## Project Structure
+
+```text
+{{ plugin_name }}/
+├── .claude-plugin/       # Plugin metadata
+│   ├── plugin.json       # Required plugin manifest
+│   ├── marketplace.json  # Marketplace listing
+│   └── aida-config.json  # AIDA configuration
+├── agents/               # Agent definitions
+├── skills/               # Skill definitions
+{% if language == "python" %}
+├── scripts/              # Python scripts
+├── tests/                # Test suite
+├── pyproject.toml        # Python project config
+{% elif language == "typescript" %}
+├── src/                  # TypeScript source
+├── tests/                # Test suite
+├── package.json          # Node.js project config
+├── tsconfig.json         # TypeScript config
+{% endif %}
+├── docs/                 # Documentation
+└── Makefile              # Build targets
+```
+
+## Development
+
+### Commands
+
+```bash
+make lint          # Run all linters
+make test          # Run tests
+make clean         # Remove build artifacts
+```
+
+{% if language == "python" %}
+### Python Setup
+
+```bash
+pip install -e ".[dev]"
+```
+
+### Testing
+
+```bash
+pytest tests/ -v
+```
+{% elif language == "typescript" %}
+### TypeScript Setup
+
+```bash
+npm install
+```
+
+### Testing
+
+```bash
+npm test
+```
+{% endif %}
+
+## Conventions
+
+### Markdown
+
+- YAML frontmatter required (type, name, description, version)
+{# Line length matches .markdownlint.json template setting #}
+- Line length: 120 characters
+
+## Key Files
+
+- `.claude-plugin/plugin.json` - Plugin manifest
+- `CLAUDE.md` - Project instructions for Claude Code

@@ -83,9 +83,36 @@ For `help` or no arguments:
 - Display the help text inline (see Help Text section below)
 - No additional files need to be loaded
 
+### Plugin Scaffolding
+
+For `plugin scaffold` commands:
+
+- **Invoke the `create-plugin` skill** to handle project scaffolding
+- This creates a NEW plugin project (not an extension inside an existing project)
+- The skill uses a two-phase API: gather questions, then execute scaffolding
+- **IMPORTANT:** Match this command BEFORE the general extension management
+  commands below, since `plugin scaffold` must NOT route to
+  `claude-code-management`
+
+**Process:**
+
+1. Parse the command to extract:
+   - Plugin name (if provided as argument)
+   - Any flags or options
+
+2. Invoke `create-plugin` skill with the parsed context
+
+**Examples:**
+
+```text
+/aida plugin scaffold "my-new-plugin"  → create-plugin skill
+/aida plugin scaffold                  → create-plugin skill (will ask for name)
+```
+
 ### Extension Management Commands
 
-For `agent`, `skill`, `plugin`, or `hook` commands:
+For `agent`, `skill`, `plugin`, or `hook` commands (**except** `plugin scaffold`
+which is handled above):
 
 - **Invoke the `claude-code-management` skill** to handle these operations
 - Pass the full command arguments to the skill
@@ -221,7 +248,7 @@ When displaying help (for `help` command or no arguments), show:
 ### Extension Management
 - `/aida agent [create|validate|version|list]` - Manage agents
 - `/aida skill [create|validate|version|list]` - Manage skills
-- `/aida plugin [create|validate|version|list|add|remove]` - Manage plugins
+- `/aida plugin [scaffold|create|validate|version|list|add|remove]` - Manage plugins
 - `/aida hook [list|add|remove|validate]` - Manage hooks (settings.json)
 
 ### Session Persistence
