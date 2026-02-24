@@ -29,7 +29,7 @@ test: ## Run pytest tests
 	pytest tests/ -v
 
 test-coverage: ## Run tests with coverage report
-	pytest tests/ -v --cov=skills/aida-dispatch/scripts --cov-report=term-missing
+	pytest tests/ -v --cov=skills/aida/scripts --cov-report=term-missing
 
 # Docker Test Environments
 docker-build-base: ## Build base Docker test image (required first)

@@ -19,8 +19,7 @@ aida-core-plugin/
 │   ├── aida/             # AIDA assistant subagent
 │   └── claude-code-expert/  # Extension design expert
 ├── skills/               # Process definitions + execution capabilities
-│   ├── aida/             # /aida skill entry point
-│   ├── aida-dispatch/    # Dispatch routing
+│   ├── aida/             # /aida skill - routing, scripts, references, templates
 │   ├── claude-code-management/  # Extension CRUD operations
 │   └── memento/          # Session persistence
 ├── tests/                # Python tests
