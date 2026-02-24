@@ -6,12 +6,12 @@ and initializing git repositories for new plugin projects.
 
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from shared.utils import render_template
 
 
-def create_directory_structure(target: Path, language: str) -> List[str]:
+def create_directory_structure(target: Path, language: str) -> list[str]:
     """Create the directory structure for a new plugin project.
 
     Args:
@@ -49,8 +49,8 @@ def create_directory_structure(target: Path, language: str) -> List[str]:
 
 
 def render_shared_files(
-    target: Path, variables: Dict[str, Any], templates_dir: Path
-) -> List[str]:
+    target: Path, variables: dict[str, Any], templates_dir: Path
+) -> list[str]:
     """Render language-independent template files.
 
     Args:
@@ -84,8 +84,8 @@ def render_shared_files(
 
 
 def render_python_files(
-    target: Path, variables: Dict[str, Any], templates_dir: Path
-) -> List[str]:
+    target: Path, variables: dict[str, Any], templates_dir: Path
+) -> list[str]:
     """Render Python-specific template files.
 
     Args:
@@ -114,8 +114,8 @@ def render_python_files(
 
 
 def render_typescript_files(
-    target: Path, variables: Dict[str, Any], templates_dir: Path
-) -> List[str]:
+    target: Path, variables: dict[str, Any], templates_dir: Path
+) -> list[str]:
     """Render TypeScript-specific template files.
 
     Args:
@@ -151,7 +151,7 @@ def render_stub_agent(
     name: str,
     description: str,
     ccm_templates_dir: Path,
-) -> List[str]:
+) -> list[str]:
     """Render an agent stub using claude-code-management templates.
 
     Args:
@@ -204,7 +204,7 @@ def render_stub_skill(
     description: str,
     language: str,
     ccm_templates_dir: Path,
-) -> List[str]:
+) -> list[str]:
     """Render a skill stub using claude-code-management templates.
 
     Args:
@@ -238,12 +238,16 @@ def render_stub_skill(
     skill_file = skill_dir / "SKILL.md"
     skill_file.write_text(content)
 
-    # Create scripts and references directories
-    (skill_dir / "scripts").mkdir(parents=True, exist_ok=True)
-    (skill_dir / "references").mkdir(parents=True, exist_ok=True)
+    # Create scripts and references directories with .gitkeep
+    for subdir in ("scripts", "references"):
+        d = skill_dir / subdir
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitkeep").write_text("")
 
     return [
         f"skills/{name}/SKILL.md",
+        f"skills/{name}/scripts/.gitkeep",
+        f"skills/{name}/references/.gitkeep",
     ]
 
 
@@ -286,7 +290,7 @@ def assemble_gitignore(
 
 
 def assemble_makefile(
-    target: Path, language: str, variables: Dict[str, Any], templates_dir: Path
+    target: Path, language: str, variables: dict[str, Any], templates_dir: Path
 ) -> str:
     """Assemble a Makefile from header + language-specific targets.
 
@@ -336,7 +340,7 @@ def initialize_git(target: Path) -> bool:
     try:
         result = subprocess.run(
             ["git", "init"],
-            cwd=str(target),
+            cwd=target,
             capture_output=True, text=True, timeout=10
         )
         return result.returncode == 0
@@ -357,7 +361,7 @@ def create_initial_commit(target: Path) -> bool:
         # Stage all files
         add_result = subprocess.run(
             ["git", "add", "."],
-            cwd=str(target),
+            cwd=target,
             capture_output=True, text=True, timeout=10
         )
         if add_result.returncode != 0:
@@ -366,7 +370,7 @@ def create_initial_commit(target: Path) -> bool:
         # Create initial commit
         commit_result = subprocess.run(
             ["git", "commit", "-m", "Initial scaffold from aida-core create-plugin"],
-            cwd=str(target),
+            cwd=target,
             capture_output=True, text=True, timeout=10
         )
         return commit_result.returncode == 0

@@ -4,20 +4,19 @@ Functions for inferring git configuration, validating target directories,
 and checking tool availability.
 """
 
-import os
 import subprocess
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Optional
 
 
-def infer_git_config() -> Dict[str, str]:
+def infer_git_config() -> dict[str, str]:
     """Infer author name and email from git config.
 
     Returns:
         Dictionary with 'author_name' and 'author_email' keys.
         Values are empty strings if inference fails.
     """
-    result: Dict[str, str] = {"author_name": "", "author_email": ""}
+    result: dict[str, str] = {"author_name": "", "author_email": ""}
 
     try:
         name = subprocess.run(
@@ -42,8 +41,11 @@ def infer_git_config() -> Dict[str, str]:
     return result
 
 
-def validate_target_directory(path: str) -> Tuple[bool, Optional[str]]:
+def validate_target_directory(path: str) -> tuple[bool, Optional[str]]:
     """Validate that the target directory is safe to use for scaffolding.
+
+    The path is resolved (canonicalized) before validation, so directory
+    traversal via '..' is inherently neutralized by resolve().
 
     Args:
         path: Target directory path
@@ -55,15 +57,6 @@ def validate_target_directory(path: str) -> Tuple[bool, Optional[str]]:
         return False, "Target directory path cannot be empty"
 
     target = Path(path).resolve()
-
-    # Check for path traversal
-    try:
-        target.relative_to(Path.cwd().resolve())
-    except ValueError:
-        # Allow absolute paths outside cwd, but check for suspicious patterns
-        path_str = str(target)
-        if ".." in path_str.split(os.sep):
-            return False, "Target path contains directory traversal (..)"
 
     # Check if directory already exists and is not empty
     if target.exists():

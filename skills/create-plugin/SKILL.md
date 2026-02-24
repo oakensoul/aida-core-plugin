@@ -118,9 +118,9 @@ containing the skill base directory.
 ### scripts/
 
 - **scaffold.py** - Main entry point (two-phase API)
-- **operations/context.py** - Git config inference, directory validation
-- **operations/generators.py** - Directory creation, template rendering, git init
-- **operations/licenses.py** - License text templates (MIT, Apache-2.0, ISC, GPL-3.0, AGPL-3.0, UNLICENSED)
+- **scaffold_ops/context.py** - Git config inference, directory validation
+- **scaffold_ops/generators.py** - Directory creation, template rendering, git init
+- **scaffold_ops/licenses.py** - License text templates (MIT, Apache-2.0, ISC, GPL-3.0, AGPL-3.0, UNLICENSED)
 
 ### templates/
 

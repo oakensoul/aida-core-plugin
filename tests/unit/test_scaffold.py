@@ -10,47 +10,9 @@ from unittest.mock import patch
 _project_root = Path(__file__).parent.parent.parent
 _scaffold_scripts = _project_root / "skills" / "create-plugin" / "scripts"
 sys.path.insert(0, str(_project_root / "scripts"))
-
-# We need to load scaffold.py and its operations subpackage without
-# conflicting with the ccm operations package. We do this by:
-# 1. Temporarily removing ccm operations from sys.modules
-# 2. Inserting scaffold scripts at the front of sys.path
-# 3. Importing scaffold (which imports its own operations)
-# 4. Saving references to the loaded modules
-
-# Save and remove any existing 'operations' modules
-_saved_ops_modules = {}
-for key in list(sys.modules.keys()):
-    if key == "operations" or key.startswith("operations."):
-        _saved_ops_modules[key] = sys.modules.pop(key)
-
-# Insert scaffold scripts path at front
 sys.path.insert(0, str(_scaffold_scripts))
 
-# Now import scaffold (which will import its own operations.*)
-import scaffold as _scaffold_mod  # noqa: E402  # must be after sys.path manipulation
-
-# Save scaffold's operations modules under namespaced keys
-_scaffold_ops = {}
-for key in list(sys.modules.keys()):
-    if key == "operations" or key.startswith("operations."):
-        _scaffold_ops[key] = sys.modules[key]
-
-# Register scaffold operations under namespaced names for patching
-sys.modules["scaffold_ops_context"] = sys.modules.get("operations.context")
-sys.modules["scaffold_ops_generators"] = sys.modules.get("operations.generators")
-
-# Remove scaffold's operations from sys.modules so ccm can reload its own
-for key in list(sys.modules.keys()):
-    if key == "operations" or key.startswith("operations."):
-        del sys.modules[key]
-
-# Restore previously saved ccm operations modules
-sys.modules.update(_saved_ops_modules)
-
-# Remove scaffold scripts from sys.path
-if str(_scaffold_scripts) in sys.path:
-    sys.path.remove(str(_scaffold_scripts))
+import scaffold as _scaffold_mod  # noqa: E402
 
 get_questions = _scaffold_mod.get_questions
 execute = _scaffold_mod.execute
@@ -316,6 +278,25 @@ class TestExecuteValidation(unittest.TestCase):
         })
         self.assertFalse(result["success"])
         self.assertIn("Unsupported language", result["message"])
+
+    def test_rejects_missing_author(self):
+        """Should reject execution without author_name."""
+        result = execute({
+            "plugin_name": "test-plugin",
+            "description": "A valid description for testing",
+        })
+        self.assertFalse(result["success"])
+        self.assertIn("author_name", result["message"])
+
+    def test_rejects_missing_author_email(self):
+        """Should reject execution without author_email."""
+        result = execute({
+            "plugin_name": "test-plugin",
+            "description": "A valid description for testing",
+            "author_name": "Test",
+        })
+        self.assertFalse(result["success"])
+        self.assertIn("author_email", result["message"])
 
     def test_rejects_existing_non_empty_directory(self):
         """Should reject non-empty target directory."""

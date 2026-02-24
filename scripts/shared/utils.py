@@ -6,11 +6,12 @@ claude-code-management and create-plugin.
 
 import json
 import re
+from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 
-def safe_json_load(json_str: str) -> Dict[str, Any]:
+def safe_json_load(json_str: str) -> dict[str, Any]:
     """Safely load JSON string with size limits.
 
     Args:
@@ -63,7 +64,7 @@ def to_kebab_case(text: str) -> str:
     return text
 
 
-def validate_name(name: str) -> Tuple[bool, Optional[str]]:
+def validate_name(name: str) -> tuple[bool, Optional[str]]:
     """Validate component name against schema rules.
 
     Args:
@@ -90,7 +91,7 @@ def validate_name(name: str) -> Tuple[bool, Optional[str]]:
     return True, None
 
 
-def validate_description(description: str) -> Tuple[bool, Optional[str]]:
+def validate_description(description: str) -> tuple[bool, Optional[str]]:
     """Validate component description against schema rules.
 
     Args:
@@ -111,7 +112,7 @@ def validate_description(description: str) -> Tuple[bool, Optional[str]]:
     return True, None
 
 
-def validate_version(version: str) -> Tuple[bool, Optional[str]]:
+def validate_version(version: str) -> tuple[bool, Optional[str]]:
     """Validate semantic version string.
 
     Args:
@@ -152,7 +153,7 @@ def bump_version(version: str, bump_type: str) -> str:
     return f"{major}.{minor}.{patch}"
 
 
-def parse_frontmatter(content: str) -> Tuple[Dict[str, Any], str]:
+def parse_frontmatter(content: str) -> tuple[dict[str, Any], str]:
     """Parse YAML frontmatter from markdown content.
 
     Args:
@@ -161,7 +162,7 @@ def parse_frontmatter(content: str) -> Tuple[Dict[str, Any], str]:
     Returns:
         Tuple of (frontmatter_dict, body_content)
     """
-    frontmatter: Dict[str, Any] = {}
+    frontmatter: dict[str, Any] = {}
     body = content
 
     if content.startswith("---"):
@@ -178,7 +179,28 @@ def parse_frontmatter(content: str) -> Tuple[Dict[str, Any], str]:
     return frontmatter, body
 
 
-def render_template(templates_dir: Path, template_name: str, variables: Dict[str, Any]) -> str:
+@lru_cache(maxsize=16)
+def _get_jinja_env(templates_dir: str) -> Any:
+    """Get or create a cached Jinja2 Environment for a templates directory.
+
+    Args:
+        templates_dir: String path to templates directory (string for hashability)
+
+    Returns:
+        Configured Jinja2 Environment
+    """
+    from jinja2 import Environment, FileSystemLoader
+
+    return Environment(
+        loader=FileSystemLoader(templates_dir),
+        autoescape=False,
+        trim_blocks=True,
+        lstrip_blocks=True,
+        keep_trailing_newline=True,
+    )
+
+
+def render_template(templates_dir: Path, template_name: str, variables: dict[str, Any]) -> str:
     """Render a Jinja2 template with variables.
 
     Args:
@@ -190,17 +212,11 @@ def render_template(templates_dir: Path, template_name: str, variables: Dict[str
         Rendered template string
     """
     try:
-        from jinja2 import Environment, FileSystemLoader, select_autoescape
+        import jinja2  # noqa: F401
     except ImportError:
         raise RuntimeError("Jinja2 is required. Install with: pip install jinja2")
 
-    env = Environment(
-        loader=FileSystemLoader(str(templates_dir)),
-        autoescape=select_autoescape(['html', 'xml']),
-        trim_blocks=True,
-        lstrip_blocks=True,
-    )
-
+    env = _get_jinja_env(str(templates_dir))
     template = env.get_template(template_name)
     return template.render(**variables)
 
@@ -214,7 +230,8 @@ def get_project_root() -> Path:
     return cwd
 
 
-# Location mappings for extensions
+# Location mappings for extensions - computed at import time for backward
+# compatibility (existing code references LOCATION_PATHS directly)
 LOCATION_PATHS = {
     "user": Path.home() / ".claude",
     "project": Path.cwd() / ".claude",
@@ -224,6 +241,8 @@ LOCATION_PATHS = {
 
 def get_location_path(location: str, plugin_path: Optional[str] = None) -> Path:
     """Get the base path for a location.
+
+    Resolves paths at call time (not import time) for user and project locations.
 
     Args:
         location: Location type (user, project, plugin)
@@ -235,6 +254,9 @@ def get_location_path(location: str, plugin_path: Optional[str] = None) -> Path:
     if location == "plugin":
         if plugin_path:
             return Path(plugin_path)
-        # Default to current directory for plugin context
         return Path.cwd()
-    return LOCATION_PATHS.get(location, Path.cwd() / ".claude")
+    if location == "user":
+        return Path.home() / ".claude"
+    if location == "project":
+        return Path.cwd() / ".claude"
+    return Path.cwd() / ".claude"

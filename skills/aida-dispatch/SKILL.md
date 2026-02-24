@@ -79,9 +79,38 @@ For `help` or no arguments:
 - Display the help text inline (see Help Text section below)
 - No additional files need to be loaded
 
+### Plugin Scaffolding
+
+For `plugin scaffold` or `plugin new` commands:
+
+- **Invoke the `create-plugin` skill** to handle project scaffolding
+- This creates a NEW plugin project (not an extension inside an existing project)
+- The skill uses a two-phase API: gather questions, then execute scaffolding
+- **IMPORTANT:** Match these commands BEFORE the general extension management
+  commands below, since `plugin scaffold` and `plugin new` must NOT route to
+  `claude-code-management`
+
+**Process:**
+
+1. Parse the command to extract:
+   - Plugin name (if provided as argument)
+   - Any flags or options
+
+2. Invoke `create-plugin` skill with the parsed context
+
+**Examples:**
+
+```text
+/aida plugin scaffold "my-new-plugin"  → create-plugin skill
+/aida plugin scaffold                  → create-plugin skill (will ask for name)
+/aida plugin new                       → create-plugin skill
+/aida plugin new "my-plugin"           → create-plugin skill
+```
+
 ### Extension Management Commands
 
-For `agent`, `skill`, `plugin`, or `hook` commands:
+For `agent`, `skill`, `plugin`, or `hook` commands (**except** `plugin scaffold`
+and `plugin new` which are handled above):
 
 - **Invoke the `claude-code-management` skill** to handle these operations
 - Pass the full command arguments to the skill
@@ -107,31 +136,6 @@ For `agent`, `skill`, `plugin`, or `hook` commands:
 /aida hook list                      → claude-code-management skill
 /aida hook add "auto-format"         → claude-code-management skill
 /aida hook remove my-hook            → claude-code-management skill
-```
-
-### Plugin Scaffolding
-
-For `plugin scaffold` or `plugin new` commands:
-
-- **Invoke the `create-plugin` skill** to handle project scaffolding
-- This creates a NEW plugin project (not an extension inside an existing project)
-- The skill uses a two-phase API: gather questions, then execute scaffolding
-
-**Process:**
-
-1. Parse the command to extract:
-   - Plugin name (if provided as argument)
-   - Any flags or options
-
-2. Invoke `create-plugin` skill with the parsed context
-
-**Examples:**
-
-```text
-/aida plugin scaffold "my-new-plugin"  → create-plugin skill
-/aida plugin scaffold                  → create-plugin skill (will ask for name)
-/aida plugin new                       → create-plugin skill
-/aida plugin new "my-plugin"           → create-plugin skill
 ```
 
 ### Memento Commands

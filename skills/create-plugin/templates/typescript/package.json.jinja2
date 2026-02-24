@@ -1,10 +1,19 @@
 {
-  "name": "{{ plugin_name }}",
-  "version": "{{ version }}",
-  "description": "{{ description }}",
+  "name": {{ plugin_name | tojson }},
+  "version": {{ version | tojson }},
+  "description": {{ description | tojson }},
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "engines": {
+    "node": ">={{ node_version }}"
+  },
   "scripts": {
     "build": "tsc",
     "lint": "eslint .",
@@ -15,11 +24,12 @@
     "test:watch": "vitest"
   },
   "keywords": {{ keywords | tojson }},
-  "author": "{{ author_name }} <{{ author_email }}>",
-  "license": "{{ license_id }}",
+  "author": {{ (author_name + " <" + author_email + ">") | tojson }},
+  "license": {{ license_id | tojson }},
   "devDependencies": {
     "@eslint/js": "^9.0.0",
     "eslint": "^9.0.0",
+    "eslint-config-prettier": "^10.0.0",
     "prettier": "^3.2.0",
     "typescript": "^5.4.0",
     "typescript-eslint": "^8.0.0",

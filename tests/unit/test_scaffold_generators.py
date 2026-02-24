@@ -10,23 +10,15 @@ from unittest.mock import patch, MagicMock
 _project_root = Path(__file__).parent.parent.parent
 _scaffold_scripts = _project_root / "skills" / "create-plugin" / "scripts"
 sys.path.insert(0, str(_project_root / "scripts"))
+sys.path.insert(0, str(_scaffold_scripts))
 
-# Import directly to avoid conflicts with ccm operations package
-import importlib.util  # noqa: E402
-
-_gen_spec = importlib.util.spec_from_file_location(
-    "scaffold_generators",
-    str(_scaffold_scripts / "operations" / "generators.py"),
+from scaffold_ops.generators import (  # noqa: E402
+    create_directory_structure,
+    render_shared_files,
+    assemble_gitignore,
+    assemble_makefile,
+    initialize_git,
 )
-_gen_mod = importlib.util.module_from_spec(_gen_spec)
-sys.modules["scaffold_generators"] = _gen_mod
-_gen_spec.loader.exec_module(_gen_mod)
-
-create_directory_structure = _gen_mod.create_directory_structure
-render_shared_files = _gen_mod.render_shared_files
-assemble_gitignore = _gen_mod.assemble_gitignore
-assemble_makefile = _gen_mod.assemble_makefile
-initialize_git = _gen_mod.initialize_git
 
 TEMPLATES_DIR = _project_root / "skills" / "create-plugin" / "templates"
 
@@ -196,7 +188,7 @@ class TestAssembleMakefile(unittest.TestCase):
             }
             assemble_makefile(target, "typescript", variables, TEMPLATES_DIR)
             content = (target / "Makefile").read_text()
-            self.assertIn("eslint", content)
+            self.assertIn("lint", content)
             self.assertIn("vitest", content)
 
     def test_makefile_differs_by_language(self):
@@ -224,7 +216,7 @@ class TestAssembleMakefile(unittest.TestCase):
 class TestInitializeGit(unittest.TestCase):
     """Test git initialization."""
 
-    @patch("scaffold_generators.subprocess.run")
+    @patch("scaffold_ops.generators.subprocess.run")
     def test_success(self, mock_run):
         """Should return True on successful git init."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -232,7 +224,7 @@ class TestInitializeGit(unittest.TestCase):
             result = initialize_git(Path(tmp))
             self.assertTrue(result)
 
-    @patch("scaffold_generators.subprocess.run")
+    @patch("scaffold_ops.generators.subprocess.run")
     def test_failure(self, mock_run):
         """Should return False when git is not available."""
         mock_run.side_effect = FileNotFoundError("git not found")

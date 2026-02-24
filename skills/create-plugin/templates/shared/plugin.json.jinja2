@@ -1,12 +1,12 @@
 {
-  "name": "{{ plugin_name }}",
-  "description": "{{ description }}",
-  "version": "{{ version }}",
+  "name": {{ plugin_name | tojson }},
+  "description": {{ description | tojson }},
+  "version": {{ version | tojson }},
   "author": {
-    "name": "{{ author_name }}",
-    "email": "{{ author_email }}"
+    "name": {{ author_name | tojson }},
+    "email": {{ author_email | tojson }}
   },
-  "license": "{{ license_id }}",
+  "license": {{ license_id | tojson }},
   "keywords": {{ keywords | tojson }},
-  "repository": "{{ repository_url }}"
+  "repository": {{ repository_url | tojson }}
 }
