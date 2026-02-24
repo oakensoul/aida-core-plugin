@@ -398,6 +398,7 @@ def _execute_list(scope: str) -> dict[str, Any]:
 
     return {
         "success": True,
+        "operation": "list",
         "hooks": results,
         "count": len(results),
         "message": f"Found {len(results)} hook(s)",

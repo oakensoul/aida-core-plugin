@@ -205,10 +205,9 @@ def bump_version(version: str, bump_type: str) -> str:
 def parse_frontmatter(content: str) -> tuple[dict[str, Any], str]:
     """Parse YAML frontmatter from markdown content.
 
-    Uses simple line-by-line parsing (not a full YAML parser). Known
-    limitations: does not handle multi-line values, block scalars, nested
-    objects, or list items as values. Values containing colons are handled
-    via split(':', 1). For full YAML support, use PyYAML directly.
+    Uses PyYAML ``safe_load`` for robust parsing of all standard YAML
+    constructs including multi-line values, block scalars, nested
+    objects, and list items.
 
     Args:
         content: Full markdown content
@@ -225,10 +224,14 @@ def parse_frontmatter(content: str) -> tuple[dict[str, Any], str]:
             frontmatter_text = content[3:end].strip()
             body = content[end + 3:].strip()
 
-            for line in frontmatter_text.split('\n'):
-                if ':' in line and not line.strip().startswith('-'):
-                    key, value = line.split(':', 1)
-                    frontmatter[key.strip()] = value.strip().strip('"\'')
+            try:
+                import yaml
+
+                parsed = yaml.safe_load(frontmatter_text)
+                if isinstance(parsed, dict):
+                    frontmatter = parsed
+            except Exception:
+                pass
 
     return frontmatter, body
 
