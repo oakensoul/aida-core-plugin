@@ -1,7 +1,9 @@
 ---
 type: reference
-title: Claude Code Extension Design Principles
-description: Architecture and quality standards for Claude Code extensions
+name: framework-design-principles
+title: Extension Framework Design Principles
+description: Architecture, quality standards, and design principles for Claude Code extensions
+version: "1.0.0"
 ---
 
 # Claude Code Extension Design Principles
@@ -140,7 +142,9 @@ to know about how this project/team works. Always in their mind, not looked up.
 - **Auto memory** (`~/.claude/projects/<project>/memory/`) - Claude
   automatically saves project patterns, debugging insights, and architecture
   notes. Distinct from CLAUDE.md instruction files; auto memory is maintained
-  by the system, not the user.
+  by the system, not the user. Also distinct from subagent persistent memory,
+  which is agent-maintained via explicit read/write operations within a
+  subagent's own memory directory.
 
 **Key distinction from Knowledge:**
 
@@ -155,8 +159,9 @@ and knowledge for installation and sharing.
 
 **Contains:**
 
-- Bundled agents and skills
+- Bundled agents, skills, hooks, MCP servers, LSP servers, and output styles
 - Plugin metadata (plugin.json)
+- Default settings (settings.json)
 - Documentation (README)
 
 **Does NOT contain:**
@@ -559,10 +564,27 @@ Return JSON: { "files": [...], "validation": {...} }
 
 ### Excellent
 
-- Focused, single-purpose hooks
+**Command hooks:**
+
+- Focused, single-purpose with correct exit codes (2 to block, 0 to pass)
+- Proper use of jq for JSON input parsing
+- Tested in isolation before deployment
+
+**Prompt hooks:**
+
+- Clear, specific prompt that produces consistent judgment
+- Appropriate model selection for cost vs capability
+- Well-scoped to a single verification concern
+
+**Agent hooks:**
+
+- Minimal tool set (only what verification requires)
+- Timeout configured to prevent runaway execution
+- Clear success/failure criteria in the prompt
+
+**All types:**
+
 - Correct type selection (`command` for deterministic enforcement, `prompt`
   for LLM judgment, `agent` for complex verification)
-- Proper use of jq for JSON input parsing (command hooks)
 - Security-conscious (no credential exposure)
 - Well-documented purpose and behavior
-- Tested in isolation before deployment

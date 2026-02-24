@@ -1,7 +1,9 @@
 ---
 type: reference
+name: skills
 title: Claude Code Skills Guide
 description: Comprehensive reference for creating and configuring skills in Claude Code
+version: "1.0.0"
 ---
 
 # Claude Code Skills
@@ -53,13 +55,17 @@ my-skill/
 │   └── validate.sh
 ├── references/        # Detailed docs loaded on demand
 │   └── REFERENCE.md
-├── templates/         # Output templates
+├── templates/         # Output templates (Claude Code/AIDA convention)
 │   └── output.jinja2
 ├── assets/            # Static resources (schemas, data)
 │   └── schema.json
 └── examples/          # Example outputs
     └── sample.md
 ```
+
+**Note:** The Agent Skills standard defines `scripts/`, `references/`, and
+`assets/` as optional subdirectories. The `templates/` and `examples/`
+directories are Claude Code/AIDA conventions, not part of the standard.
 
 The `SKILL.md` file has two parts:
 
@@ -98,8 +104,9 @@ For API conventions, see [reference.md](references/reference.md).
 
 ## Frontmatter Reference
 
-All frontmatter fields are optional. Only `description` is recommended so
-Claude knows when to use the skill.
+All fields are optional for Claude Code. However, `name` and `description`
+are required by the Agent Skills open standard for cross-tool compatibility.
+Only `description` is recommended so Claude knows when to use the skill.
 
 ### Core Fields
 
@@ -167,10 +174,10 @@ namespace, so they cannot conflict with other levels.
 
 ### Backward Compatibility with Commands
 
-Files in `.claude/commands/` still work. A file at `.claude/commands/review.md`
-and a skill at `.claude/skills/review/SKILL.md` both create `/review`. If both
-exist, the skill takes precedence. Commands support the same frontmatter fields
-as skills.
+Use `skills/` for new development; `commands/` is maintained for backward
+compatibility. A file at `.claude/commands/review.md` and a skill at
+`.claude/skills/review/SKILL.md` both create `/review`. If both exist, the
+skill takes precedence. Commands support the same frontmatter fields as skills.
 
 ### Nested Directory Discovery
 
@@ -313,8 +320,8 @@ Skills and subagents work together in two directions:
 | Subagent with `skills` field | Subagent's markdown body | Claude's delegation message | Preloaded skills + CLAUDE.md |
 
 With `context: fork`, you write the task in your skill and pick an agent type.
-For defining a custom subagent that uses skills as reference material, see the
-subagents documentation.
+For defining a custom subagent that uses skills as reference material, see
+`knowledge/subagents.md`.
 
 ## Controlling Skill Access with Permissions
 
@@ -360,7 +367,7 @@ Use `disable-model-invocation: true` to block programmatic invocation.
 | **Purpose** | Process definitions, workflows | Expert personas, judgment | Reference material | Lifecycle-bound execution |
 | **Trigger** | User invocation or Claude auto-load | Task delegation | On-demand loading | Automatic (lifecycle events) |
 | **Control** | LLM-guided | LLM-guided | Passive (read-only) | Deterministic (command type) |
-| **Entry point** | `SKILL.md` | `agent-name.md` | `knowledge/*.md` | `settings.json` hooks |
+| **Entry point** | `SKILL.md` | `agent-name.md` | `knowledge/*.md` | `settings.json` / `hooks.json` / frontmatter |
 | **Location** | `skills/<name>/` | `agents/<name>/` | `knowledge/` subdirs | JSON configuration |
 | **Invocation** | `/skill-name` | `Task(agent)` delegation | Referenced from skills/agents | Event-triggered |
 
@@ -542,7 +549,8 @@ modifying any files.
 - Move detailed references to supporting files
 - Include step-by-step instructions for task skills
 - Use string substitutions for dynamic values
-- Include the word "ultrathink" to enable extended thinking
+- Include the word "ultrathink" in skill content to enable extended thinking,
+  which gives Claude a longer internal reasoning budget for complex tasks
 
 ### Invocation Control
 

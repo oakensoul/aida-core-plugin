@@ -1,7 +1,9 @@
 ---
 type: reference
+name: design-patterns
 title: Extension Design Patterns
 description: Best practices and common patterns for Claude Code extensions
+version: "1.0.0"
 ---
 
 # Design Patterns
@@ -203,6 +205,12 @@ my-plugin/
 │   └── plugin.json       # Required: plugin metadata
 ├── agents/               # Optional: plugin agents
 ├── skills/               # Optional: plugin skills
+├── hooks/                # Optional: hook configurations
+│   └── hooks.json
+├── .mcp.json             # Optional: MCP server definitions
+├── .lsp.json             # Optional: LSP server configurations
+├── settings.json         # Optional: default settings
+├── outputStyles/         # Optional: response formatting
 ├── templates/            # Optional: shared templates
 ├── README.md             # Required: documentation
 ├── CHANGELOG.md          # Recommended: version history
@@ -218,12 +226,21 @@ Essential plugin.json fields:
   "name": "my-plugin",
   "version": "0.1.0",
   "description": "What this plugin does",
-  "author": "Author name",
+  "author": {
+    "name": "Author name",
+    "email": "author@example.com",
+    "url": "https://github.com/username"
+  },
+  "license": "MIT",
   "repository": "https://github.com/...",
-  "keywords": ["keyword1", "keyword2"],
-  "dependencies": {}
+  "keywords": ["keyword1", "keyword2"]
 }
 ```
+
+Only `name` is required. Component paths (`commands`, `agents`, `skills`,
+`hooks`, `mcpServers`, `lspServers`, `outputStyles`) can override default
+directory locations. See `knowledge/plugin-development.md` for the
+complete schema.
 
 ### Internal References
 

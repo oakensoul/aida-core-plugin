@@ -1,7 +1,9 @@
 ---
 type: reference
+name: claude-md-files
 title: CLAUDE.md Memory Files Guide
 description: Understanding Claude Code memory files for persistent context and instructions
+version: "1.0.0"
 ---
 
 # CLAUDE.md Memory Files
@@ -44,9 +46,47 @@ Priority (highest to lowest):
 | ----- | -------- | ----- |
 | Enterprise | `/Library/Application Support/ClaudeCode/CLAUDE.md` (macOS) | Organization |
 | Enterprise | `/etc/claude-code/CLAUDE.md` (Linux) | Organization |
-| Enterprise | `C:\ProgramData\ClaudeCode\CLAUDE.md` (Windows) | Organization |
+| Enterprise | `C:\Program Files\ClaudeCode\CLAUDE.md` (Windows) | Organization |
 | Project | `./.claude/CLAUDE.md` or `./CLAUDE.md` | Team/Project |
 | User | `~/.claude/CLAUDE.md` | Personal global |
+
+### CLAUDE.local.md
+
+Each `CLAUDE.md` file can have a corresponding `CLAUDE.local.md` alongside it.
+Local files provide personal project-specific preferences that are not shared
+with the team:
+
+- Automatically gitignored (not committed to version control)
+- Located in the same directory as the corresponding `CLAUDE.md`
+- Use for personal overrides that should not be shared (e.g., preferred tools,
+  local paths, personal workflow preferences)
+
+### Modular Rules (.claude/rules/)
+
+For projects that need topic-specific instructions without growing a single
+`CLAUDE.md`, use the modular rules system:
+
+- `.claude/rules/*.md` files for modular, topic-specific instructions
+- Path-specific rules via YAML frontmatter with glob patterns (e.g.,
+  `globs: "src/**/*.ts"` to apply rules only to matching files)
+- Recursive subdirectory discovery within `.claude/rules/`
+- User-level rules at `~/.claude/rules/` for personal global rules
+- Symlink support for shared cross-project rules
+
+### Auto Memory vs CLAUDE.md
+
+Claude Code has two distinct memory systems:
+
+| Aspect | CLAUDE.md | Auto Memory |
+| ------ | --------- | ----------- |
+| **Location** | Project root or `.claude/` | `~/.claude/projects/<project>/memory/` |
+| **Maintained by** | User (manual edits) | System (automatic) |
+| **Contains** | Instructions, conventions, context | Patterns and insights learned across sessions |
+| **Scope** | Shared with team (committed) | Personal (not committed) |
+
+CLAUDE.md files are user-maintained instructions. Auto memory is
+system-maintained patterns and insights that Claude accumulates across
+sessions.
 
 ### How Memory Loads
 
@@ -118,6 +158,15 @@ Memory files support imports using `@path/to/file` syntax:
 - Paths are relative to the memory file location
 - Imports inside code blocks are ignored (prevents collisions)
 - Circular imports are detected and prevented
+- Home-directory imports supported: `@~/.claude/my-project-instructions.md`
+- External imports (outside project root) trigger a one-time approval dialog
+  per project for security
+
+### Import with Additional Directories
+
+When using `--add-dir` to include additional directories, use the
+`CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD` environment variable to specify
+which CLAUDE.md files from those directories should be loaded.
 
 ### Import Use Cases
 
