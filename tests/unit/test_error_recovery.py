@@ -12,28 +12,20 @@ from pathlib import Path
 from unittest.mock import patch
 
 # Add scripts directories to path for imports
+_project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(_project_root / "scripts"))
 sys.path.insert(
     0,
-    str(
-        Path(__file__).parent.parent.parent
-        / "skills"
-        / "claude-code-management"
-        / "scripts"
-    ),
+    str(_project_root / "skills" / "claude-code-management" / "scripts"),
 )
 sys.path.insert(
     0,
-    str(
-        Path(__file__).parent.parent.parent
-        / "skills"
-        / "permissions"
-        / "scripts"
-    ),
+    str(_project_root / "skills" / "permissions" / "scripts"),
 )
 
-from operations.utils import safe_json_load, parse_frontmatter
-from scanner import read_plugin_manifest, read_aida_config
-from settings_manager import write_permissions
+from operations.utils import safe_json_load, parse_frontmatter  # noqa: E402
+from scanner import read_plugin_manifest, read_aida_config  # noqa: E402
+from settings_manager import write_permissions  # noqa: E402
 
 
 class TestCorruptedJsonFiles(unittest.TestCase):

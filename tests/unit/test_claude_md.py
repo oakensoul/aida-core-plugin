@@ -11,8 +11,10 @@ import tempfile
 import shutil
 from pathlib import Path
 
-# Add scripts directory to path for imports
-SKILL_DIR = Path(__file__).parent.parent.parent / "skills" / "claude-code-management"
+# Add scripts directories to path for imports
+_project_root = Path(__file__).parent.parent.parent
+SKILL_DIR = _project_root / "skills" / "claude-code-management"
+sys.path.insert(0, str(_project_root / "scripts"))
 sys.path.insert(0, str(SKILL_DIR / "scripts"))
 TEMPLATES_DIR = SKILL_DIR / "templates"
 

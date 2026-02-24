@@ -9,10 +9,12 @@ import unittest
 import json
 from pathlib import Path
 
-# Add scripts directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "skills" / "claude-code-management" / "scripts"))
+# Add scripts directories to path for imports
+_project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(_project_root / "scripts"))
+sys.path.insert(0, str(_project_root / "skills" / "claude-code-management" / "scripts"))
 
-from operations.utils import (
+from operations.utils import (  # noqa: E402
     to_kebab_case,
     validate_name,
     validate_description,
@@ -20,8 +22,8 @@ from operations.utils import (
     bump_version,
     safe_json_load,
 )
-from operations.extensions import infer_from_description
-from manage import get_questions, execute
+from operations.extensions import infer_from_description  # noqa: E402
+from manage import get_questions, execute  # noqa: E402
 
 
 class TestKebabCase(unittest.TestCase):
@@ -405,46 +407,47 @@ class TestCommandTypeRemoved(unittest.TestCase):
         self.assertNotIn("command", COMPONENT_TYPES)
 
     def test_create_command_type_raises(self):
-        """Test that creating a command type raises KeyError."""
+        """Test that creating a command type raises ValueError."""
         context = {
             "operation": "create",
             "type": "command",
             "description": "A test command that should not work",
         }
-        # get_questions calls find_components which raises KeyError
-        # for unknown types
-        with self.assertRaises(KeyError):
+        # find_components raises ValueError for unknown component types
+        with self.assertRaises(ValueError):
             get_questions(context)
 
-    def test_list_command_type_raises(self):
-        """Test that listing command type raises KeyError."""
+    def test_list_command_type_returns_error(self):
+        """Test that listing command type returns structured error."""
         context = {
             "operation": "list",
             "type": "command",
             "location": "user",
         }
-        with self.assertRaises(KeyError):
+        # execute_list -> find_components raises ValueError,
+        # caught by manage.py's main handler
+        with self.assertRaises(ValueError):
             execute(context, {})
 
     def test_validate_command_type_raises(self):
-        """Test that validating command type raises KeyError."""
+        """Test that validating command type raises ValueError."""
         context = {
             "operation": "validate",
             "type": "command",
             "name": "some-command",
         }
-        with self.assertRaises(KeyError):
+        with self.assertRaises(ValueError):
             execute(context, {})
 
     def test_version_command_type_raises(self):
-        """Test that versioning command type raises KeyError."""
+        """Test that versioning command type raises ValueError."""
         context = {
             "operation": "version",
             "type": "command",
             "name": "some-command",
             "bump": "patch",
         }
-        with self.assertRaises(KeyError):
+        with self.assertRaises(ValueError):
             execute(context, {})
 
 

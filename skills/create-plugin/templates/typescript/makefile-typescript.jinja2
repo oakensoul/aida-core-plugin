@@ -1,0 +1,23 @@
+
+# TypeScript targets
+.PHONY: lint-ts test build format install clean
+
+lint-ts: ## Run eslint on TypeScript files
+	npm run lint
+
+lint: lint-ts lint-md lint-yaml lint-frontmatter ## Run all linters
+
+test: ## Run vitest
+	npm test
+
+build: ## Build TypeScript
+	npm run build
+
+format: ## Format code with prettier
+	npm run format
+
+install: ## Install Node.js dependencies
+	npm install
+
+clean: ## Remove build artifacts
+	rm -rf dist/ coverage/ *.tsbuildinfo

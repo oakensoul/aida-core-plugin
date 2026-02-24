@@ -67,6 +67,11 @@ def find_components(
     Returns:
         List of component info dictionaries
     """
+    if component_type not in COMPONENT_TYPES:
+        raise ValueError(
+            f"Unknown component type: {component_type!r}. "
+            f"Supported types: {', '.join(COMPONENT_TYPES)}"
+        )
     config = COMPONENT_TYPES[component_type]
     components = []
 
@@ -456,6 +461,14 @@ def execute_create(
     Returns:
         Result dictionary with success status and details
     """
+    if component_type not in COMPONENT_TYPES:
+        return {
+            "success": False,
+            "message": (
+                f"Unknown component type: {component_type!r}. "
+                f"Supported types: {', '.join(COMPONENT_TYPES)}"
+            ),
+        }
     config = COMPONENT_TYPES[component_type]
     base_path = get_location_path(location, plugin_path)
 
