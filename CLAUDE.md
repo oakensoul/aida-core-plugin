@@ -18,9 +18,8 @@ aida-core-plugin/
 ├── agents/               # Subagent definitions
 │   ├── aida/             # AIDA assistant subagent
 │   └── claude-code-expert/  # Extension design expert
-├── commands/             # Command definitions (recipes)
-│   └── aida.md           # /aida command entry point
-├── skills/               # Execution capabilities
+├── skills/               # Process definitions + execution capabilities
+│   ├── aida/             # /aida skill entry point
 │   ├── aida-dispatch/    # Command routing
 │   ├── claude-code-management/  # Extension CRUD operations
 │   └── memento/          # Session persistence
@@ -51,14 +50,12 @@ pytest tests/test_manage.py -v   # Run specific test file
 ### Extension Types (see agents/claude-code-expert/knowledge/)
 
 - **Subagents**: WHO - expertise definitions in `agents/`
-- **Commands**: WHAT - recipes/instructions in `commands/`
-- **Skills**: HOW - execution capabilities in `skills/`
+- **Skills**: HOW - process definitions + execution capabilities in `skills/`
 - **Knowledge**: CONTEXT - reference material in `knowledge/` subdirs
 
 ### File Naming
 
 - Subagents: `agents/{name}/{name}.md` with `knowledge/` subdir
-- Commands: `commands/{name}.md`
 - Skills: `skills/{name}/SKILL.md` with `scripts/`, `templates/`, `references/`
 
 ### Python Style
@@ -77,4 +74,4 @@ pytest tests/test_manage.py -v   # Run specific test file
 
 - `agents/claude-code-expert/knowledge/framework-design-principles.md` - Extension architecture reference
 - `skills/claude-code-management/SKILL.md` - How extensions are created/managed
-- `commands/aida.md` - Main command entry point
+- `skills/aida/SKILL.md` - Main skill entry point
