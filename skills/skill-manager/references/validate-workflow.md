@@ -70,17 +70,21 @@ python manage.py --execute \
 ```json
 {
   "success": true,
-  "all_valid": true,
+  "operation": "validate",
   "results": [
     {
       "name": "my-skill",
-      "location": "user",
       "path": "~/.claude/skills/my-skill/SKILL.md",
       "valid": true,
-      "errors": []
+      "errors": [],
+      "warnings": []
     }
   ],
-  "summary": "Validated 1 skill(s): 1 valid, 0 invalid"
+  "summary": {
+    "total": 1,
+    "valid": 1,
+    "invalid": 0
+  }
 }
 ```
 
@@ -89,26 +93,30 @@ python manage.py --execute \
 ```json
 {
   "success": true,
-  "all_valid": false,
+  "operation": "validate",
   "results": [
     {
       "name": "my-skill",
-      "location": "user",
       "path": "~/.claude/skills/my-skill/SKILL.md",
       "valid": true,
-      "errors": []
+      "errors": [],
+      "warnings": []
     },
     {
       "name": "bad-skill",
-      "location": "user",
       "path": "~/.claude/skills/bad-skill/SKILL.md",
       "valid": false,
       "errors": [
         "Description: Description must be at least 10 characters"
-      ]
+      ],
+      "warnings": []
     }
   ],
-  "summary": "Validated 2 skill(s): 1 valid, 1 invalid"
+  "summary": {
+    "total": 2,
+    "valid": 1,
+    "invalid": 1
+  }
 }
 ```
 
