@@ -1043,8 +1043,18 @@ class TestPermissionsGetQuestions(unittest.TestCase):
     @patch("permissions.scan_plugins")
     @patch("permissions.read_all_settings")
     def test_returns_preset_question(self, mock_read, mock_scan):
-        """Test that preset question is returned."""
-        mock_scan.return_value = []
+        """Test that preset question is returned with plugins."""
+        mock_scan.return_value = [
+            {
+                "name": "plugin1",
+                "permissions": {
+                    "file-read": {
+                        "rules": ["Read(*)"],
+                        "suggested": "allow",
+                    }
+                },
+            }
+        ]
         mock_read.return_value = {"user": {}, "project": {}, "local": {}}
 
         result = get_questions({})
@@ -1059,8 +1069,18 @@ class TestPermissionsGetQuestions(unittest.TestCase):
     @patch("permissions.scan_plugins")
     @patch("permissions.read_all_settings")
     def test_returns_scope_question(self, mock_read, mock_scan):
-        """Test that scope question is returned."""
-        mock_scan.return_value = []
+        """Test that scope question is returned with plugins."""
+        mock_scan.return_value = [
+            {
+                "name": "plugin1",
+                "permissions": {
+                    "file-read": {
+                        "rules": ["Read(*)"],
+                        "suggested": "allow",
+                    }
+                },
+            }
+        ]
         mock_read.return_value = {"user": {}, "project": {}, "local": {}}
 
         result = get_questions({})
@@ -1092,6 +1112,78 @@ class TestPermissionsGetQuestions(unittest.TestCase):
         )
         self.assertEqual(cat_q["type"], "choice")
         self.assertEqual(len(cat_q["choices"]), 3)  # allow, ask, deny
+
+    @patch("permissions.scan_plugins")
+    @patch("permissions.read_all_settings")
+    def test_no_plugins_returns_empty_questions(
+        self, mock_read, mock_scan
+    ):
+        """Test that no plugins returns empty questions list."""
+        mock_scan.return_value = []
+        mock_read.return_value = {
+            "user": {},
+            "project": {},
+            "local": {},
+        }
+
+        result = get_questions({})
+        self.assertEqual(result["questions"], [])
+        self.assertTrue(result["inferred"]["no_recommendations"])
+        self.assertEqual(result["inferred"]["plugin_count"], 0)
+
+    @patch("permissions.scan_plugins")
+    @patch("permissions.read_all_settings")
+    def test_no_plugins_message_mentions_no_recommendations(
+        self, mock_read, mock_scan
+    ):
+        """Test that message explains no recommendations found."""
+        mock_scan.return_value = []
+        mock_read.return_value = {
+            "user": {},
+            "project": {},
+            "local": {},
+        }
+
+        result = get_questions({})
+        message = result["inferred"]["message"]
+        self.assertIn("No installed plugins", message)
+        self.assertIn("recommendedPermissions", message)
+
+    @patch("permissions.scan_plugins")
+    @patch("permissions.read_all_settings")
+    def test_no_plugins_with_existing_perms_suggests_audit(
+        self, mock_read, mock_scan
+    ):
+        """Test audit suggestion when existing permissions exist."""
+        mock_scan.return_value = []
+        mock_read.return_value = {
+            "user": {"allow": ["Read(*)"]},
+            "project": {},
+            "local": {},
+        }
+
+        result = get_questions({})
+        inferred = result["inferred"]
+        self.assertTrue(inferred["has_existing_permissions"])
+        self.assertIn("audit", inferred["message"])
+
+    @patch("permissions.scan_plugins")
+    @patch("permissions.read_all_settings")
+    def test_no_plugins_without_existing_perms_suggests_manual(
+        self, mock_read, mock_scan
+    ):
+        """Test manual config suggestion when no perms exist."""
+        mock_scan.return_value = []
+        mock_read.return_value = {
+            "user": {},
+            "project": {},
+            "local": {},
+        }
+
+        result = get_questions({})
+        inferred = result["inferred"]
+        self.assertFalse(inferred["has_existing_permissions"])
+        self.assertIn("manually", inferred["message"])
 
 
 class TestPermissionsExecute(unittest.TestCase):
@@ -1182,6 +1274,33 @@ class TestPermissionsExecute(unittest.TestCase):
             str(self.temp_path / ".claude" / "settings.json")
             in result["files_modified"][0]
         )
+
+    def test_empty_categories_returns_failure(self):
+        """Test that empty categories does not write 0 rules."""
+        context = {"categories": {}}
+        responses = {
+            "preset": "developer-workstation",
+            "scope": "user",
+        }
+
+        result = execute(context, responses)
+        self.assertFalse(result["success"])
+        self.assertEqual(result["rules_count"], 0)
+        self.assertEqual(result["files_modified"], [])
+        self.assertIn("No permission rules", result["message"])
+
+    def test_missing_categories_returns_failure(self):
+        """Test that missing categories key returns failure."""
+        context = {}
+        responses = {
+            "preset": "developer-workstation",
+            "scope": "user",
+        }
+
+        result = execute(context, responses)
+        self.assertFalse(result["success"])
+        self.assertEqual(result["rules_count"], 0)
+        self.assertIn("No permission rules", result["message"])
 
 
 class TestPermissionsAudit(unittest.TestCase):
