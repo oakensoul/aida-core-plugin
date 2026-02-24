@@ -6,7 +6,12 @@ from unittest.mock import patch
 import sys
 _project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(_project_root / "scripts"))
-sys.path.insert(0, str(_project_root / "skills" / "claude-code-management" / "scripts"))
+sys.path.insert(0, str(_project_root / "skills" / "hook-manager" / "scripts"))
+
+# Clear cached operations modules to avoid cross-manager conflicts in pytest
+for _mod_name in list(sys.modules):
+    if _mod_name == "operations" or _mod_name.startswith("operations."):
+        del sys.modules[_mod_name]
 
 from operations import hooks  # noqa: E402
 
@@ -276,7 +281,8 @@ class TestExecuteValidate:
             result = hooks.execute({"operation": "validate", "scope": "user"}, {})
 
         assert result["success"]
-        assert result["error_count"] == 0
+        assert result["operation"] == "validate"
+        assert result["summary"]["invalid"] == 0
 
     @patch.object(hooks, '_load_settings')
     def test_validate_invalid_event(self, mock_load):
@@ -293,8 +299,11 @@ class TestExecuteValidate:
             result = hooks.execute({"operation": "validate", "scope": "user"}, {})
 
         assert not result["success"]
-        assert result["error_count"] > 0
-        assert any("Invalid event" in i["message"] for i in result["issues"])
+        assert result["operation"] == "validate"
+        assert result["summary"]["invalid"] > 0
+        # Check that errors contain the invalid event message
+        all_errors = [e for r in result["results"] for e in r["errors"]]
+        assert any("Invalid event" in e for e in all_errors)
 
     @patch.object(hooks, '_load_settings')
     def test_validate_dangerous_command(self, mock_load):
@@ -310,6 +319,8 @@ class TestExecuteValidate:
         with patch.object(Path, 'exists', return_value=True):
             result = hooks.execute({"operation": "validate", "scope": "user"}, {})
 
+        assert result["operation"] == "validate"
         # Should still pass (warning, not error) but have warnings
-        assert result["warning_count"] > 0
-        assert any("dangerous" in i["message"] for i in result["issues"])
+        all_warnings = [w for r in result["results"] for w in r["warnings"]]
+        assert len(all_warnings) > 0
+        assert any("dangerous" in w for w in all_warnings)

@@ -1,0 +1,198 @@
+"""License text templates for plugin scaffolding.
+
+Stores full license bodies keyed by SPDX identifier with
+year/author placeholders for substitution at render time.
+"""
+
+
+LICENSES = {
+    "MIT": (
+        "MIT License\n"
+        "\n"
+        "Copyright (c) {year} {author_name}\n"
+        "\n"
+        "Permission is hereby granted, free of charge, "
+        "to any person obtaining a copy\n"
+        'of this software and associated documentation '
+        'files (the "Software"), to deal\n'
+        "in the Software without restriction, including "
+        "without limitation the rights\n"
+        "to use, copy, modify, merge, publish, distribute"
+        ", sublicense, and/or sell\n"
+        "copies of the Software, and to permit persons to"
+        " whom the Software is\n"
+        "furnished to do so, subject to the following "
+        "conditions:\n"
+        "\n"
+        "The above copyright notice and this permission "
+        "notice shall be included in all\n"
+        "copies or substantial portions of the "
+        "Software.\n"
+        "\n"
+        'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT '
+        "WARRANTY OF ANY KIND, EXPRESS OR\n"
+        "IMPLIED, INCLUDING BUT NOT LIMITED TO THE "
+        "WARRANTIES OF MERCHANTABILITY,\n"
+        "FITNESS FOR A PARTICULAR PURPOSE AND "
+        "NONINFRINGEMENT. IN NO EVENT SHALL THE\n"
+        "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY "
+        "CLAIM, DAMAGES OR OTHER\n"
+        "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, "
+        "TORT OR OTHERWISE, ARISING FROM,\n"
+        "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR "
+        "THE USE OR OTHER DEALINGS IN THE\n"
+        "SOFTWARE.\n"
+    ),
+    "Apache-2.0": (
+        "                                 Apache License\n"
+        "                           Version 2.0, "
+        "January 2004\n"
+        "                        "
+        "http://www.apache.org/licenses/\n"
+        "\n"
+        "   Copyright {year} {author_name}\n"
+        "\n"
+        "   Licensed under the Apache License, "
+        'Version 2.0 (the "License");\n'
+        "   you may not use this file except in "
+        "compliance with the License.\n"
+        "   You may obtain a copy of the License at\n"
+        "\n"
+        "       "
+        "http://www.apache.org/licenses/LICENSE-2.0\n"
+        "\n"
+        "   Unless required by applicable law or agreed "
+        "to in writing, software\n"
+        '   distributed under the License is distributed '
+        'on an "AS IS" BASIS,\n'
+        "   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND"
+        ", either express or implied.\n"
+        "   See the License for the specific language "
+        "governing permissions and\n"
+        "   limitations under the License.\n"
+    ),
+    "ISC": (
+        "ISC License\n"
+        "\n"
+        "Copyright (c) {year} {author_name}\n"
+        "\n"
+        "Permission to use, copy, modify, and/or "
+        "distribute this software for any\n"
+        "purpose with or without fee is hereby granted, "
+        "provided that the above\n"
+        "copyright notice and this permission notice "
+        "appear in all copies.\n"
+        "\n"
+        'THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR '
+        "DISCLAIMS ALL WARRANTIES WITH\n"
+        "REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED "
+        "WARRANTIES OF MERCHANTABILITY\n"
+        "AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE "
+        "LIABLE FOR ANY SPECIAL, DIRECT,\n"
+        "INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY "
+        "DAMAGES WHATSOEVER RESULTING FROM\n"
+        "LOSS OF USE, DATA OR PROFITS, WHETHER IN AN "
+        "ACTION OF CONTRACT, NEGLIGENCE OR\n"
+        "OTHER TORTIOUS ACTION, ARISING OUT OF OR IN "
+        "CONNECTION WITH THE USE OR\n"
+        "PERFORMANCE OF THIS SOFTWARE.\n"
+    ),
+    "GPL-3.0": (
+        "                    GNU GENERAL PUBLIC LICENSE\n"
+        "                       Version 3, "
+        "29 June 2007\n"
+        "\n"
+        " Copyright (C) {year} {author_name}\n"
+        "\n"
+        " This program is free software: you can "
+        "redistribute it and/or modify\n"
+        " it under the terms of the GNU General Public "
+        "License as published by\n"
+        " the Free Software Foundation, either version 3 "
+        "of the License, or\n"
+        " (at your option) any later version.\n"
+        "\n"
+        " This program is distributed in the hope that "
+        "it will be useful,\n"
+        " but WITHOUT ANY WARRANTY; without even the "
+        "implied warranty of\n"
+        " MERCHANTABILITY or FITNESS FOR A PARTICULAR "
+        "PURPOSE.  See the\n"
+        " GNU General Public License for more details.\n"
+        "\n"
+        " You should have received a copy of the GNU "
+        "General Public License\n"
+        " along with this program.  If not, see "
+        "<https://www.gnu.org/licenses/>.\n"
+    ),
+    "AGPL-3.0": (
+        "                    GNU AFFERO GENERAL PUBLIC "
+        "LICENSE\n"
+        "                       Version 3, "
+        "19 November 2007\n"
+        "\n"
+        " Copyright (C) {year} {author_name}\n"
+        "\n"
+        " This program is free software: you can "
+        "redistribute it and/or modify\n"
+        " it under the terms of the GNU Affero General "
+        "Public License as published by\n"
+        " the Free Software Foundation, either version 3 "
+        "of the License, or\n"
+        " (at your option) any later version.\n"
+        "\n"
+        " This program is distributed in the hope that "
+        "it will be useful,\n"
+        " but WITHOUT ANY WARRANTY; without even the "
+        "implied warranty of\n"
+        " MERCHANTABILITY or FITNESS FOR A PARTICULAR "
+        "PURPOSE.  See the\n"
+        " GNU Affero General Public License for "
+        "more details.\n"
+        "\n"
+        " You should have received a copy of the GNU "
+        "Affero General Public License\n"
+        " along with this program.  If not, see "
+        "<https://www.gnu.org/licenses/>.\n"
+    ),
+    "UNLICENSED": (
+        "Copyright (c) {year} {author_name}\n"
+        "\n"
+        "All rights reserved. No part of this software "
+        "may be reproduced,\n"
+        "distributed, or transmitted in any form or by "
+        "any means without the\n"
+        "prior written permission of the copyright "
+        "holder.\n"
+    ),
+}
+
+SUPPORTED_LICENSES = list(LICENSES.keys())
+
+
+def get_license_text(
+    license_id: str, year: str, author_name: str
+) -> str:
+    """Get rendered license text for a given SPDX identifier.
+
+    Args:
+        license_id: SPDX license identifier
+        year: Copyright year
+        author_name: Author/copyright holder name
+
+    Returns:
+        Full license text with year and author substituted
+
+    Raises:
+        ValueError: If license_id is not supported
+    """
+    if license_id not in LICENSES:
+        raise ValueError(
+            f"Unsupported license: {license_id}. "
+            f"Supported: {', '.join(SUPPORTED_LICENSES)}"
+        )
+
+    text = LICENSES[license_id]
+    text = text.replace("{year}", year)
+    text = text.replace("{author_name}", author_name)
+    return text

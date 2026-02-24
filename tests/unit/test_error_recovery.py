@@ -16,12 +16,17 @@ _project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(_project_root / "scripts"))
 sys.path.insert(
     0,
-    str(_project_root / "skills" / "claude-code-management" / "scripts"),
+    str(_project_root / "skills" / "agent-manager" / "scripts"),
 )
 sys.path.insert(
     0,
     str(_project_root / "skills" / "permissions" / "scripts"),
 )
+
+# Clear cached operations modules to avoid cross-manager conflicts in pytest
+for _mod_name in list(sys.modules):
+    if _mod_name == "operations" or _mod_name.startswith("operations."):
+        del sys.modules[_mod_name]
 
 from operations.utils import safe_json_load, parse_frontmatter  # noqa: E402
 from scanner import read_plugin_manifest, read_aida_config  # noqa: E402

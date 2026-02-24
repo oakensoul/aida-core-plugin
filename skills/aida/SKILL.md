@@ -2,8 +2,9 @@
 type: skill
 name: aida
 description: This skill routes /aida commands to appropriate handlers - configuration,
-  diagnostics, feedback, extension management, session persistence (memento
-  operations), and CLAUDE.md management.
+  diagnostics, feedback, extension management (agent-manager, skill-manager,
+  plugin-manager, hook-manager, claude-md-manager), and session persistence
+  (memento).
 version: 0.8.0
 tags:
   - core
@@ -83,61 +84,108 @@ For `help` or no arguments:
 - Display the help text inline (see Help Text section below)
 - No additional files need to be loaded
 
-### Plugin Scaffolding
+### Agent Management Commands
 
-For `plugin scaffold` commands:
+For `agent` commands:
 
-- **Invoke the `create-plugin` skill** to handle project scaffolding
-- This creates a NEW plugin project (not an extension inside an existing project)
-- The skill uses a two-phase API: gather questions, then execute scaffolding
-- **IMPORTANT:** Match this command BEFORE the general extension management
-  commands below, since `plugin scaffold` must NOT route to
-  `claude-code-management`
-
-**Process:**
-
-1. Parse the command to extract:
-   - Plugin name (if provided as argument)
-   - Any flags or options
-
-2. Invoke `create-plugin` skill with the parsed context
-
-**Examples:**
-
-```text
-/aida plugin scaffold "my-new-plugin"  → create-plugin skill
-/aida plugin scaffold                  → create-plugin skill (will ask for name)
-```
-
-### Extension Management Commands
-
-For `agent`, `skill`, `plugin`, or `hook` commands (**except** `plugin scaffold`
-which is handled above):
-
-- **Invoke the `claude-code-management` skill** to handle these operations
+- **Invoke the `agent-manager` skill** to handle these operations
 - Pass the full command arguments to the skill
-- The skill handles create, validate, version, list, and plugin-specific operations
-- For hooks: handles list, add, remove, validate (hooks are settings.json config, not files)
+- The skill handles create, validate, version, and list operations
 
 **Process:**
 
 1. Parse the command to extract:
-   - Component type: `agent`, `skill`, `plugin`, or `hook`
-   - Operation: `create`, `validate`, `version`, `list`, `add`, `remove`
+   - Operation: `create`, `validate`, `version`, `list`
    - Arguments: name, description, options
 
-2. Invoke `claude-code-management` skill with the parsed context
+2. Invoke `agent-manager` skill with the parsed context
 
 **Examples:**
 
 ```text
-/aida agent create "description"     → claude-code-management skill
-/aida skill validate --all           → claude-code-management skill
-/aida skill version my-skill patch   → claude-code-management skill
-/aida plugin list                    → claude-code-management skill
-/aida hook list                      → claude-code-management skill
-/aida hook add "auto-format"         → claude-code-management skill
-/aida hook remove my-hook            → claude-code-management skill
+/aida agent create "description"     → agent-manager skill
+/aida agent validate --all           → agent-manager skill
+/aida agent version my-agent patch   → agent-manager skill
+/aida agent list                     → agent-manager skill
+```
+
+### Skill Management Commands
+
+For `skill` commands:
+
+- **Invoke the `skill-manager` skill** to handle these operations
+- Pass the full command arguments to the skill
+- The skill handles create, validate, version, and list operations
+
+**Process:**
+
+1. Parse the command to extract:
+   - Operation: `create`, `validate`, `version`, `list`
+   - Arguments: name, description, options
+
+2. Invoke `skill-manager` skill with the parsed context
+
+**Examples:**
+
+```text
+/aida skill create "description"     → skill-manager skill
+/aida skill validate --all           → skill-manager skill
+/aida skill version my-skill patch   → skill-manager skill
+/aida skill list                     → skill-manager skill
+```
+
+### Plugin Management Commands
+
+For `plugin` commands (including `plugin scaffold`):
+
+- **Invoke the `plugin-manager` skill** to handle these operations
+- Pass the full command arguments to the skill
+- The skill handles create, validate, version, list, and scaffold operations
+- Scaffold creates a NEW plugin project (not an extension inside an existing
+  project)
+
+**Process:**
+
+1. Parse the command to extract:
+   - Operation: `create`, `validate`, `version`, `list`, `scaffold`
+   - Arguments: name, description, options
+
+2. Invoke `plugin-manager` skill with the parsed context
+
+**Examples:**
+
+```text
+/aida plugin create "description"        → plugin-manager skill
+/aida plugin validate --all              → plugin-manager skill
+/aida plugin list                        → plugin-manager skill
+/aida plugin scaffold "my-new-plugin"    → plugin-manager skill
+/aida plugin scaffold                    → plugin-manager skill (will ask)
+```
+
+### Hook Management Commands
+
+For `hook` commands:
+
+- **Invoke the `hook-manager` skill** to handle these operations
+- Pass the full command arguments to the skill
+- Hooks are settings.json config, not files
+- The skill handles list, add, remove, and validate operations
+
+**Process:**
+
+1. Parse the command to extract:
+   - Operation: `list`, `add`, `remove`, `validate`
+   - Arguments: event, matcher, command, scope
+
+2. Invoke `hook-manager` skill with the parsed context
+
+**Examples:**
+
+```text
+/aida hook list                      → hook-manager skill
+/aida hook add "auto-format"         → hook-manager skill
+/aida hook remove my-hook            → hook-manager skill
+/aida hook validate                  → hook-manager skill
 ```
 
 ### Memento Commands
@@ -176,7 +224,7 @@ For `memento` commands:
 
 For `claude` commands:
 
-- **Invoke the `claude-code-management` skill** to handle these operations
+- **Invoke the `claude-md-manager` skill** to handle these operations
 - Pass the full command arguments to the skill
 - The skill handles create, optimize, validate, and list operations
 
@@ -186,18 +234,18 @@ For `claude` commands:
    - Operation: `create`, `optimize`, `validate`, `list`
    - Arguments: scope (project/user/plugin), path, options
 
-2. Invoke `claude-code-management` skill with the parsed context
+2. Invoke `claude-md-manager` skill with the parsed context
 
 **Examples:**
 
 ```text
-/aida claude create                  → claude-code-management skill (auto-detect scope)
-/aida claude create --scope project  → claude-code-management skill (scope=project)
-/aida claude create --scope user     → claude-code-management skill (scope=user)
-/aida claude optimize                → claude-code-management skill (audit current)
-/aida claude optimize ./CLAUDE.md    → claude-code-management skill (audit specific)
-/aida claude validate                → claude-code-management skill
-/aida claude list                    → claude-code-management skill
+/aida claude create                  → claude-md-manager skill (auto-detect scope)
+/aida claude create --scope project  → claude-md-manager skill (scope=project)
+/aida claude create --scope user     → claude-md-manager skill (scope=user)
+/aida claude optimize                → claude-md-manager skill (audit current)
+/aida claude optimize ./CLAUDE.md    → claude-md-manager skill (audit specific)
+/aida claude validate                → claude-md-manager skill
+/aida claude list                    → claude-md-manager skill
 ```
 
 ## Path Resolution
@@ -248,7 +296,7 @@ When displaying help (for `help` command or no arguments), show:
 ### Extension Management
 - `/aida agent [create|validate|version|list]` - Manage agents
 - `/aida skill [create|validate|version|list]` - Manage skills
-- `/aida plugin [scaffold|create|validate|version|list|add|remove]` - Manage plugins
+- `/aida plugin [scaffold|create|validate|version|list]` - Manage plugins
 - `/aida hook [list|add|remove|validate]` - Manage hooks (settings.json)
 
 ### Session Persistence
