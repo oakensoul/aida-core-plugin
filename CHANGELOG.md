@@ -10,6 +10,48 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-02-24
+
+### Added
+
+#### Plugin Scaffolding Skill (#23)
+
+- Two-phase API for creating new plugins from templates
+- Interactive setup with marketplace configuration
+
+#### Plugin Update Skill (#27)
+
+- `/aida plugin update` for standards migration
+- Guides plugins through convention changes
+
+### Changed
+
+#### Decompose claude-code-management into Focused Skills (#31)
+
+- Extracted `agent-manager`, `skill-manager`, `plugin-manager`,
+  `hook-manager`, and `claude-md-manager` as standalone skills
+- Shared logic moved to `extension_utils` module
+- Standardized validate response shapes and default operations
+- Replaced hand-rolled YAML parser with PyYAML
+- Added `operation` key to list responses
+
+#### Merge aida-dispatch into aida Skill (#24)
+
+- Unified `/aida` routing into a single `aida` skill
+- Removed `aida-dispatch` as a separate skill
+
+#### Updated Knowledge Base (#31)
+
+- Refreshed all 10 claude-code-expert knowledge files with current
+  Claude Code capabilities
+
+### Fixed
+
+- Short-circuit permissions flow when no plugin recommendations
+  exist (#28)
+
+---
+
 ## [0.8.0] - 2026-02-23
 
 ### Changed
@@ -256,6 +298,7 @@ See git history for details on versions prior to 0.2.0.
 
 ---
 
+[1.0.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.0.0
 [0.8.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.8.0
 [0.7.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.7.0
 [0.6.1]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.6.1
