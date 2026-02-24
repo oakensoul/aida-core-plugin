@@ -8,20 +8,13 @@ from pathlib import Path
 _project_root = Path(__file__).parent.parent.parent
 _scaffold_scripts = _project_root / "skills" / "create-plugin" / "scripts"
 sys.path.insert(0, str(_project_root / "scripts"))
+sys.path.insert(0, str(_scaffold_scripts))
 
-# Import directly to avoid conflicts with ccm operations package
-import importlib.util  # noqa: E402
-
-_licenses_spec = importlib.util.spec_from_file_location(
-    "scaffold_licenses",
-    str(_scaffold_scripts / "operations" / "licenses.py"),
+from scaffold_ops.licenses import (  # noqa: E402
+    get_license_text,
+    LICENSES,
+    SUPPORTED_LICENSES,
 )
-_licenses_mod = importlib.util.module_from_spec(_licenses_spec)
-_licenses_spec.loader.exec_module(_licenses_mod)
-
-get_license_text = _licenses_mod.get_license_text
-LICENSES = _licenses_mod.LICENSES
-SUPPORTED_LICENSES = _licenses_mod.SUPPORTED_LICENSES
 
 
 class TestGetLicenseText(unittest.TestCase):
@@ -93,6 +86,12 @@ class TestGetLicenseText(unittest.TestCase):
     def test_licenses_count(self):
         """Should have exactly 6 supported licenses."""
         self.assertEqual(len(SUPPORTED_LICENSES), 6)
+
+    def test_format_string_injection_safe(self):
+        """Author names with format-like patterns should not cause errors."""
+        # This should not raise KeyError or other format-related errors
+        text = get_license_text("MIT", "2026", "Author {with} {curly} braces")
+        self.assertIn("Author {with} {curly} braces", text)
 
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ import argparse
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 # Configure logging
 logging.basicConfig(
@@ -49,14 +49,14 @@ from shared.utils import (  # noqa: E402
     validate_version,
     to_kebab_case,
 )
-from operations.context import (  # noqa: E402
+from scaffold_ops.context import (  # noqa: E402
     infer_git_config,
     validate_target_directory,
     check_gh_available,
     resolve_default_target,
 )
-from operations.licenses import get_license_text, SUPPORTED_LICENSES  # noqa: E402
-from operations.generators import (  # noqa: E402
+from scaffold_ops.licenses import get_license_text, SUPPORTED_LICENSES  # noqa: E402
+from scaffold_ops.generators import (  # noqa: E402
     create_directory_structure,
     render_shared_files,
     render_python_files,
@@ -72,7 +72,7 @@ from operations.generators import (  # noqa: E402
 GENERATOR_VERSION = "0.9.0"
 
 
-def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
+def get_questions(context: dict[str, Any]) -> dict[str, Any]:
     """Phase 1: Analyze context and return questions for missing info.
 
     Args:
@@ -81,8 +81,8 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Dictionary with 'questions' list and optional 'inferred' data
     """
-    questions: List[Dict[str, Any]] = []
-    inferred: Dict[str, Any] = {}
+    questions: list[dict[str, Any]] = []
+    inferred: dict[str, Any] = {}
 
     # Infer git config for author info
     git_config = infer_git_config()
@@ -206,7 +206,7 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def execute(context: Dict[str, Any]) -> Dict[str, Any]:
+def execute(context: dict[str, Any]) -> dict[str, Any]:
     """Phase 2: Execute the scaffolding with the provided context.
 
     Args:
@@ -245,6 +245,14 @@ def execute(context: Dict[str, Any]) -> Dict[str, Any]:
     if license_id not in SUPPORTED_LICENSES:
         return {"success": False, "message": f"Unsupported license: {license_id}"}
 
+    # Validate author info
+    author_name = context.get("author_name", "")
+    author_email = context.get("author_email", "")
+    if not author_name or not author_name.strip():
+        return {"success": False, "message": "author_name is required"}
+    if not author_email or not author_email.strip():
+        return {"success": False, "message": "author_email is required"}
+
     # Resolve target directory
     target_str = context.get("target_directory", "")
     if not target_str:
@@ -257,8 +265,6 @@ def execute(context: Dict[str, Any]) -> Dict[str, Any]:
         return {"success": False, "message": f"Invalid target directory: {error}"}
 
     # Build template variables
-    author_name = context.get("author_name", "")
-    author_email = context.get("author_email", "")
     year = str(datetime.now(timezone.utc).year)
     timestamp = datetime.now(timezone.utc).isoformat()
 
@@ -276,7 +282,7 @@ def execute(context: Dict[str, Any]) -> Dict[str, Any]:
     script_extension = ".py" if language == "python" else ".ts"
     plugin_display_name = plugin_name.replace("-", " ").title()
 
-    variables: Dict[str, Any] = {
+    variables: dict[str, Any] = {
         "plugin_name": plugin_name,
         "plugin_display_name": plugin_display_name,
         "description": description,
@@ -309,7 +315,7 @@ def execute(context: Dict[str, Any]) -> Dict[str, Any]:
     }
 
     # Create the project
-    all_files: List[str] = []
+    all_files: list[str] = []
 
     try:
         # Create target directory
@@ -388,12 +394,12 @@ def execute(context: Dict[str, Any]) -> Dict[str, Any]:
 
 def _build_next_steps(
     plugin_name: str, target: Path, language: str, create_repo: bool
-) -> List[str]:
+) -> list[str]:
     """Build list of suggested next steps after scaffolding."""
     steps = [f"cd {target}"]
 
     if language == "python":
-        steps.append("pip install -r requirements.txt  # (if applicable)")
+        steps.append('pip install -e ".[dev]"')
     else:
         steps.append("npm install")
 

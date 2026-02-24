@@ -3,21 +3,21 @@
 .PHONY: lint-ts test build format install
 
 lint-ts: ## Run eslint on TypeScript files
-	npx eslint .
+	npm run lint
 
 lint: lint-ts lint-md lint-yaml lint-frontmatter ## Run all linters
 
 test: ## Run vitest
-	npx vitest run
+	npm test
 
 build: ## Build TypeScript
-	npx tsc
+	npm run build
 
 format: ## Format code with prettier
-	npx prettier --write .
+	npm run format
 
 install: ## Install Node.js dependencies
 	npm install
 
 clean: ## Remove build artifacts
-	rm -rf dist/ node_modules/ coverage/ *.tsbuildinfo
+	rm -rf dist/ coverage/ *.tsbuildinfo
