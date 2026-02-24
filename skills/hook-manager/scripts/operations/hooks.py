@@ -69,14 +69,31 @@ HOOK_TEMPLATES = {
     },
 }
 
-# Settings file locations
-SETTINGS_PATHS = {
-    "user": Path.home() / ".claude" / "settings.json",
-    "project": Path.cwd() / ".claude" / "settings.json",
-    "local": (
-        Path.cwd() / ".claude" / "settings.local.json"
-    ),
-}
+# Settings file locations — resolved lazily so that
+# project/local paths reflect the *current* working
+# directory at call time, not at import time.
+
+
+def get_settings_paths() -> dict[str, Path]:
+    """Return settings file locations.
+
+    The ``project`` and ``local`` entries use
+    ``Path.cwd()`` so they must be evaluated lazily;
+    calling at import time would freeze the paths.
+    """
+    return {
+        "user": (
+            Path.home() / ".claude" / "settings.json"
+        ),
+        "project": (
+            Path.cwd() / ".claude" / "settings.json"
+        ),
+        "local": (
+            Path.cwd()
+            / ".claude"
+            / "settings.local.json"
+        ),
+    }
 
 
 def _load_settings(path: Path) -> dict[str, Any]:
@@ -361,13 +378,13 @@ def _execute_list(scope: str) -> dict[str, Any]:
     results = []
 
     scopes_to_check = (
-        list(SETTINGS_PATHS.keys())
+        list(get_settings_paths().keys())
         if scope == "all"
         else [scope]
     )
 
     for scope_name in scopes_to_check:
-        path = SETTINGS_PATHS.get(scope_name)
+        path = get_settings_paths().get(scope_name)
         if not path:
             continue
 
@@ -434,7 +451,7 @@ def _execute_add(
         }
 
     # Load current settings
-    path = SETTINGS_PATHS.get(scope)
+    path = get_settings_paths().get(scope)
     if not path:
         return {
             "success": False,
@@ -520,7 +537,7 @@ def _execute_remove(
             ),
         }
 
-    path = SETTINGS_PATHS.get(scope)
+    path = get_settings_paths().get(scope)
     if not path:
         return {
             "success": False,
@@ -596,13 +613,13 @@ def _execute_validate(scope: str) -> dict[str, Any]:
     issues: list[dict[str, Any]] = []
 
     scopes_to_check = (
-        list(SETTINGS_PATHS.keys())
+        list(get_settings_paths().keys())
         if scope == "all"
         else [scope]
     )
 
     for scope_name in scopes_to_check:
-        path = SETTINGS_PATHS.get(scope_name)
+        path = get_settings_paths().get(scope_name)
         if not path or not path.exists():
             continue
 

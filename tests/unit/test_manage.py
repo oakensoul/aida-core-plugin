@@ -19,6 +19,7 @@ for _mod_name in list(sys.modules):
     if _mod_name == "operations" or _mod_name.startswith("operations."):
         del sys.modules[_mod_name]
 sys.modules.pop("manage", None)
+sys.modules.pop("_paths", None)
 
 from operations.utils import (  # noqa: E402
     to_kebab_case,

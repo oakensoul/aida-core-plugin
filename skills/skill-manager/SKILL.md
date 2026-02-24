@@ -184,6 +184,39 @@ tags.
 | `project` | `./.claude/` | Project-specific skills     |
 | `plugin`  | Custom path  | Plugin development          |
 
+## Example Workflow
+
+### Creating a Skill (Full Flow)
+
+```text
+User: /aida skill create "auto-format code on save"
+
+1. Parse: operation=create, description="auto-format code on save"
+
+2. Phase 1 (Python):
+   python manage.py --get-questions --context='{...}'
+   Returns:
+   - inferred: name="auto-format", version="0.1.0"
+   - questions: [location question]
+   - project_context: {languages: ["python"]}
+
+3. Ask user questions (if any):
+   "Where should we create this skill?"
+
+4. Phase 2 (Agent):
+   Spawn claude-code-expert with context + output contract
+   Agent returns JSON with files array
+
+5. Phase 3 (Python):
+   python manage.py --execute --context='{"operation": "create", "agent_output": {...}}'
+   - Validates structure
+   - Creates directories + scripts/, references/, templates/
+   - Writes SKILL.md and supporting files
+
+6. Report to user:
+   "Created skill 'auto-format' with 4 files"
+```
+
 ## Resources
 
 ### scripts/

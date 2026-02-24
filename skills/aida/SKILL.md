@@ -296,7 +296,7 @@ When displaying help (for `help` command or no arguments), show:
 ### Extension Management
 - `/aida agent [create|validate|version|list]` - Manage agents
 - `/aida skill [create|validate|version|list]` - Manage skills
-- `/aida plugin [scaffold|create|validate|version|list|add|remove]` - Manage plugins
+- `/aida plugin [scaffold|create|validate|version|list]` - Manage plugins
 - `/aida hook [list|add|remove|validate]` - Manage hooks (settings.json)
 
 ### Session Persistence

@@ -69,8 +69,8 @@ def get_questions(
     if is_scaffold_operation(context):
         return scaffold.get_questions(context)
 
-    # Auto-set type to plugin for extension operations
-    context.setdefault("type", "plugin")
+    # Force type to plugin for extension operations
+    context["type"] = "plugin"
     return extensions.get_questions(context)
 
 
@@ -93,8 +93,8 @@ def execute(
             context.update(responses)
         return scaffold.execute(context)
 
-    # Auto-set type to plugin for extension operations
-    context.setdefault("type", "plugin")
+    # Force type to plugin for extension operations
+    context["type"] = "plugin"
     return extensions.execute(
         context, responses, _paths.EXTENSION_TEMPLATES_DIR
     )

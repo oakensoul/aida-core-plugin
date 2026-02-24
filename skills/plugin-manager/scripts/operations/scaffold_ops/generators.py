@@ -197,16 +197,17 @@ def render_stub_agent(
     target: Path,
     name: str,
     description: str,
-    ccm_templates_dir: Path,
+    extension_templates_dir: Path,
     timestamp: str = "",
 ) -> list[str]:
-    """Render an agent stub using CCM templates.
+    """Render an agent stub using extension templates.
 
     Args:
         target: Target directory path
         name: Agent name (kebab-case)
         description: Agent description
-        ccm_templates_dir: Path to CCM templates directory
+        extension_templates_dir: Path to agent extension
+            templates directory
         timestamp: ISO 8601 timestamp
 
     Returns:
@@ -226,7 +227,7 @@ def render_stub_agent(
     }
 
     content = render_template(
-        ccm_templates_dir,
+        extension_templates_dir,
         "agent/agent.md.jinja2",
         variables,
     )
@@ -261,17 +262,18 @@ def render_stub_skill(
     name: str,
     description: str,
     language: str,
-    ccm_templates_dir: Path,
+    extension_templates_dir: Path,
     timestamp: str = "",
 ) -> list[str]:
-    """Render a skill stub using CCM templates.
+    """Render a skill stub using extension templates.
 
     Args:
         target: Target directory path
         name: Skill name (kebab-case)
         description: Skill description
         language: "python" or "typescript"
-        ccm_templates_dir: Path to CCM templates directory
+        extension_templates_dir: Path to skill extension
+            templates directory
         timestamp: ISO 8601 timestamp
 
     Returns:
@@ -296,7 +298,7 @@ def render_stub_skill(
     }
 
     content = render_template(
-        ccm_templates_dir,
+        extension_templates_dir,
         "skill/SKILL.md.jinja2",
         variables,
     )

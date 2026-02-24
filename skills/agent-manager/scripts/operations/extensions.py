@@ -11,7 +11,6 @@ Supports three-phase orchestration:
 - Phase 3: execute() with agent_output -- validate and write
 """
 
-import json
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -21,7 +20,9 @@ import yaml
 
 from .utils import (
     bump_version,
+    detect_project_context,
     get_location_path,
+    infer_from_description,
     render_template,
     to_kebab_case,
     validate_description,
@@ -142,184 +143,6 @@ def agent_exists(
     """
     agents = find_agents(location, plugin_path)
     return any(a["name"] == name for a in agents)
-
-
-# ------------------------------------------------------------------
-# Inference helpers
-# ------------------------------------------------------------------
-
-
-def infer_from_description(
-    description: str,
-) -> Dict[str, Any]:
-    """Infer agent metadata from a description string.
-
-    Args:
-        description: User-provided description
-
-    Returns:
-        Dictionary of inferred values
-    """
-    inferred: Dict[str, Any] = {
-        "name": to_kebab_case(description[:50]),
-        "version": "0.1.0",
-        "tags": ["custom"],
-    }
-
-    description_lower = description.lower()
-
-    tag_keywords: Dict[str, List[str]] = {
-        "api": ["api", "endpoint", "rest", "graphql"],
-        "database": [
-            "database",
-            "sql",
-            "query",
-            "migration",
-        ],
-        "auth": [
-            "auth",
-            "login",
-            "authentication",
-            "security",
-        ],
-        "testing": ["test", "testing", "spec", "coverage"],
-        "documentation": ["doc", "documentation", "readme"],
-        "deployment": ["deploy", "deployment", "ci", "cd"],
-        "monitoring": [
-            "monitor",
-            "logging",
-            "metrics",
-            "observability",
-        ],
-    }
-
-    for tag, keywords in tag_keywords.items():
-        if any(kw in description_lower for kw in keywords):
-            if tag not in inferred["tags"]:
-                inferred["tags"].append(tag)
-
-    return inferred
-
-
-def detect_project_context() -> Dict[str, Any]:
-    """Detect project context for the agent to use.
-
-    Returns:
-        Dictionary of detected project facts
-    """
-    context: Dict[str, Any] = {
-        "languages": [],
-        "frameworks": [],
-        "tools": [],
-        "has_tests": False,
-        "has_ci": False,
-    }
-
-    cwd = Path.cwd()
-
-    language_indicators: Dict[str, List[str]] = {
-        "python": [
-            "*.py",
-            "requirements.txt",
-            "pyproject.toml",
-            "setup.py",
-            "Pipfile",
-        ],
-        "javascript": ["*.js", "package.json"],
-        "typescript": ["*.ts", "tsconfig.json"],
-        "go": ["*.go", "go.mod"],
-        "rust": ["*.rs", "Cargo.toml"],
-        "ruby": ["*.rb", "Gemfile"],
-        "java": ["*.java", "pom.xml", "build.gradle"],
-    }
-
-    for lang, indicators in language_indicators.items():
-        for indicator in indicators:
-            if indicator.startswith("*"):
-                if list(cwd.glob(indicator)) or list(
-                    cwd.glob(f"**/{indicator}")
-                ):
-                    if lang not in context["languages"]:
-                        context["languages"].append(lang)
-                    break
-            else:
-                if (cwd / indicator).exists():
-                    if lang not in context["languages"]:
-                        context["languages"].append(lang)
-                    break
-
-    framework_files: Dict[str, List[str]] = {
-        "fastapi": ["main.py"],
-        "django": ["manage.py", "settings.py"],
-        "flask": ["app.py"],
-        "react": ["package.json"],
-        "nextjs": ["next.config.js", "next.config.ts"],
-        "dbt": ["dbt_project.yml"],
-        "terraform": ["*.tf"],
-        "cdk": ["cdk.json"],
-    }
-
-    for framework, files in framework_files.items():
-        for f in files:
-            if f.startswith("*"):
-                if list(cwd.glob(f)):
-                    context["frameworks"].append(framework)
-                    break
-            elif (cwd / f).exists():
-                context["frameworks"].append(framework)
-                break
-
-    package_json = cwd / "package.json"
-    if package_json.exists():
-        try:
-            with open(package_json) as fh:
-                pkg = json.load(fh)
-                deps = {
-                    **pkg.get("dependencies", {}),
-                    **pkg.get("devDependencies", {}),
-                }
-                if "react" in deps:
-                    context["frameworks"].append("react")
-                if "vue" in deps:
-                    context["frameworks"].append("vue")
-                if "next" in deps:
-                    context["frameworks"].append("nextjs")
-        except (json.JSONDecodeError, IOError):
-            pass
-
-    tool_files: Dict[str, List[str]] = {
-        "docker": [
-            "Dockerfile",
-            "docker-compose.yml",
-            "docker-compose.yaml",
-        ],
-        "make": ["Makefile"],
-        "git": [".git"],
-        "pytest": ["pytest.ini", "conftest.py"],
-        "jest": ["jest.config.js", "jest.config.ts"],
-    }
-
-    for tool, files in tool_files.items():
-        for f in files:
-            if (cwd / f).exists():
-                context["tools"].append(tool)
-                break
-
-    context["has_tests"] = (
-        (cwd / "tests").exists()
-        or (cwd / "test").exists()
-        or (cwd / "__tests__").exists()
-        or bool(list(cwd.glob("**/test_*.py")))
-        or bool(list(cwd.glob("**/*.test.js")))
-    )
-
-    context["has_ci"] = (
-        (cwd / ".github" / "workflows").exists()
-        or (cwd / ".gitlab-ci.yml").exists()
-        or (cwd / ".circleci").exists()
-    )
-
-    return context
 
 
 # ------------------------------------------------------------------
