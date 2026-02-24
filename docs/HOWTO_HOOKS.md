@@ -29,7 +29,7 @@ Use hooks when you need:
 
 Don't use hooks for:
 
-- Workflows (use a [command](HOWTO_CREATE_COMMAND.md))
+- Workflows (use a [skill](HOWTO_CREATE_SKILL.md))
 - Expertise (use an [agent](HOWTO_CREATE_AGENT.md))
 - Complex logic (use a [skill](HOWTO_CREATE_SKILL.md))
 
@@ -281,6 +281,5 @@ Then reference it in your hook:
 
 ## Next Steps
 
-- [Create a Command](HOWTO_CREATE_COMMAND.md) - For complex workflows
-- [Create a Skill](HOWTO_CREATE_SKILL.md) - For reusable capabilities
+- [Create a Skill](HOWTO_CREATE_SKILL.md) - For workflows and reusable capabilities
 - [Extension Framework](EXTENSION_FRAMEWORK.md) - Understand the architecture

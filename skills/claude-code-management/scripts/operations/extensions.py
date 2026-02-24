@@ -104,7 +104,7 @@ def find_components(
                         except (json.JSONDecodeError, IOError):
                             pass
         else:
-            # For agents, commands, skills
+            # For agents, skills
             pattern = "**/*.md" if config["has_subdirectory"] else "*.md"
             for md_file in search_dir.glob(pattern):
                 # Skip non-component files
@@ -314,7 +314,7 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
     Args:
         context: Operation context containing:
             - operation: create, validate, version, update, list
-            - type: agent, command, skill, plugin
+            - type: agent, skill, plugin
             - description: (for create) component description
             - name: (for validate/version/update) component name
             - location: user, project, plugin (default: user)
@@ -517,7 +517,7 @@ def execute_create(
         }
 
     else:
-        # Agent, command, or skill
+        # Agent or skill
         component_dir = base_path / config["directory"]
         file_path = component_dir / config["file_pattern"].format(name=name)
 

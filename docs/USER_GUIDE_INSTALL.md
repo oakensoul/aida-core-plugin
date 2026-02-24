@@ -393,7 +393,7 @@ After installation, AIDA creates these files and directories:
 ├── settings.json                   # Claude Code settings
 └── plugins/
     └── aida-core/             # Plugin files
-        ├── commands/               # /aida command entry point
+        ├── skills/                 # /aida skill definitions
         ├── scripts/                # Python utilities
         └── templates/              # Jinja2 templates
 ```
@@ -497,7 +497,7 @@ ls -la ~/.claude/skills/user-context/
 # SKILL.md
 ```
 
-### Step 3: Test a Command
+### Step 3: Test a Skill
 
 ```bash
 /aida help
@@ -514,7 +514,7 @@ Available commands:
   /aida config          Project setup (per project)
   [... etc ...]
 
-For detailed help: /aida command info [name]
+For detailed help: /aida help
 ```
 
 ### Step 4: Run Health Check
@@ -693,7 +693,6 @@ Try these commands to explore AIDA:
 
 ```bash
 /aida skill list         # See all your skills
-/aida command list       # See all available commands
 /aida agent list         # See available agents
 ```
 

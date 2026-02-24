@@ -188,7 +188,7 @@ npm run test
 
 - Based on base image
 - Sample AIDA project structure
-- `.claude/` directory with commands/skills/agents
+- `.claude/` directory with skills/agents
 - Git repository initialized
 
 ### PHP Environment

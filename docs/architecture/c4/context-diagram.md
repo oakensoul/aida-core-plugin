@@ -51,7 +51,7 @@ Primary user of the system
 
 - Writes code using Claude Code
 - Runs `/aida` commands to configure context
-- Creates custom skills/commands/agents
+- Creates custom skills and agents
 - Provides feedback via `/aida bug`
 
 ##### Goals
@@ -98,7 +98,7 @@ Skills-first architecture plugin
 
 - Manages personal and project skills
 - Provides installation and configuration
-- Creates custom skills/commands/agents
+- Creates custom skills and agents
 - Integrates feedback system
 
 ##### Key Features

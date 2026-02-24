@@ -426,6 +426,27 @@ class TestCommandTypeRemoved(unittest.TestCase):
         with self.assertRaises(KeyError):
             execute(context, {})
 
+    def test_validate_command_type_raises(self):
+        """Test that validating command type raises KeyError."""
+        context = {
+            "operation": "validate",
+            "type": "command",
+            "name": "some-command",
+        }
+        with self.assertRaises(KeyError):
+            execute(context, {})
+
+    def test_version_command_type_raises(self):
+        """Test that versioning command type raises KeyError."""
+        context = {
+            "operation": "version",
+            "type": "command",
+            "name": "some-command",
+            "bump": "patch",
+        }
+        with self.assertRaises(KeyError):
+            execute(context, {})
+
 
 class TestCreateComponent(unittest.TestCase):
     """Test component creation in temporary directory."""

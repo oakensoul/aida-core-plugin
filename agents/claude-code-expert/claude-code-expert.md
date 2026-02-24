@@ -7,7 +7,7 @@ tags:
   - core
   - meta
   - extensions
-model: claude-sonnet-4.5
+model: sonnet
 ---
 
 # Claude Code Expert

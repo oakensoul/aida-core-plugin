@@ -293,7 +293,7 @@ Follow Semantic Versioning (SemVer):
 
 Breaking changes:
 
-- Removing agents, commands, or skills
+- Removing agents or skills
 - Changing command argument formats
 - Incompatible schema changes
 - Renamed entry points
@@ -302,7 +302,7 @@ Breaking changes:
 
 New features (backwards compatible):
 
-- Adding new agents, commands, or skills
+- Adding new agents or skills
 - New optional parameters
 - Enhanced functionality
 - New knowledge files
@@ -372,7 +372,7 @@ Include in README.md:
 1. **What it does** - Clear value proposition
 2. **Installation** - How to install
 3. **Quick start** - Basic usage example
-4. **Components** - List of agents/commands/skills
+4. **Components** - List of agents and skills
 5. **Configuration** - Any setup required
 6. **Examples** - Common use cases
 
@@ -463,7 +463,7 @@ template_path = plugin_dir / "templates" / "my-template.jinja2"
 
 ### Missing Components
 
-**Problem:** Commands reference skills that don't exist.
+**Problem:** Skills reference other skills that don't exist.
 
 **Solution:**
 

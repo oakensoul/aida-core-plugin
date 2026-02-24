@@ -230,7 +230,7 @@ Essential plugin.json fields:
 Reference components within the plugin:
 
 ```markdown
-# In a command
+# In a skill
 
 Invoke the `../skills/my-skill` skill for this operation.
 ```

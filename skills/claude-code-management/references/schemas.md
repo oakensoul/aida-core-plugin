@@ -237,7 +237,6 @@ my-plugin/
 │   ├── plugin.json       # Standard Claude Code metadata
 │   └── aida-config.json  # AIDA config + permissions
 ├── agents/               # Plugin agents
-├── commands/             # Plugin commands
 ├── skills/               # Plugin skills
 ├── templates/            # Optional: shared templates
 ├── README.md             # Plugin documentation
