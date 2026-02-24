@@ -118,7 +118,7 @@ Once created, your agent is available via the Task tool:
 "Please have the security-engineer review this authentication code"
 ```
 
-Or reference it in commands/skills you create.
+Or reference it in skills you create.
 
 ## Adding Knowledge
 

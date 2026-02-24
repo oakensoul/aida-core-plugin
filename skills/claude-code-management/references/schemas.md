@@ -69,8 +69,20 @@ version: 0.1.0
 tags:
   - core
   - automation
+user-invocable: true          # Optional: allow /skill-name invocation
+argument-hint: "[args]"       # Optional: shown to user at invocation
+allowed-tools: "Read,Bash"    # Optional: restrict tool access
 ---
 ```
+
+### Skill-Specific Fields
+
+| Field                      | Type    | Required | Description                            |
+| -------------------------- | ------- | -------- | -------------------------------------- |
+| `user-invocable`           | boolean | No       | Allow `/skill-name` invocation         |
+| `argument-hint`            | string  | No       | Hint shown to user at invocation       |
+| `allowed-tools`            | string  | No       | Restrict tool access (e.g., `"*"`)     |
+| `disable-model-invocation` | boolean | No       | Prevent model from invoking the skill  |
 
 ### Skill Directory Structure
 

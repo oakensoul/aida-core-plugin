@@ -294,7 +294,7 @@ Follow Semantic Versioning (SemVer):
 Breaking changes:
 
 - Removing agents or skills
-- Changing command argument formats
+- Changing skill invocation argument formats
 - Incompatible schema changes
 - Renamed entry points
 
