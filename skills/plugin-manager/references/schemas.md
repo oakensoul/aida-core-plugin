@@ -59,10 +59,27 @@ which rejects unrecognized keys in `plugin.json`.
 
 ```json
 {
+  "generator_version": "0.9.0",
   "config": { },
   "recommendedPermissions": { }
 }
 ```
+
+### Generator Version
+
+The `generator_version` field records which version of the
+AIDA scaffolder created or last updated the plugin. This
+field is used by the `update` operation to determine what
+changes need to be applied.
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `generator_version` | string | No | Semver of the scaffolder that created/updated this plugin |
+
+Plugins created before this field was introduced (or
+created manually) will not have it. The update operation
+treats missing `generator_version` as `"0.0.0"`
+(pre-tracking).
 
 ### Config Section
 
@@ -110,9 +127,13 @@ Plugins can declare user-configurable preferences:
 
 | Type | Fields | Description |
 | --- | --- | --- |
-| `boolean` | `key`, `label`, `default` | On/off toggle |
-| `choice` | `key`, `label`, `options`, `default` | Select from list |
-| `string` | `key`, `label`, `default` | Free-text input |
+| `boolean` | `key`, `label`, `default`, `required?` | On/off toggle |
+| `choice` | `key`, `label`, `options`, `default`, `required?` | Select from list |
+| `string` | `key`, `label`, `default`, `required?` | Free-text input |
+
+All preference types accept an optional `required` boolean
+field (defaults to `false`) indicating whether the preference
+must be configured before the plugin is usable.
 
 ### Recommended Permissions Section
 
