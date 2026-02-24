@@ -1,0 +1,67 @@
+---
+type: readme
+title: {{ plugin_display_name }}
+---
+
+# {{ plugin_display_name }}
+
+{{ description }}
+
+## Installation
+
+Install as a Claude Code plugin:
+
+```bash
+{% if repository_url %}
+claude plugin add {{ repository_url }}
+{% else %}
+# Replace with your repository URL once published
+claude plugin add https://github.com/YOUR_USER/{{ plugin_name }}
+{% endif %}
+```
+
+## Features
+
+<!-- TODO: Replace with actual plugin features -->
+- Describe your first key feature here
+- Describe your second key feature here
+
+## Development
+
+### Prerequisites
+
+{% if language == "python" %}
+- Python {{ python_version }}+
+- pip
+{% elif language == "typescript" %}
+- Node.js {{ node_version }}+
+- npm
+{% endif %}
+
+### Setup
+
+```bash
+git clone {{ repository_url if repository_url else "https://github.com/YOUR_USER/" + plugin_name + ".git" }}
+cd {{ plugin_name }}
+{% if language == "python" %}
+pip install -e ".[dev]"
+{% elif language == "typescript" %}
+npm install
+{% endif %}
+```
+
+### Commands
+
+```bash
+make lint    # Run linters
+make test    # Run tests
+make clean   # Clean build artifacts
+```
+
+## License
+
+{{ license_id }}{% if license_id != "UNLICENSED" %} - see [LICENSE](LICENSE) for details{% endif %}.
+
+---
+
+*Scaffolded with [aida-core](https://github.com/oakensoul/aida-core-plugin) v{{ generator_version }}*

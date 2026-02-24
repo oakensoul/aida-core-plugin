@@ -1,0 +1,12 @@
+import { describe, it, expect } from "vitest";
+import { name, version } from "../src/index.js";
+
+describe({{ plugin_display_name | tojson }}, () => {
+  it("should export the plugin name", () => {
+    expect(name).toBe({{ plugin_name | tojson }});
+  });
+
+  it("should export a valid version", () => {
+    expect(version).toMatch(/^\d+\.\d+\.\d+$/);
+  });
+});
