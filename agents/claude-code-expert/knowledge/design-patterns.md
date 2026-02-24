@@ -15,8 +15,7 @@ Claude Code extensions.
 
 Each extension should do one thing well:
 
-- Commands: One action
-- Skills: One capability
+- Skills: One capability or workflow
 - Agents: One domain of expertise
 
 ### 2. Composability
@@ -24,7 +23,7 @@ Each extension should do one thing well:
 Design extensions to work together:
 
 - Skills can be used by multiple agents
-- Commands can delegate to skills
+- Skills can delegate to other skills
 - Plugins can bundle related components
 
 ### 3. Progressive Disclosure
@@ -43,33 +42,18 @@ Write clear documentation:
 - Include usage examples
 - Document expected behavior
 
-## Command Patterns
+## Skill Patterns
 
-### Delegation Pattern
+### Argument Handling (User-Invocable Skills)
 
-Commands should delegate logic to skills:
-
-```markdown
-# my-command.md
-
-## Process
-
-1. Parse arguments
-2. Invoke `my-skill` skill
-3. Report results
-```
-
-**Why:** Keeps commands simple, logic is reusable.
-
-### Argument Handling
-
-Use clear argument hints:
+Use clear argument hints for user-invocable skills:
 
 ```yaml
 argument-hint: "[target] [--verbose] [--dry-run]"
+user-invocable: true
 ```
 
-Document each argument in the command body.
+Document each argument in the skill body.
 
 ### Tool Restrictions
 
@@ -79,8 +63,6 @@ Restrict tools when security matters:
 allowed-tools: "Read,Write,Bash"  # Specific tools
 allowed-tools: "*"                 # All tools (default)
 ```
-
-## Skill Patterns
 
 ### Two-Phase API
 
@@ -220,7 +202,6 @@ my-plugin/
 ├── .claude-plugin/
 │   └── plugin.json       # Required: plugin metadata
 ├── agents/               # Optional: plugin agents
-├── commands/             # Optional: plugin commands
 ├── skills/               # Optional: plugin skills
 ├── templates/            # Optional: shared templates
 ├── README.md             # Required: documentation
@@ -270,20 +251,20 @@ Bump versions using:
 
 ## Anti-Patterns
 
-### Avoid: Monolithic Commands
+### Avoid: Monolithic Skills
 
 **Bad:**
 
 ```markdown
-# deploy.md
-[500 lines of deployment logic]
+# SKILL.md
+[500 lines of deployment logic with no script delegation]
 ```
 
 **Good:**
 
 ```markdown
-# deploy.md
-Delegates to deploy-automation skill
+# SKILL.md
+Delegates complex automation to scripts/ and spawns agents for expertise
 ```
 
 ### Avoid: Hardcoded Paths
