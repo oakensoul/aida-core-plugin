@@ -8,7 +8,7 @@
     "type": {
       "type": "string",
       "description": "Document type",
-      "enum": ["skill", "agent", "command", "documentation", "guide", "adr", "diagram", "reference", "changelog", "readme", "issue"]
+      "enum": ["skill", "agent", "documentation", "guide", "adr", "diagram", "reference", "changelog", "readme", "issue"]
     }
   },
   "allOf": [
@@ -37,6 +37,22 @@
           "tags": {
             "type": "array",
             "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+          },
+          "allowed-tools": {
+            "type": "string",
+            "description": "Tools allowed for this skill"
+          },
+          "argument-hint": {
+            "type": "string",
+            "description": "Hint shown to user for arguments"
+          },
+          "user-invocable": {
+            "type": "boolean",
+            "description": "Whether this skill can be invoked directly by users"
+          },
+          "disable-model-invocation": {
+            "type": "boolean",
+            "description": "Whether to prevent model from invoking this skill"
           }
         }
       }
@@ -66,47 +82,6 @@
           "tags": {
             "type": "array",
             "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": { "type": { "const": "command" } }
-      },
-      "then": {
-        "required": ["name", "description", "version", "tags"],
-        "properties": {
-          "name": {
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9-]*$",
-            "minLength": 2,
-            "maxLength": 50
-          },
-          "description": {
-            "type": "string",
-            "minLength": 10,
-            "maxLength": 500
-          },
-          "version": {
-            "type": "string",
-            "pattern": "^\\d+\\.\\d+\\.\\d+$"
-          },
-          "tags": {
-            "type": "array",
-            "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
-          },
-          "args": {
-            "type": "string",
-            "description": "Command arguments specification"
-          },
-          "allowed-tools": {
-            "type": "string",
-            "description": "Tools allowed for this command"
-          },
-          "argument-hint": {
-            "type": "string",
-            "description": "Hint shown to user for arguments"
           }
         }
       }
