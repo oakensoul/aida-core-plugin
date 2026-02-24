@@ -140,14 +140,16 @@ For `plugin` commands (including `plugin scaffold`):
 
 - **Invoke the `plugin-manager` skill** to handle these operations
 - Pass the full command arguments to the skill
-- The skill handles create, validate, version, list, and scaffold operations
+- The skill handles create, validate, version, list, scaffold, and update
+  operations
 - Scaffold creates a NEW plugin project (not an extension inside an existing
   project)
+- Update scans an existing plugin and patches it to current standards
 
 **Process:**
 
 1. Parse the command to extract:
-   - Operation: `create`, `validate`, `version`, `list`, `scaffold`
+   - Operation: `create`, `validate`, `version`, `list`, `scaffold`, `update`
    - Arguments: name, description, options
 
 2. Invoke `plugin-manager` skill with the parsed context
@@ -160,6 +162,7 @@ For `plugin` commands (including `plugin scaffold`):
 /aida plugin list                        → plugin-manager skill
 /aida plugin scaffold "my-new-plugin"    → plugin-manager skill
 /aida plugin scaffold                    → plugin-manager skill (will ask)
+/aida plugin update "/path/to/plugin"   → plugin-manager skill
 ```
 
 ### Hook Management Commands
@@ -296,7 +299,7 @@ When displaying help (for `help` command or no arguments), show:
 ### Extension Management
 - `/aida agent [create|validate|version|list]` - Manage agents
 - `/aida skill [create|validate|version|list]` - Manage skills
-- `/aida plugin [scaffold|create|validate|version|list]` - Manage plugins
+- `/aida plugin [scaffold|create|validate|version|list|update]` - Manage plugins
 - `/aida hook [list|add|remove|validate]` - Manage hooks (settings.json)
 
 ### Session Persistence

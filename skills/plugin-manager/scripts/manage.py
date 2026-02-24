@@ -4,6 +4,7 @@
 Entry point for all plugin operations:
 - Extension CRUD: create, validate, version, list
 - Project scaffolding: scaffold
+- Standards migration: update
 
 Routes to the appropriate operations module based on context.
 
@@ -15,6 +16,10 @@ Usage:
     # Scaffold operation
     python manage.py --get-questions --context='{"operation": "scaffold", ...}'
     python manage.py --execute --context='{"operation": "scaffold", ...}'
+
+    # Update operation
+    python manage.py --get-questions --context='{"operation": "update", ...}'
+    python manage.py --execute --context='{"operation": "update", ...}'
 
 Exit codes:
     0   - Success
@@ -33,6 +38,7 @@ import _paths  # noqa: F401
 from shared.utils import safe_json_load  # noqa: E402
 from operations import extensions  # noqa: E402
 from operations import scaffold  # noqa: E402
+from operations import update  # noqa: E402
 
 # Configure logging
 logging.basicConfig(
@@ -55,6 +61,18 @@ def is_scaffold_operation(context: dict[str, Any]) -> bool:
     return context.get("operation") == "scaffold"
 
 
+def is_update_operation(context: dict[str, Any]) -> bool:
+    """Determine if this is an update operation.
+
+    Args:
+        context: Operation context
+
+    Returns:
+        True if the operation is update
+    """
+    return context.get("operation") == "update"
+
+
 def get_questions(
     context: dict[str, Any],
 ) -> dict[str, Any]:
@@ -68,6 +86,9 @@ def get_questions(
     """
     if is_scaffold_operation(context):
         return scaffold.get_questions(context)
+
+    if is_update_operation(context):
+        return update.get_questions(context)
 
     # Force type to plugin for extension operations
     context["type"] = "plugin"
@@ -92,6 +113,9 @@ def execute(
         if responses:
             context.update(responses)
         return scaffold.execute(context)
+
+    if is_update_operation(context):
+        return update.execute(context, responses)
 
     # Force type to plugin for extension operations
     context["type"] = "plugin"
