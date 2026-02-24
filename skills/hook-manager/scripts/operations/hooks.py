@@ -155,7 +155,7 @@ def get_questions(
     Returns:
         Questions result dictionary
     """
-    operation = context.get("operation", "list")
+    operation = context.get("operation", "add")
 
     if operation == "list":
         return {"questions": [], "inferred": {}}
@@ -352,7 +352,7 @@ def execute(
     Returns:
         Execution result dictionary
     """
-    operation = context.get("operation", "list")
+    operation = context.get("operation", "add")
     scope = (
         context.get("scope")
         or responses.get("scope", "all")
@@ -610,18 +610,25 @@ def _execute_remove(
 
 def _execute_validate(scope: str) -> dict[str, Any]:
     """Validate hook configurations."""
-    issues: list[dict[str, Any]] = []
-
     scopes_to_check = (
         list(get_settings_paths().keys())
         if scope == "all"
         else [scope]
     )
 
+    # Collect errors/warnings per scope
+    scope_errors: dict[str, list[str]] = {}
+    scope_warnings: dict[str, list[str]] = {}
+    scope_paths: dict[str, str] = {}
+
     for scope_name in scopes_to_check:
         path = get_settings_paths().get(scope_name)
         if not path or not path.exists():
             continue
+
+        scope_errors.setdefault(scope_name, [])
+        scope_warnings.setdefault(scope_name, [])
+        scope_paths[scope_name] = str(path)
 
         settings = _load_settings(path)
         hooks = settings.get("hooks", {})
@@ -630,65 +637,38 @@ def _execute_validate(scope: str) -> dict[str, Any]:
             # Check event name
             if event not in VALID_EVENTS:
                 valid = ", ".join(VALID_EVENTS)
-                issues.append({
-                    "severity": "error",
-                    "source": scope_name,
-                    "message": (
-                        f"Invalid event '{event}'"
-                    ),
-                    "suggestion": (
-                        f"Use one of: {valid}"
-                    ),
-                })
+                scope_errors[scope_name].append(
+                    f"Invalid event '{event}'. "
+                    f"Use one of: {valid}"
+                )
                 continue
 
             if not isinstance(configs, list):
-                issues.append({
-                    "severity": "error",
-                    "source": scope_name,
-                    "message": (
-                        f"Event '{event}' config "
-                        "should be an array"
-                    ),
-                    "suggestion": (
-                        "Wrap hook config in an array"
-                    ),
-                })
+                scope_errors[scope_name].append(
+                    f"Event '{event}' config "
+                    "should be an array"
+                )
                 continue
 
             for i, config in enumerate(configs):
                 if "hooks" not in config:
-                    issues.append({
-                        "severity": "error",
-                        "source": scope_name,
-                        "message": (
-                            f"{event}[{i}] missing "
-                            "'hooks' array"
-                        ),
-                        "suggestion": (
-                            "Add hooks array with "
-                            "command objects"
-                        ),
-                    })
+                    scope_errors[scope_name].append(
+                        f"{event}[{i}] missing "
+                        "'hooks' array"
+                    )
                     continue
 
                 for j, hook in enumerate(
                     config.get("hooks", [])
                 ):
                     if "command" not in hook:
-                        issues.append({
-                            "severity": "error",
-                            "source": scope_name,
-                            "message": (
-                                f"{event}[{i}]"
-                                f".hooks[{j}] "
-                                "missing 'command'"
-                            ),
-                            "suggestion": (
-                                "Add command field "
-                                "with shell command"
-                            ),
-                        })
+                        scope_errors[
+                            scope_name
+                        ].append(
+                            f"{event}[{i}]"
+                            f".hooks[{j}] "
+                            "missing 'command'"
+                        )
 
                     # Warn about dangerous commands
                     cmd = hook.get("command", "")
@@ -696,40 +676,41 @@ def _execute_validate(scope: str) -> dict[str, Any]:
                         "rm -rf" in cmd
                         or "sudo" in cmd
                     ):
-                        issues.append({
-                            "severity": "warning",
-                            "source": scope_name,
-                            "message": (
-                                f"{event}[{i}]"
-                                f".hooks[{j}] has "
-                                "potentially "
-                                "dangerous command"
-                            ),
-                            "suggestion": (
-                                "Review command "
-                                "for safety"
-                            ),
-                        })
+                        scope_warnings[
+                            scope_name
+                        ].append(
+                            f"{event}[{i}]"
+                            f".hooks[{j}] has "
+                            "potentially "
+                            "dangerous command"
+                        )
 
-    error_count = len(
-        [i for i in issues if i["severity"] == "error"]
+    results: list[dict[str, Any]] = []
+    for scope_name in scope_paths:
+        errors = scope_errors.get(scope_name, [])
+        warnings = scope_warnings.get(
+            scope_name, []
+        )
+        results.append({
+            "name": scope_name,
+            "path": scope_paths[scope_name],
+            "valid": len(errors) == 0,
+            "errors": errors,
+            "warnings": warnings,
+        })
+
+    valid_count = sum(
+        1 for r in results if r["valid"]
     )
-    warning_count = len(
-        [
-            i
-            for i in issues
-            if i["severity"] == "warning"
-        ]
-    )
+    invalid_count = len(results) - valid_count
 
     return {
-        "success": error_count == 0,
-        "issues": issues,
-        "error_count": error_count,
-        "warning_count": warning_count,
-        "message": (
-            "Validation passed"
-            if not issues
-            else f"Found {len(issues)} issue(s)"
-        ),
+        "success": invalid_count == 0,
+        "operation": "validate",
+        "results": results,
+        "summary": {
+            "total": len(results),
+            "valid": valid_count,
+            "invalid": invalid_count,
+        },
     }

@@ -1006,43 +1006,43 @@ def execute_validate(
     if not files:
         return {
             "success": True,
-            "valid": False,
-            "message": (
-                "No CLAUDE.md found at "
-                f"scope '{scope}'"
-            ),
+            "operation": "validate",
             "results": [],
+            "summary": {
+                "total": 0,
+                "valid": 0,
+                "invalid": 0,
+            },
         }
 
     results = []
-    all_valid = True
 
     for file_info in files:
         path = Path(file_info["path"])
         validation = validate_claude_md(path)
 
-        if not validation["valid"]:
-            all_valid = False
-
         results.append({
-            "scope": file_info["scope"],
+            "name": file_info["scope"],
             "path": str(path),
             "valid": validation["valid"],
-            "checks": validation["checks"],
             "errors": validation["errors"],
             "warnings": validation["warnings"],
         })
 
+    valid_count = sum(
+        1 for r in results if r["valid"]
+    )
+    invalid_count = len(results) - valid_count
+
     return {
         "success": True,
-        "valid": all_valid,
+        "operation": "validate",
         "results": results,
-        "total_errors": sum(
-            len(r["errors"]) for r in results
-        ),
-        "total_warnings": sum(
-            len(r["warnings"]) for r in results
-        ),
+        "summary": {
+            "total": len(results),
+            "valid": valid_count,
+            "invalid": invalid_count,
+        },
     }
 
 
