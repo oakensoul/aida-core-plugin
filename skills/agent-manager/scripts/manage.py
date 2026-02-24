@@ -19,8 +19,14 @@ import argparse
 import json
 import logging
 import sys
-from pathlib import Path
 from typing import Any
+
+# Path setup - must come before local imports
+import _paths  # noqa: F401
+
+from shared.utils import safe_json_load  # noqa: E402
+
+from operations import extensions  # noqa: E402
 
 # Configure logging
 logging.basicConfig(
@@ -28,19 +34,6 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
-
-# Paths
-SCRIPT_DIR = Path(__file__).parent
-SKILL_DIR = SCRIPT_DIR.parent
-PROJECT_ROOT = SKILL_DIR.parent.parent
-TEMPLATES_DIR = SKILL_DIR / "templates"
-
-# Add operations and shared scripts to path
-sys.path.insert(0, str(SCRIPT_DIR))
-sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
-
-from operations import extensions  # noqa: E402
-from operations.utils import safe_json_load  # noqa: E402
 
 
 def get_questions(
@@ -57,7 +50,7 @@ def get_questions(
     Returns:
         Questions result dictionary
     """
-    context.setdefault("type", "agent")
+    context["type"] = "agent"
     return extensions.get_questions(context)
 
 
@@ -74,8 +67,10 @@ def execute(
     Returns:
         Execution result dictionary
     """
-    context.setdefault("type", "agent")
-    return extensions.execute(context, responses, TEMPLATES_DIR)
+    context["type"] = "agent"
+    return extensions.execute(
+        context, responses, _paths.TEMPLATES_DIR
+    )
 
 
 def main() -> int:

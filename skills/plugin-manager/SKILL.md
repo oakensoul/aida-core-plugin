@@ -1,6 +1,7 @@
 ---
 type: skill
 name: plugin-manager
+title: Plugin Manager
 description: >-
   Unified plugin management combining extension CRUD operations
   (create, validate, version, list) with project scaffolding

@@ -23,8 +23,10 @@ sys.path.insert(0, str(_scripts_path))
 from shared.utils import (  # noqa: E402, F401
     LOCATION_PATHS,
     bump_version,
+    detect_project_context,
     get_location_path,
     get_project_root,
+    infer_from_description,
     parse_frontmatter,
     render_template,
     safe_json_load,
@@ -37,8 +39,10 @@ from shared.utils import (  # noqa: E402, F401
 __all__ = [
     "LOCATION_PATHS",
     "bump_version",
+    "detect_project_context",
     "get_location_path",
     "get_project_root",
+    "infer_from_description",
     "parse_frontmatter",
     "render_template",
     "safe_json_load",
