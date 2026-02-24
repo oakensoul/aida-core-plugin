@@ -16,22 +16,33 @@ from typing import Any, Dict, List, Optional
 
 from .utils import (
     bump_version,
-    detect_project_context,
     get_location_path,
-    infer_from_description,
     render_template,
-    to_kebab_case,
-    validate_description,
-    validate_name,
-    validate_version,
+)
+
+from shared.extension_utils import (
+    execute_create_from_agent as _execute_create_from_agent,
+    execute_extension,
+    execute_extension_list,
+    execute_extension_validate,
+    get_extension_questions,
+    validate_agent_output,  # noqa: F401  re-exported
 )
 
 # Plugin configuration
-PLUGIN_CONFIG = {
-    "dir": ".claude-plugin",
+PLUGIN_CONFIG: Dict[str, Any] = {
+    "entity_label": "plugin",
+    "directory": ".claude-plugin",
     "file_pattern": "plugin.json",
     "frontmatter_type": None,  # plugins use JSON, not frontmatter
+    "create_subdirs": [],
+    "main_file_filter": None,  # skip frontmatter validation
 }
+
+
+# ------------------------------------------------------------------
+# Discovery helpers (plugin-specific: JSON-based)
+# ------------------------------------------------------------------
 
 
 def find_components(
@@ -39,6 +50,9 @@ def find_components(
     plugin_path: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """Find all plugin components.
+
+    Plugins use a different discovery mechanism from agents/skills:
+    they look for ``.claude-plugin/plugin.json`` inside subdirectories.
 
     Args:
         location: Where to search (user, project, plugin, all)
@@ -65,7 +79,6 @@ def find_components(
         if not search_dir.exists():
             continue
 
-        # Look for .claude-plugin directories
         for item in search_dir.iterdir():
             if item.is_dir():
                 plugin_json = (
@@ -115,6 +128,11 @@ def component_exists(
     return any(c["name"] == name for c in components)
 
 
+# ------------------------------------------------------------------
+# Phase 1: get_questions
+# ------------------------------------------------------------------
+
+
 def get_questions(
     context: Dict[str, Any],
 ) -> Dict[str, Any]:
@@ -132,137 +150,17 @@ def get_questions(
         Dictionary with questions, inferred values, and
         validation results
     """
-    operation = context.get("operation", "create")
-    location = context.get("location", "user")
-    plugin_path = context.get("plugin_path")
+    return get_extension_questions(
+        PLUGIN_CONFIG,
+        context,
+        find_fn=find_components,
+        exists_fn=component_exists,
+    )
 
-    result: Dict[str, Any] = {
-        "questions": [],
-        "inferred": {},
-        "validation": {"valid": True, "errors": []},
-    }
 
-    if operation == "create":
-        description = context.get("description", "")
-
-        result["project_context"] = detect_project_context()
-
-        if not description:
-            result["questions"].append(
-                {
-                    "id": "description",
-                    "question": (
-                        "What should this plugin do? "
-                        "(brief description)"
-                    ),
-                    "type": "text",
-                    "required": True,
-                    "help": (
-                        "Describe the purpose of this plugin "
-                        "in 1-2 sentences"
-                    ),
-                }
-            )
-            return result
-
-        inferred = infer_from_description(description)
-        inferred["description"] = description
-        inferred["base_path"] = str(
-            get_location_path(location, plugin_path)
-        )
-
-        is_valid, error = validate_name(inferred["name"])
-        if not is_valid:
-            result["questions"].append(
-                {
-                    "id": "name",
-                    "question": (
-                        "What should this plugin be named?"
-                    ),
-                    "type": "text",
-                    "required": True,
-                    "help": (
-                        "Must be kebab-case "
-                        "(e.g., my-plugin). "
-                        f"Error: {error}"
-                    ),
-                    "default": (
-                        inferred["name"][:50]
-                        if inferred["name"]
-                        else ""
-                    ),
-                }
-            )
-
-        if component_exists(
-            inferred["name"], location, plugin_path
-        ):
-            result["questions"].append(
-                {
-                    "id": "name",
-                    "question": (
-                        f"A plugin named "
-                        f"'{inferred['name']}' already "
-                        "exists. Choose a different name:"
-                    ),
-                    "type": "text",
-                    "required": True,
-                    "help": (
-                        "Must be unique within the location"
-                    ),
-                }
-            )
-
-        result["inferred"] = inferred
-
-    elif operation == "validate":
-        name = context.get("name")
-        validate_all = context.get("all", False)
-
-        if validate_all:
-            components = find_components(
-                location, plugin_path
-            )
-            result["inferred"] = {"components": components}
-        elif name:
-            result["inferred"] = {"name": name}
-        else:
-            result["questions"].append(
-                {
-                    "id": "name",
-                    "question": (
-                        "Which plugin do you want to validate?"
-                    ),
-                    "type": "text",
-                    "required": True,
-                }
-            )
-
-    elif operation == "version":
-        name = context.get("name")
-        bump_type = context.get("bump", "patch")
-
-        if not name:
-            result["questions"].append(
-                {
-                    "id": "name",
-                    "question": (
-                        "Which plugin do you want to version?"
-                    ),
-                    "type": "text",
-                    "required": True,
-                }
-            )
-
-        result["inferred"] = {
-            "name": name,
-            "bump": bump_type,
-        }
-
-    elif operation == "list":
-        result["inferred"] = {"location": location}
-
-    return result
+# ------------------------------------------------------------------
+# Plugin-specific execution helpers
+# ------------------------------------------------------------------
 
 
 def execute_create(
@@ -353,10 +251,14 @@ def execute_create(
 
     return {
         "success": True,
-        "message": f"Created plugin '{name}' at {output_dir}",
+        "message": (
+            f"Created plugin '{name}' at {output_dir}"
+        ),
         "files_created": [
             str(
-                output_dir / ".claude-plugin" / "plugin.json"
+                output_dir
+                / ".claude-plugin"
+                / "plugin.json"
             ),
             str(output_dir / "README.md"),
         ],
@@ -383,68 +285,14 @@ def execute_validate(
     Returns:
         Result dictionary with validation results
     """
-    components = find_components(location, plugin_path)
-
-    if name and not validate_all:
-        components = [
-            c for c in components if c["name"] == name
-        ]
-        if not components:
-            return {
-                "success": False,
-                "message": f"Plugin '{name}' not found",
-            }
-
-    results = []
-    all_valid = True
-
-    for component in components:
-        errors: List[str] = []
-
-        # Validate name
-        is_valid, error = validate_name(component["name"])
-        if not is_valid:
-            errors.append(f"Name: {error}")
-
-        # Validate description
-        is_valid, error = validate_description(
-            component.get("description", "")
-        )
-        if not is_valid:
-            errors.append(f"Description: {error}")
-
-        # Validate version
-        is_valid, error = validate_version(
-            component.get("version", "")
-        )
-        if not is_valid:
-            errors.append(f"Version: {error}")
-
-        if errors:
-            all_valid = False
-
-        results.append(
-            {
-                "name": component["name"],
-                "location": component["location"],
-                "path": component["path"],
-                "valid": len(errors) == 0,
-                "errors": errors,
-            }
-        )
-
-    valid_count = sum(1 for r in results if r["valid"])
-    invalid_count = sum(1 for r in results if not r["valid"])
-
-    return {
-        "success": True,
-        "all_valid": all_valid,
-        "results": results,
-        "summary": (
-            f"Validated {len(results)} plugin(s): "
-            f"{valid_count} valid, {invalid_count} invalid"
-        ),
-    }
+    return execute_extension_validate(
+        PLUGIN_CONFIG,
+        name,
+        validate_all,
+        location,
+        plugin_path,
+        find_fn=find_components,
+    )
 
 
 def execute_version(
@@ -488,7 +336,9 @@ def execute_version(
     )
 
     try:
-        content = plugin_json_path.read_text(encoding="utf-8")
+        content = plugin_json_path.read_text(
+            encoding="utf-8"
+        )
         data = json.loads(content)
         data["version"] = new_version
         new_content = json.dumps(data, indent=2)
@@ -529,83 +379,21 @@ def execute_list(
     Returns:
         Result dictionary with plugin list
     """
-    components = find_components(location, plugin_path)
+    return execute_extension_list(
+        PLUGIN_CONFIG,
+        location,
+        plugin_path,
+        output_format,
+        find_fn=find_components,
+    )
 
-    return {
-        "success": True,
-        "components": components,
-        "count": len(components),
-        "format": output_format,
-    }
 
+# ------------------------------------------------------------------
+# Agent output validation (Phase 3 support)
+# ------------------------------------------------------------------
 
-def validate_agent_output(
-    agent_output: Dict[str, Any],
-) -> Dict[str, Any]:
-    """Validate the structure of agent output.
-
-    Args:
-        agent_output: The output from the agent
-
-    Returns:
-        Dictionary with validation results
-    """
-    errors: List[str] = []
-
-    required_keys = ["validation", "files", "summary"]
-    for key in required_keys:
-        if key not in agent_output:
-            errors.append(f"Missing required key: {key}")
-
-    if errors:
-        return {"valid": False, "errors": errors}
-
-    validation = agent_output.get("validation", {})
-    if "passed" not in validation:
-        errors.append("validation.passed is required")
-    if not isinstance(
-        validation.get("issues", []), list
-    ):
-        errors.append("validation.issues must be a list")
-
-    files = agent_output.get("files", [])
-    if not isinstance(files, list):
-        errors.append("files must be a list")
-    else:
-        for i, file_entry in enumerate(files):
-            if not isinstance(file_entry, dict):
-                errors.append(
-                    f"files[{i}] must be an object"
-                )
-                continue
-            if "path" not in file_entry:
-                errors.append(
-                    f"files[{i}].path is required"
-                )
-            if "content" not in file_entry:
-                errors.append(
-                    f"files[{i}].content is required"
-                )
-            path = file_entry.get("path", "")
-            if ".." in path or path.startswith("/"):
-                errors.append(
-                    f"files[{i}].path contains invalid "
-                    f"characters: {path}"
-                )
-
-    summary = agent_output.get("summary", {})
-    if not isinstance(
-        summary.get("created", []), list
-    ):
-        errors.append("summary.created must be a list")
-    if not isinstance(
-        summary.get("next_steps", []), list
-    ):
-        errors.append(
-            "summary.next_steps must be a list"
-        )
-
-    return {"valid": len(errors) == 0, "errors": errors}
+# validate_agent_output is imported from shared and
+# re-exported directly (see imports above).
 
 
 def execute_create_from_agent(
@@ -625,83 +413,18 @@ def execute_create_from_agent(
     Returns:
         Result dictionary with success status and details
     """
-    structure_validation = validate_agent_output(
-        agent_output
+    return _execute_create_from_agent(
+        PLUGIN_CONFIG,
+        agent_output,
+        base_path,
+        location,
+        plugin_path,
     )
-    if not structure_validation["valid"]:
-        return {
-            "success": False,
-            "message": "Invalid agent output structure",
-            "errors": structure_validation["errors"],
-        }
 
-    agent_validation = agent_output.get("validation", {})
-    if not agent_validation.get("passed", False):
-        errors = agent_validation.get("issues", [])
-        error_messages = [
-            issue.get("message", str(issue))
-            for issue in errors
-            if isinstance(issue, dict)
-            and issue.get("severity") == "error"
-        ]
-        if error_messages:
-            return {
-                "success": False,
-                "message": "Agent validation failed",
-                "errors": error_messages,
-                "issues": errors,
-            }
 
-    files = agent_output.get("files", [])
-    if not files:
-        return {
-            "success": False,
-            "message": "No files provided by agent",
-        }
-
-    actual_base = Path(base_path).expanduser()
-
-    # plugin.json doesn't use frontmatter validation
-    created_files: List[str] = []
-    try:
-        for file_entry in files:
-            rel_path = file_entry["path"]
-            content = file_entry["content"]
-
-            full_path = actual_base / rel_path
-            if not str(full_path).startswith(
-                str(actual_base)
-            ):
-                return {
-                    "success": False,
-                    "message": f"Invalid path: {rel_path}",
-                }
-
-            full_path.parent.mkdir(
-                parents=True, exist_ok=True
-            )
-            full_path.write_text(content, encoding="utf-8")
-            created_files.append(str(full_path))
-
-    except Exception as e:
-        return {
-            "success": False,
-            "message": f"Failed to create files: {e}",
-            "files_created": created_files,
-        }
-
-    summary = agent_output.get("summary", {})
-
-    return {
-        "success": True,
-        "message": (
-            f"Created plugin with "
-            f"{len(created_files)} files"
-        ),
-        "files_created": created_files,
-        "next_steps": summary.get("next_steps", []),
-        "base_path": str(actual_base),
-    }
+# ------------------------------------------------------------------
+# Phase 2/3: execute
+# ------------------------------------------------------------------
 
 
 def execute(
@@ -723,94 +446,12 @@ def execute(
     Returns:
         Result dictionary
     """
-    operation = context.get("operation", "create")
-    location = context.get("location", "user")
-    plugin_path = context.get("plugin_path")
-
-    if responses:
-        context.update(responses)
-
-    if operation == "create":
-        agent_output = context.get("agent_output")
-        if agent_output:
-            base_path = context.get("base_path")
-            if not base_path:
-                base_path = str(
-                    get_location_path(location, plugin_path)
-                )
-
-            return execute_create_from_agent(
-                agent_output,
-                base_path,
-                location,
-                plugin_path,
-            )
-
-        # Legacy template-based creation
-        name = context.get("name") or to_kebab_case(
-            context.get("description", "")[:50]
-        )
-        description = context.get("description", "")
-        version = context.get("version", "0.1.0")
-        tags = context.get("tags", ["custom"])
-
-        is_valid, error = validate_name(name)
-        if not is_valid:
-            return {
-                "success": False,
-                "message": f"Invalid name: {error}",
-            }
-
-        is_valid, error = validate_description(description)
-        if not is_valid:
-            return {
-                "success": False,
-                "message": (
-                    f"Invalid description: {error}"
-                ),
-            }
-
-        return execute_create(
-            name,
-            description,
-            version,
-            tags,
-            location,
-            templates_dir,
-            plugin_path,
-        )
-
-    elif operation == "validate":
-        name = context.get("name")
-        validate_all = context.get("all", False)
-        return execute_validate(
-            name, validate_all, location, plugin_path
-        )
-
-    elif operation == "version":
-        name = context.get("name")
-        bump_type = context.get("bump", "patch")
-
-        if not name:
-            return {
-                "success": False,
-                "message": (
-                    "Name is required for version operation"
-                ),
-            }
-
-        return execute_version(
-            name, bump_type, location, plugin_path
-        )
-
-    elif operation == "list":
-        output_format = context.get("format", "table")
-        return execute_list(
-            location, plugin_path, output_format
-        )
-
-    else:
-        return {
-            "success": False,
-            "message": f"Unknown operation: {operation}",
-        }
+    return execute_extension(
+        PLUGIN_CONFIG,
+        context,
+        responses,
+        templates_dir,
+        find_fn=find_components,
+        create_fn=execute_create,
+        version_fn=execute_version,
+    )

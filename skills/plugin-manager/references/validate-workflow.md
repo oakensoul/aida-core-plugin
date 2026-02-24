@@ -74,17 +74,21 @@ python manage.py --execute \
 ```json
 {
   "success": true,
-  "all_valid": true,
+  "operation": "validate",
   "results": [
     {
       "name": "my-plugin",
-      "location": "user",
       "path": "/path/to/plugin",
       "valid": true,
-      "errors": []
+      "errors": [],
+      "warnings": []
     }
   ],
-  "summary": "Validated 1 plugin(s): 1 valid, 0 invalid"
+  "summary": {
+    "total": 1,
+    "valid": 1,
+    "invalid": 0
+  }
 }
 ```
 
@@ -93,26 +97,30 @@ python manage.py --execute \
 ```json
 {
   "success": true,
-  "all_valid": false,
+  "operation": "validate",
   "results": [
     {
       "name": "my-plugin",
-      "location": "user",
       "path": "/path/to/plugin",
       "valid": true,
-      "errors": []
+      "errors": [],
+      "warnings": []
     },
     {
       "name": "bad-plugin",
-      "location": "user",
       "path": "/path/to/bad-plugin",
       "valid": false,
       "errors": [
         "Description: Description must be at least 10 characters"
-      ]
+      ],
+      "warnings": []
     }
   ],
-  "summary": "Validated 2 plugin(s): 1 valid, 1 invalid"
+  "summary": {
+    "total": 2,
+    "valid": 1,
+    "invalid": 1
+  }
 }
 ```
 
