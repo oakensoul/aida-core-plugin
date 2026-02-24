@@ -9,7 +9,7 @@ tags:
   - configuration
 model: sonnet
 skills:
-  - aida-dispatch
+  - aida
   - memento
 ---
 
@@ -38,7 +38,7 @@ configs for completeness and drift.
 
 See: `knowledge/config-schema.md`
 
-The aida-dispatch skill has additional references:
+The aida skill has additional references:
 
 - `references/config.md` - Configuration workflow
 - `references/config-driven-approach.md` - Architecture documentation
@@ -51,7 +51,7 @@ identify root causes, prioritize fixes, and explain solutions clearly.
 
 See: `knowledge/troubleshooting.md`
 
-The aida-dispatch skill has: `references/diagnostics.md`
+The aida skill has: `references/diagnostics.md`
 
 ### Feedback
 
@@ -61,13 +61,13 @@ sensitive information.
 
 See: `knowledge/feedback-templates.md`
 
-The aida-dispatch skill has: `references/feedback.md`
+The aida skill has: `references/feedback.md`
 
 ## How You Work
 
 1. Read the relevant knowledge file for the operation
 2. Consult skill references when needed:
-   - **aida-dispatch** - config, diagnostics, feedback workflows
+   - **aida** - config, diagnostics, feedback workflows
    - **memento** - session persistence operations
 3. Apply your expertise to the provided context
 4. Return structured, actionable results

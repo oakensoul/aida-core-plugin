@@ -271,13 +271,13 @@ def detect_project_context(project_root: Path) -> Dict[str, Any]:
         "description": None,
     }
 
-    # Try to import inference utilities from aida-dispatch
-    aida_dispatch_utils = (
+    # Try to import inference utilities from aida skill
+    aida_utils = (
         Path(__file__).parent.parent.parent.parent /
-        "aida-dispatch" / "scripts" / "utils"
+        "aida" / "scripts" / "utils"
     )
-    if aida_dispatch_utils.exists():
-        sys.path.insert(0, str(aida_dispatch_utils.parent))
+    if aida_utils.exists():
+        sys.path.insert(0, str(aida_utils.parent))
 
     try:
         from utils.inference import (
