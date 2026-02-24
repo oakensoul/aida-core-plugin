@@ -101,16 +101,10 @@ def find_extensions(
                     continue
 
                 fm_text = content[3:end].strip()
-                frontmatter: Dict[str, str] = {}
-                for line in fm_text.split("\n"):
-                    if (
-                        ":" in line
-                        and not line.strip().startswith("-")
-                    ):
-                        key, value = line.split(":", 1)
-                        frontmatter[key.strip()] = (
-                            value.strip().strip("\"'")
-                        )
+                parsed = yaml.safe_load(fm_text)
+                frontmatter: Dict[str, Any] = (
+                    parsed if isinstance(parsed, dict) else {}
+                )
 
                 if frontmatter.get("type") == expected_type:
                     # Prefer parent dir name for skills
@@ -134,7 +128,7 @@ def find_extensions(
                             "path": str(md_file),
                         }
                     )
-            except (IOError, UnicodeDecodeError):
+            except (IOError, UnicodeDecodeError, yaml.YAMLError):
                 pass
 
     return components
@@ -615,6 +609,7 @@ def execute_extension_list(
 
     return {
         "success": True,
+        "operation": "list",
         "components": components,
         "count": len(components),
         "format": output_format,

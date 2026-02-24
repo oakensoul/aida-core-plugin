@@ -1072,6 +1072,7 @@ def execute_list(
 
     return {
         "success": True,
+        "operation": "list",
         "files": files,
         "count": len(files),
     }
