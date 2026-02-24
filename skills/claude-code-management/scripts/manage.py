@@ -31,7 +31,7 @@ import json
 import argparse
 import logging
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 # Configure logging
 logging.basicConfig(
@@ -43,10 +43,12 @@ logger = logging.getLogger(__name__)
 # Paths
 SCRIPT_DIR = Path(__file__).parent
 SKILL_DIR = SCRIPT_DIR.parent
+PROJECT_ROOT = SKILL_DIR.parent.parent
 TEMPLATES_DIR = SKILL_DIR / "templates"
 
-# Add operations to path (must be before local imports)
+# Add operations and shared scripts to path (must be before local imports)
 sys.path.insert(0, str(SCRIPT_DIR))
+sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
 from operations.utils import safe_json_load  # noqa: E402
 from operations import extensions  # noqa: E402
@@ -54,7 +56,7 @@ from operations import claude_md  # noqa: E402
 from operations import hooks  # noqa: E402
 
 
-def is_hook_operation(context: Dict[str, Any]) -> bool:
+def is_hook_operation(context: dict[str, Any]) -> bool:
     """Determine if this is a hook operation.
 
     Args:
@@ -74,7 +76,7 @@ def is_hook_operation(context: Dict[str, Any]) -> bool:
     return False
 
 
-def is_claude_md_operation(context: Dict[str, Any]) -> bool:
+def is_claude_md_operation(context: dict[str, Any]) -> bool:
     """Determine if this is a CLAUDE.md operation.
 
     Args:
@@ -100,7 +102,7 @@ def is_claude_md_operation(context: Dict[str, Any]) -> bool:
     return False
 
 
-def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
+def get_questions(context: dict[str, Any]) -> dict[str, Any]:
     """Route to appropriate get_questions based on context.
 
     Args:
@@ -117,7 +119,7 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
         return extensions.get_questions(context)
 
 
-def execute(context: Dict[str, Any], responses: Dict[str, Any]) -> Dict[str, Any]:
+def execute(context: dict[str, Any], responses: dict[str, Any]) -> dict[str, Any]:
     """Route to appropriate execute based on context.
 
     Args:
