@@ -1,7 +1,9 @@
 ---
 type: reference
+name: subagents
 title: Claude Code Subagents Guide
 description: Comprehensive reference for creating and configuring subagents in Claude Code
+version: "1.0.0"
 ---
 
 # Claude Code Subagents
@@ -80,6 +82,7 @@ A command execution specialist for running terminal commands in a separate
 context.
 
 - **Model:** Inherits from main conversation
+- **Tools:** Bash
 - **Purpose:** Running terminal commands in a separate context
 
 ### statusline-setup
@@ -94,6 +97,7 @@ A configuration helper for the status line feature.
 A help and documentation assistant.
 
 - **Model:** Haiku
+- **Tools:** Read-only tools (Read, Grep, Glob)
 - **Purpose:** Answering questions about Claude Code features
 
 ## Subagent File Structure
@@ -152,10 +156,11 @@ description.
 ### tools
 
 Tools the subagent can use. Inherits all tools from the main conversation if
-omitted. Specify as a comma-separated list or YAML array.
+omitted. Specify as a comma-separated list or YAML array. Prefer
+comma-separated string format for simplicity.
 
 ```yaml
-# Comma-separated
+# Comma-separated (preferred)
 tools: Read, Glob, Grep, Bash
 
 # YAML array
@@ -283,6 +288,9 @@ mcpServers:
       - -y
       - "@myorg/mcp-server"
 ```
+
+**Note:** This YAML syntax is for agent frontmatter. For MCP server
+configuration in JSON settings files, see `knowledge/settings.md`.
 
 **Note:** MCP tools are NOT available in background subagents.
 
@@ -420,6 +428,7 @@ Claude spawns subagents using the Task tool. Key parameters:
 | `name` | For agent teams: name of the teammate |
 | `mode` | Execution mode (e.g., plan mode) |
 | `isolation` | Set to `"worktree"` for git worktree isolation |
+| `run_in_background` | Set to `true` to run the subagent as a background task |
 
 You can request a specific subagent explicitly:
 
@@ -563,12 +572,15 @@ the main session:
 
 ## Agent Teams (Experimental)
 
+> **Experimental.** Agent teams require
+> `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` and are disabled by default.
+
 Agent teams coordinate **multiple Claude Code instances** working together. One
 session acts as the team lead, coordinating work and assigning tasks. Teammates
 work independently, each in its own context window, and can communicate directly
 with each other.
 
-**Status:** Experimental, disabled by default. Enable via settings:
+Enable via settings:
 
 ```json
 {
@@ -698,7 +710,7 @@ Restrict tools to prevent modifications:
 ---
 name: code-reviewer
 description: Reviews code for quality and best practices
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob
 model: inherit
 ---
 ```
@@ -852,7 +864,8 @@ and recurring issues you discover.
 8. **Use hooks for guardrails** -- add `PreToolUse` hooks to validate
    operations when you need finer control than the `tools` field provides
 9. **Keep system prompts focused** -- subagents receive only their markdown
-   body as a system prompt; include clear instructions, a workflow, and any
-   domain knowledge they need
+   body as a system prompt; keep the agent definition markdown under 500
+   lines; include clear instructions, a workflow, and any domain knowledge
+   they need
 10. **Avoid verbose returns** -- subagent results return to the main
     conversation; keep summaries concise to preserve context budget
