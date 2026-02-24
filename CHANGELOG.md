@@ -10,6 +10,48 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-02-23
+
+### Changed
+
+#### Merge Commands into Skills (#19)
+
+- Eliminated "Command" as a separate extension type, aligning with Anthropic's
+  upstream merge of commands into skills in Claude Code
+- Migrated `commands/aida.md` to `skills/aida/SKILL.md` with `user-invocable: true`
+  frontmatter field
+- Removed `commands/` directory entirely
+- Updated `.frontmatter-schema.json`: removed `command` from type enum, added
+  skill-specific fields (`user-invocable`, `argument-hint`, `allowed-tools`,
+  `disable-model-invocation`)
+- Removed `command` from `COMPONENT_TYPES` in Python extension management code
+- Removed command template from `skills/claude-code-management/templates/`
+- Updated extension taxonomy from WHO/WHAT/HOW/CONTEXT to WHO/HOW/CONTEXT
+  (Subagents/Skills/Knowledge)
+
+#### Knowledge Documentation Rewrite
+
+- Rewrote `extension-types.md` with updated decision tree (no Command branch)
+- Rewrote `framework-design-principles.md` removing Command sections
+- Updated `design-patterns.md`, `plugin-development.md`, `claude-md-files.md`,
+  and `hooks.md` to reflect skills-only taxonomy
+- Updated `schemas.md` with skill-specific field documentation and examples
+
+#### User-Facing Documentation Updates
+
+- Removed `docs/HOWTO_CREATE_COMMAND.md`
+- Updated all HOWTO guides, Getting Started, Install Guide, Development Guide,
+  Examples, and Architecture docs
+- Updated C4 container and context diagrams (merged Commands container into Skills)
+- Updated CI workflow, CODEOWNERS, and integration test scripts
+
+### Fixed
+
+- Fixed agent `model` frontmatter using invalid `claude-sonnet-4.5` model ID;
+  changed to `sonnet` alias which resolves to latest Sonnet at runtime
+
+---
+
 ## [0.7.0] - 2026-02-16
 
 ### Added
@@ -214,6 +256,7 @@ See git history for details on versions prior to 0.2.0.
 
 ---
 
+[0.8.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.8.0
 [0.7.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.7.0
 [0.6.1]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.6.1
 [0.6.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.6.0

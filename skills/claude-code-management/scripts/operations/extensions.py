@@ -2,7 +2,6 @@
 
 Handles create, validate, version, and list operations for:
 - Agents
-- Commands
 - Skills
 - Plugins
 
@@ -38,12 +37,6 @@ COMPONENT_TYPES = {
         "template": "agent/agent.md.jinja2",
         "has_subdirectory": True,
     },
-    "command": {
-        "directory": "commands",
-        "file_pattern": "{name}.md",
-        "template": "command/command.md.jinja2",
-        "has_subdirectory": False,
-    },
     "skill": {
         "directory": "skills",
         "file_pattern": "{name}/SKILL.md",
@@ -67,7 +60,7 @@ def find_components(
     """Find all components of a given type.
 
     Args:
-        component_type: Type of component (agent, command, skill, plugin)
+        component_type: Type of component (agent, skill, plugin)
         location: Where to search (user, project, plugin, all)
         plugin_path: Path to plugin directory (if location is plugin)
 
@@ -111,7 +104,7 @@ def find_components(
                         except (json.JSONDecodeError, IOError):
                             pass
         else:
-            # For agents, commands, skills
+            # For agents, skills
             pattern = "**/*.md" if config["has_subdirectory"] else "*.md"
             for md_file in search_dir.glob(pattern):
                 # Skip non-component files
@@ -321,7 +314,7 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
     Args:
         context: Operation context containing:
             - operation: create, validate, version, update, list
-            - type: agent, command, skill, plugin
+            - type: agent, skill, plugin
             - description: (for create) component description
             - name: (for validate/version/update) component name
             - location: user, project, plugin (default: user)
@@ -475,7 +468,6 @@ def execute_create(
         # Create subdirectories
         (output_dir / ".claude-plugin").mkdir(exist_ok=True)
         (output_dir / "agents").mkdir(exist_ok=True)
-        (output_dir / "commands").mkdir(exist_ok=True)
         (output_dir / "skills").mkdir(exist_ok=True)
 
         # Render plugin.json
@@ -525,7 +517,7 @@ def execute_create(
         }
 
     else:
-        # Agent, command, or skill
+        # Agent or skill
         component_dir = base_path / config["directory"]
         file_path = component_dir / config["file_pattern"].format(name=name)
 
@@ -914,7 +906,6 @@ def execute_create_from_agent(
     # Validate main component file has proper frontmatter
     main_file_patterns = {
         "agent": lambda f: f["path"].endswith(".md") and "/knowledge/" not in f["path"],
-        "command": lambda f: f["path"].endswith(".md"),
         "skill": lambda f: f["path"].endswith("SKILL.md"),
         "plugin": lambda f: f["path"].endswith("plugin.json"),
     }

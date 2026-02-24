@@ -10,7 +10,7 @@ description: "Foundation plugin for AIDA"
 
 ## Why AIDA?
 
-Claude Code is extensible — but there's no scaffolding. Building agents, commands, and skills
+Claude Code is extensible — but there's no scaffolding. Building agents and skills
 from scratch means reinventing structure, conventions, and patterns every time. AIDA gives you
 the foundation to build on.
 
@@ -18,7 +18,7 @@ the foundation to build on.
 scaffolding, session persistence — so you can focus on building the tools that matter to your
 workflow.
 
-**Standardized extension creation.** Create agents, commands, skills, and plugins with guided
+**Standardized extension creation.** Create agents, skills, and plugins with guided
 templates that follow consistent conventions. Run `/aida agent create` and get properly
 structured extensions without guessing at the format.
 
@@ -52,7 +52,7 @@ or your user profile.
 
 - **Session Memory** - Save and restore context across sessions with mementos
 - **Smart Configuration** - Auto-detects your environment, tools, and project setup
-- **Extension Creation** - Build agents, commands, and skills with guided templates
+- **Extension Creation** - Build agents and skills with guided templates
 - **Project Context** - Claude understands your codebase patterns and conventions
 - **Health Diagnostics** - Built-in troubleshooting with `/aida doctor`
 - **GitHub Integration** - Easy bug reports and feature requests
@@ -94,7 +94,6 @@ For detailed walkthrough, see the [Getting Started Guide](docs/GETTING_STARTED.m
 | `/aida doctor`          | Run health diagnostics               |
 | `/aida memento`         | Save/restore session context         |
 | `/aida agent create`    | Create a custom agent                |
-| `/aida command create`  | Create a custom command              |
 | `/aida skill create`    | Create a custom skill                |
 | `/aida feedback`        | Submit feedback via GitHub           |
 | `/aida bug`             | Report a bug                         |
@@ -112,7 +111,6 @@ For detailed walkthrough, see the [Getting Started Guide](docs/GETTING_STARTED.m
 
 - **[Using Mementos](docs/HOWTO_MEMENTO.md)** - Save and restore session context
 - **[Creating Agents](docs/HOWTO_CREATE_AGENT.md)** - Build custom expert personas
-- **[Creating Commands](docs/HOWTO_CREATE_COMMAND.md)** - Define workflows and procedures
 - **[Creating Skills](docs/HOWTO_CREATE_SKILL.md)** - Add execution capabilities
 - **[Using Hooks](docs/HOWTO_HOOKS.md)** - Automate with lifecycle events
 
@@ -133,20 +131,19 @@ AIDA extends Claude Code with a layered extension system:
 
 ```text
 agents/          # WHO - Expert personas
-commands/        # WHAT - User-invoked actions
-skills/          # HOW - Background knowledge
+skills/          # HOW - Process definitions + execution capabilities
 ```
 
 See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed design.
 
 ## Roadmap
 
-### Current: v0.7.x - Launch & Polish
+### Current: v0.8.x - Upstream Alignment
 
 - Session persistence (mementos)
 - Smart configuration with auto-detection
 - Agent-based orchestration
-- Extension creation (`/aida agent|command|skill|plugin create`)
+- Extension creation (`/aida agent|skill|plugin create`)
 - Hook management (`/aida hook`)
 - Marketplace integration
 - Security hardening and test coverage

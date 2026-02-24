@@ -339,7 +339,7 @@ Memory files (CLAUDE.md) are part of the broader context system:
 │     Current task & discussion                       │
 ├─────────────────────────────────────────────────────┤
 │  4. Extension Context                               │
-│     Active command/skill/subagent + knowledge       │
+│     Active skill/subagent + knowledge                │
 ├─────────────────────────────────────────────────────┤
 │  3. Project Memory  ─┐                              │
 │     ./CLAUDE.md      │ "Memory files"               │

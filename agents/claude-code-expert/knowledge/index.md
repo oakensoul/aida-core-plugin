@@ -1,7 +1,7 @@
 ---
 type: reference
 title: Claude Code Expert Knowledge Index
-description: Catalog of knowledge documents for the claude-code-expert agent
+description: Catalog of knowledge documents for the claude-code-expert agent - guides for agents, skills, plugins, hooks, and configuration
 ---
 
 # Knowledge Index
@@ -17,7 +17,7 @@ agent. Use this index to find the right document for your needs.
 
 Contains:
 
-- The WHO/WHAT/HOW/CONTEXT framework
+- The WHO/HOW/CONTEXT framework
 - Quality standards for all extension types
 - The Consultant Rule (how agents should work)
 - What belongs vs doesn't belong in each type
@@ -30,7 +30,7 @@ This is the **authoritative reference** for extension architecture.
 
 Contains:
 
-- Decision tree for choosing between agent, command, skill, and plugin
+- Decision tree for choosing between agent, skill, plugin, and hook
 - Characteristics of each extension type
 - Example use cases for each type
 
