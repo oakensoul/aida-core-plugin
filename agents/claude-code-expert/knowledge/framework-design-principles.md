@@ -1,7 +1,9 @@
 ---
 type: reference
-title: Claude Code Extension Design Principles
-description: Architecture and quality standards for Claude Code extensions
+name: framework-design-principles
+title: Extension Framework Design Principles
+description: Architecture, quality standards, and design principles for Claude Code extensions
+version: "1.0.0"
 ---
 
 # Claude Code Extension Design Principles
@@ -43,6 +45,12 @@ to apply knowledge to problems.
 **Analogy:** Hiring a specialist consultant. You (the orchestrator) describe the
 problem; they apply their domain expertise. When done, control returns to you.
 
+**Agent teams (experimental):** Multiple subagent instances can work as a
+coordinated team with a shared task list and inter-agent messaging. Agent
+teams are a coordination mode for subagents, not a new extension type.
+
+See: `knowledge/subagents.md` for the complete subagents reference.
+
 ### Skill (HOW)
 
 Skills provide **process definitions and execution capabilities**. They are the
@@ -75,6 +83,8 @@ workflows with Python scripts, Jinja2 templates, and reference documentation.
 cognitive steps ("analyze this", "decide which approach") and execution steps
 ("run this script"). The orchestrator reads the skill and actually performs
 those steps.
+
+See: `knowledge/skills.md` for the complete skills reference.
 
 ### Knowledge (CONTEXT)
 
@@ -118,15 +128,29 @@ user-level context for every request.
 **Analogy:** Onboarding documentation for a new team member - everything they need
 to know about how this project/team works. Always in their mind, not looked up.
 
-**Scope levels (both always loaded):**
+**Scope levels (always loaded):**
 
 - `~/.claude/CLAUDE.md` - User preferences (global memory)
 - `./CLAUDE.md` - Project conventions (project memory)
+- `CLAUDE.local.md` - Personal project preferences (auto-gitignored)
+
+**Related memory mechanisms:**
+
+- **Modular rules** (`.claude/rules/*.md`) - Path-specific instructions with
+  glob-targeted frontmatter. A targeted MEMORY mechanism for organizing
+  project instructions by topic and scope.
+- **Auto memory** (`~/.claude/projects/<project>/memory/`) - Claude
+  automatically saves project patterns, debugging insights, and architecture
+  notes. Distinct from CLAUDE.md instruction files; auto memory is maintained
+  by the system, not the user. Also distinct from subagent persistent memory,
+  which is agent-maintained via explicit read/write operations within a
+  subagent's own memory directory.
 
 **Key distinction from Knowledge:**
 
 - **Knowledge** = Extension-bundled, loaded when agent/skill is active
 - **CLAUDE.md** = Environment memory, always loaded for every request
+- **Auto memory** = System-maintained project learnings, loaded automatically
 
 ### Plugin (DISTRIBUTION)
 
@@ -135,8 +159,9 @@ and knowledge for installation and sharing.
 
 **Contains:**
 
-- Bundled agents and skills
+- Bundled agents, skills, hooks, MCP servers, LSP servers, and output styles
 - Plugin metadata (plugin.json)
+- Default settings (settings.json)
 - Documentation (README)
 
 **Does NOT contain:**
@@ -149,38 +174,54 @@ and chef expertise (agents) - packaged for distribution.
 
 ### Hooks (AUTOMATION)
 
-Hooks are **deterministic shell commands** that execute at specific lifecycle
-events. Unlike other extensions that rely on LLM judgment, hooks provide
-guaranteed execution - things that MUST happen.
+Hooks provide **lifecycle-bound execution** at specific events. They support
+three types with different execution models:
+
+- **`command` hooks** -- Deterministic shell commands. Same input always
+  produces the same output. No LLM involvement.
+- **`prompt` hooks** -- LLM-evaluated prompts that invoke Claude's judgment
+  at lifecycle events. Non-deterministic.
+- **`agent` hooks** -- Agentic verifiers with tool access for complex
+  verification. Non-deterministic.
+
+`command` hooks are the most common type and provide guaranteed, deterministic
+execution -- things that MUST happen. `prompt` and `agent` hooks extend the
+AUTOMATION category into LLM-guided territory for cases where lifecycle-bound
+judgment is needed.
 
 **Contains:**
 
-- Shell commands to execute
+- Shell commands, LLM prompts, or agentic verifiers to execute
 - Matcher patterns (which tools trigger the hook)
 - Lifecycle event bindings (PreToolUse, PostToolUse, etc.)
 
 **Does NOT contain:**
 
-- LLM-guided logic (hooks are deterministic)
-- Complex workflows (use Skills)
+- Complex multi-step workflows (use Skills)
 - Domain expertise (use Agents)
 
-**Analogy:** Factory automation - quality checks that run on every widget,
-regardless of who's operating the machine. The conveyor belt triggers the
-scanner; no human judgment required.
+**Analogy:** `command` hooks are factory automation -- quality checks that run
+on every widget, no human judgment required. `prompt` and `agent` hooks are
+like having an inspector at the checkpoint who can exercise judgment.
 
 **Key distinction from other types:**
 
 - **Skills** = LLM decides when/how to use them
-- **Hooks** = Automatically triggered, always execute
+- **Hooks** = Automatically triggered on lifecycle events
 
 **Lifecycle events:**
 
-- `PreToolUse` / `PostToolUse` - Before/after tool execution
+- `PreToolUse` / `PostToolUse` / `PostToolUseFailure` - Tool execution
+- `PermissionRequest` - Permission dialog
 - `SessionStart` / `SessionEnd` - Session lifecycle
 - `UserPromptSubmit` - When user submits prompt
 - `Notification` / `Stop` - Response lifecycle
-- `SubagentStop` / `PreCompact` - Agent lifecycle
+- `SubagentStart` / `SubagentStop` / `PreCompact` - Agent lifecycle
+- `TeammateIdle` / `TaskCompleted` - Agent team coordination
+- `ConfigChange` - Settings changes
+- `WorktreeCreate` / `WorktreeRemove` - Worktree lifecycle
+
+See: `knowledge/hooks.md` for the complete hooks reference.
 
 ---
 
@@ -300,7 +341,7 @@ All extension types are **inert text** - they define behavior but don't execute 
 | **Knowledge** | CONTEXT | Facts to reference | With extension |
 | **CLAUDE.md** | MEMORY | Environment context | Always |
 | **Plugin** | DISTRIBUTION | Container | When installed |
-| **Hooks** | AUTOMATION | Deterministic actions | On lifecycle events |
+| **Hooks** | AUTOMATION | Lifecycle-bound actions | On lifecycle events |
 
 **Note:** The orchestrator (Claude Code) is the primary agent. Subagents are
 specialists spawned for specific expertise - they live in `/agents` folders.
@@ -502,28 +543,48 @@ Return JSON: { "files": [...], "validation": {...} }
 
 ### What Belongs
 
-- Shell commands that execute reliably
+- `command` hooks: Shell commands that execute reliably and deterministically
+- `prompt` hooks: LLM prompts for lifecycle-bound judgment
+- `agent` hooks: Agentic verifiers with tool access for complex validation
 - Specific matcher patterns
 - Clear lifecycle event binding
-- Deterministic behavior (same input = same output)
 
 ### What Does NOT Belong
 
-- Complex conditional logic (use Skills)
-- LLM-dependent decisions
-- Interactive prompts (hooks are non-interactive)
+- Complex multi-step workflows (use Skills)
+- Domain expertise definitions (use Agents)
+- Interactive user prompts (hooks are non-interactive)
 - Long-running processes without timeout handling
 
 ### Good Enough
 
-- Working shell command
+- Working hook of the appropriate type for the use case
 - Appropriate event binding
 - Handles errors gracefully (non-zero exit when needed)
 
 ### Excellent
 
-- Focused, single-purpose hooks
+**Command hooks:**
+
+- Focused, single-purpose with correct exit codes (2 to block, 0 to pass)
 - Proper use of jq for JSON input parsing
+- Tested in isolation before deployment
+
+**Prompt hooks:**
+
+- Clear, specific prompt that produces consistent judgment
+- Appropriate model selection for cost vs capability
+- Well-scoped to a single verification concern
+
+**Agent hooks:**
+
+- Minimal tool set (only what verification requires)
+- Timeout configured to prevent runaway execution
+- Clear success/failure criteria in the prompt
+
+**All types:**
+
+- Correct type selection (`command` for deterministic enforcement, `prompt`
+  for LLM judgment, `agent` for complex verification)
 - Security-conscious (no credential exposure)
 - Well-documented purpose and behavior
-- Tested in isolation before deployment

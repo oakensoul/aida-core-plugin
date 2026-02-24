@@ -74,19 +74,78 @@ PRESETS: dict[str, dict[str, str]] = {
 }
 
 
+def _has_existing_permissions(current: dict) -> bool:
+    """Check whether any scope has configured permission rules.
+
+    Args:
+        current: Settings dict from ``read_all_settings()``.
+
+    Returns:
+        True if at least one rule exists across all scopes.
+    """
+    for scope_perms in current.values():
+        for action in ("allow", "ask", "deny"):
+            if scope_perms.get(action):
+                return True
+    return False
+
+
 def get_questions(context: dict) -> dict:
     """Phase 1: Build interactive questions for permission setup.
+
+    When no installed plugins declare ``recommendedPermissions``,
+    returns an empty questions list with a message explaining the
+    situation instead of presenting a questionnaire that leads
+    nowhere.
 
     Args:
         context: Context dict, may contain ``operation`` key.
 
     Returns:
         Dict with ``questions`` list and ``inferred`` data.
+        When no plugin recommendations exist, ``inferred``
+        includes a ``no_recommendations`` flag and a ``message``.
     """
     plugins = scan_plugins()
     categorized = deduplicate_and_categorize(plugins)
     current = read_all_settings()
     categories = categorized.get("categories", {})
+
+    # Short-circuit when no plugins provide recommendations.
+    # Presenting preset/scope questions would lead the user
+    # through a multi-step flow that writes 0 rules.
+    if not categories:
+        has_existing = _has_existing_permissions(current)
+        message_parts = [
+            "No installed plugins declare recommended "
+            "permissions.",
+        ]
+        if has_existing:
+            message_parts.append(
+                "You have existing permissions configured. "
+                "Run '/aida config permissions --audit' to "
+                "review them."
+            )
+        else:
+            message_parts.append(
+                "Install plugins that include "
+                "recommendedPermissions in their "
+                "aida-config.json, or configure permissions "
+                "manually by editing your settings.json."
+            )
+
+        return {
+            "questions": [],
+            "inferred": {
+                "categories": {},
+                "current_permissions": current,
+                "conflicts": [],
+                "plugin_count": 0,
+                "no_recommendations": True,
+                "has_existing_permissions": has_existing,
+                "message": " ".join(message_parts),
+            },
+        }
 
     proposed_flat: dict[str, list[str]] = {
         "allow": [],
@@ -241,6 +300,10 @@ def get_questions(context: dict) -> dict:
 def execute(context: dict, responses: dict) -> dict:
     """Phase 2: Apply permission choices to settings.
 
+    When the context indicates no plugin recommendations were
+    found (empty ``categories``), returns immediately with an
+    informative message instead of silently writing 0 rules.
+
     Args:
         context: Context dict from Phase 1.
         responses: User responses keyed by question ``id``.
@@ -249,6 +312,26 @@ def execute(context: dict, responses: dict) -> dict:
         Dict with ``success``, ``files_modified``,
         ``rules_count``, and ``message`` keys.
     """
+    categories = context.get("categories", {})
+
+    # Guard against writing 0 rules when no plugins provided
+    # recommendations.  This can happen if execute is called
+    # directly (e.g. via CLI --execute) without going through
+    # get_questions first.
+    if not categories:
+        return {
+            "success": False,
+            "files_modified": [],
+            "rules_count": 0,
+            "message": (
+                "No permission rules to write. No installed "
+                "plugins declare recommended permissions. "
+                "Install plugins with recommendedPermissions "
+                "in their aida-config.json, or configure "
+                "permissions manually."
+            ),
+        }
+
     preset = responses.get("preset", "developer-workstation")
     if preset not in PRESETS and preset != "custom":
         logger.warning(
@@ -264,8 +347,6 @@ def execute(context: dict, responses: dict) -> dict:
             "Invalid scope %r, falling back to 'user'", scope
         )
         scope = "user"
-
-    categories = context.get("categories", {})
 
     rules: dict[str, list[str]] = {
         "allow": [],

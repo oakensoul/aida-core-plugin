@@ -1,4 +1,4 @@
-"""Unit tests for claude-code-management CLAUDE.md operations.
+"""Unit tests for claude-md-manager CLAUDE.md operations.
 
 This test suite covers the operations/claude_md.py module functionality including
 CLAUDE.md detection, validation, audit scoring, and management operations.
@@ -13,10 +13,15 @@ from pathlib import Path
 
 # Add scripts directories to path for imports
 _project_root = Path(__file__).parent.parent.parent
-SKILL_DIR = _project_root / "skills" / "claude-code-management"
+SKILL_DIR = _project_root / "skills" / "claude-md-manager"
 sys.path.insert(0, str(_project_root / "scripts"))
 sys.path.insert(0, str(SKILL_DIR / "scripts"))
 TEMPLATES_DIR = SKILL_DIR / "templates"
+
+# Clear cached operations modules to avoid cross-manager conflicts in pytest
+for _mod_name in list(sys.modules):
+    if _mod_name == "operations" or _mod_name.startswith("operations."):
+        del sys.modules[_mod_name]
 
 from operations.utils import (  # noqa: E402
     get_project_root,

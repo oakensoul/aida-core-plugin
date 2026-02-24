@@ -1,7 +1,8 @@
 """Shared utilities for AIDA Core Plugin scripts.
 
-Common functions used across multiple skills including
-claude-code-management and create-plugin.
+Common functions used across multiple manager skills including
+agent-manager, skill-manager, plugin-manager, hook-manager,
+and claude-md-manager.
 """
 
 import json
@@ -62,6 +63,49 @@ def to_kebab_case(text: str) -> str:
     # Collapse multiple hyphens
     text = re.sub(r'-+', '-', text)
     return text
+
+
+def infer_from_description(description: str) -> dict[str, Any]:
+    """Infer extension metadata from a description string.
+
+    Converts the description to a kebab-case name, assigns a default
+    version, and infers tags from keyword matching.
+
+    Args:
+        description: User-provided description
+
+    Returns:
+        Dictionary with keys: name, version, tags
+    """
+    inferred: dict[str, Any] = {
+        "name": to_kebab_case(description[:50]),
+        "version": "0.1.0",
+        "tags": ["custom"],
+    }
+
+    description_lower = description.lower()
+
+    tag_keywords: dict[str, list[str]] = {
+        "api": ["api", "endpoint", "rest", "graphql"],
+        "database": ["database", "sql", "query", "migration"],
+        "auth": ["auth", "login", "authentication", "security"],
+        "testing": ["test", "testing", "spec", "coverage"],
+        "documentation": ["doc", "documentation", "readme"],
+        "deployment": ["deploy", "deployment", "ci", "cd"],
+        "monitoring": [
+            "monitor",
+            "logging",
+            "metrics",
+            "observability",
+        ],
+    }
+
+    for tag, keywords in tag_keywords.items():
+        if any(kw in description_lower for kw in keywords):
+            if tag not in inferred["tags"]:
+                inferred["tags"].append(tag)
+
+    return inferred
 
 
 def validate_name(name: str) -> tuple[bool, Optional[str]]:
@@ -161,10 +205,9 @@ def bump_version(version: str, bump_type: str) -> str:
 def parse_frontmatter(content: str) -> tuple[dict[str, Any], str]:
     """Parse YAML frontmatter from markdown content.
 
-    Uses simple line-by-line parsing (not a full YAML parser). Known
-    limitations: does not handle multi-line values, block scalars, nested
-    objects, or list items as values. Values containing colons are handled
-    via split(':', 1). For full YAML support, use PyYAML directly.
+    Uses PyYAML ``safe_load`` for robust parsing of all standard YAML
+    constructs including multi-line values, block scalars, nested
+    objects, and list items.
 
     Args:
         content: Full markdown content
@@ -181,10 +224,14 @@ def parse_frontmatter(content: str) -> tuple[dict[str, Any], str]:
             frontmatter_text = content[3:end].strip()
             body = content[end + 3:].strip()
 
-            for line in frontmatter_text.split('\n'):
-                if ':' in line and not line.strip().startswith('-'):
-                    key, value = line.split(':', 1)
-                    frontmatter[key.strip()] = value.strip().strip('"\'')
+            try:
+                import yaml
+
+                parsed = yaml.safe_load(frontmatter_text)
+                if isinstance(parsed, dict):
+                    frontmatter = parsed
+            except Exception:
+                pass
 
     return frontmatter, body
 
@@ -238,6 +285,138 @@ def get_project_root() -> Path:
         if (parent / ".git").exists() or (parent / ".claude").exists():
             return parent
     return cwd
+
+
+def detect_project_context() -> dict[str, Any]:
+    """Detect project context for extension creation.
+
+    Scans the current working directory for language indicators,
+    framework files, build tools, test directories, and CI
+    configuration.
+
+    Returns:
+        Dictionary with keys: languages, frameworks, tools,
+        has_tests, has_ci
+    """
+    context: dict[str, Any] = {
+        "languages": [],
+        "frameworks": [],
+        "tools": [],
+        "has_tests": False,
+        "has_ci": False,
+    }
+
+    cwd = Path.cwd()
+
+    # Detect languages
+    language_indicators: dict[str, list[str]] = {
+        "python": [
+            "*.py",
+            "requirements.txt",
+            "pyproject.toml",
+            "setup.py",
+            "Pipfile",
+        ],
+        "javascript": ["*.js", "package.json"],
+        "typescript": ["*.ts", "tsconfig.json"],
+        "go": ["*.go", "go.mod"],
+        "rust": ["*.rs", "Cargo.toml"],
+        "ruby": ["*.rb", "Gemfile"],
+        "java": ["*.java", "pom.xml", "build.gradle"],
+    }
+
+    for lang, indicators in language_indicators.items():
+        for indicator in indicators:
+            if indicator.startswith("*"):
+                if list(cwd.glob(indicator)) or list(
+                    cwd.glob(f"**/{indicator}")
+                ):
+                    if lang not in context["languages"]:
+                        context["languages"].append(lang)
+                    break
+            else:
+                if (cwd / indicator).exists():
+                    if lang not in context["languages"]:
+                        context["languages"].append(lang)
+                    break
+
+    # Detect frameworks
+    framework_files: dict[str, list[str]] = {
+        "fastapi": ["main.py"],
+        "django": ["manage.py", "settings.py"],
+        "flask": ["app.py"],
+        "react": ["package.json"],
+        "nextjs": ["next.config.js", "next.config.ts"],
+        "dbt": ["dbt_project.yml"],
+        "terraform": ["*.tf"],
+        "cdk": ["cdk.json"],
+    }
+
+    for framework, files in framework_files.items():
+        for f in files:
+            if f.startswith("*"):
+                if list(cwd.glob(f)):
+                    context["frameworks"].append(framework)
+                    break
+            elif (cwd / f).exists():
+                context["frameworks"].append(framework)
+                break
+
+    # Check package.json for JS frameworks
+    package_json = cwd / "package.json"
+    if package_json.exists():
+        try:
+            with open(package_json) as fh:
+                pkg = json.load(fh)
+                deps = {
+                    **pkg.get("dependencies", {}),
+                    **pkg.get("devDependencies", {}),
+                }
+                if "react" in deps:
+                    context["frameworks"].append("react")
+                if "vue" in deps:
+                    context["frameworks"].append("vue")
+                if "next" in deps:
+                    context["frameworks"].append("nextjs")
+        except (json.JSONDecodeError, IOError):
+            pass
+
+    # Detect tools
+    tool_files: dict[str, list[str]] = {
+        "docker": [
+            "Dockerfile",
+            "docker-compose.yml",
+            "docker-compose.yaml",
+        ],
+        "make": ["Makefile"],
+        "git": [".git"],
+        "pytest": ["pytest.ini", "conftest.py"],
+        "jest": ["jest.config.js", "jest.config.ts"],
+    }
+
+    for tool, files in tool_files.items():
+        for f in files:
+            if (cwd / f).exists():
+                context["tools"].append(tool)
+                break
+
+    # Check for tests
+    context["has_tests"] = (
+        (cwd / "tests").exists()
+        or (cwd / "test").exists()
+        or (cwd / "__tests__").exists()
+        or bool(list(cwd.glob("**/test_*.py")))
+        or bool(list(cwd.glob("**/*.test.js")))
+    )
+
+    # Check for CI
+    context["has_ci"] = (
+        (cwd / ".github" / "workflows").exists()
+        or (cwd / ".gitlab-ci.yml").exists()
+        or (cwd / ".circleci").exists()
+    )
+
+    return context
 
 
 # DEPRECATED: Computed at import time; "project" path may be stale if cwd
