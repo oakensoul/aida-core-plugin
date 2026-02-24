@@ -6,13 +6,12 @@ version: 0.7.0
 tags:
   - core
   - dispatcher
-  - commands
 ---
 
 # AIDA Dispatch
 
 Routes `/aida` commands to appropriate action handlers, managing AIDA's configuration,
-diagnostics, feedback systems, and extension management (agents, commands, skills, plugins).
+diagnostics, feedback systems, and extension management (agents, skills, plugins).
 
 ## Activation
 
@@ -82,7 +81,7 @@ For `help` or no arguments:
 
 ### Extension Management Commands
 
-For `agent`, `command`, `skill`, `plugin`, or `hook` commands:
+For `agent`, `skill`, `plugin`, or `hook` commands:
 
 - **Invoke the `claude-code-management` skill** to handle these operations
 - Pass the full command arguments to the skill
@@ -92,7 +91,7 @@ For `agent`, `command`, `skill`, `plugin`, or `hook` commands:
 **Process:**
 
 1. Parse the command to extract:
-   - Component type: `agent`, `command`, `skill`, `plugin`, or `hook`
+   - Component type: `agent`, `skill`, `plugin`, or `hook`
    - Operation: `create`, `validate`, `version`, `list`, `add`, `remove`
    - Arguments: name, description, options
 
@@ -102,7 +101,7 @@ For `agent`, `command`, `skill`, `plugin`, or `hook` commands:
 
 ```text
 /aida agent create "description"     → claude-code-management skill
-/aida command validate --all         → claude-code-management skill
+/aida skill validate --all           → claude-code-management skill
 /aida skill version my-skill patch   → claude-code-management skill
 /aida plugin list                    → claude-code-management skill
 /aida hook list                      → claude-code-management skill
@@ -217,7 +216,6 @@ When displaying help (for `help` command or no arguments), show:
 
 ### Extension Management
 - `/aida agent [create|validate|version|list]` - Manage agents
-- `/aida command [create|validate|version|list]` - Manage commands
 - `/aida skill [create|validate|version|list]` - Manage skills
 - `/aida plugin [create|validate|version|list|add|remove]` - Manage plugins
 - `/aida hook [list|add|remove|validate]` - Manage hooks (settings.json)

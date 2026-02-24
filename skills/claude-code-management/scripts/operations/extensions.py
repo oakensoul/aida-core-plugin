@@ -2,7 +2,6 @@
 
 Handles create, validate, version, and list operations for:
 - Agents
-- Commands
 - Skills
 - Plugins
 
@@ -38,12 +37,6 @@ COMPONENT_TYPES = {
         "template": "agent/agent.md.jinja2",
         "has_subdirectory": True,
     },
-    "command": {
-        "directory": "commands",
-        "file_pattern": "{name}.md",
-        "template": "command/command.md.jinja2",
-        "has_subdirectory": False,
-    },
     "skill": {
         "directory": "skills",
         "file_pattern": "{name}/SKILL.md",
@@ -67,7 +60,7 @@ def find_components(
     """Find all components of a given type.
 
     Args:
-        component_type: Type of component (agent, command, skill, plugin)
+        component_type: Type of component (agent, skill, plugin)
         location: Where to search (user, project, plugin, all)
         plugin_path: Path to plugin directory (if location is plugin)
 
@@ -475,7 +468,6 @@ def execute_create(
         # Create subdirectories
         (output_dir / ".claude-plugin").mkdir(exist_ok=True)
         (output_dir / "agents").mkdir(exist_ok=True)
-        (output_dir / "commands").mkdir(exist_ok=True)
         (output_dir / "skills").mkdir(exist_ok=True)
 
         # Render plugin.json
@@ -914,7 +906,6 @@ def execute_create_from_agent(
     # Validate main component file has proper frontmatter
     main_file_patterns = {
         "agent": lambda f: f["path"].endswith(".md") and "/knowledge/" not in f["path"],
-        "command": lambda f: f["path"].endswith(".md"),
         "skill": lambda f: f["path"].endswith("SKILL.md"),
         "plugin": lambda f: f["path"].endswith("plugin.json"),
     }
