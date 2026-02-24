@@ -7,7 +7,7 @@ description: Step-by-step process for creating Claude Code extensions
 # Create Workflow
 
 This document describes the workflow for creating new Claude Code extensions
-(agents, commands, skills, plugins).
+(agents, skills, plugins).
 
 ## Overview
 
@@ -23,7 +23,7 @@ The create workflow uses a two-phase API:
 ```json
 {
   "operation": "create",
-  "type": "agent|command|skill|plugin",
+  "type": "agent|skill|plugin",
   "description": "User-provided description",
   "location": "user|project|plugin",
   "plugin_path": "/path/to/plugin"
@@ -89,12 +89,6 @@ The create workflow uses a two-phase API:
 3. Create `knowledge/` subdirectory
 4. Return success with file paths
 
-#### Command
-
-1. Create file: `{location}/commands/{name}.md`
-2. Render from `command/command.md.jinja2`
-3. Return success with file path
-
 #### Skill
 
 1. Create directory: `{location}/skills/{name}/`
@@ -108,7 +102,7 @@ The create workflow uses a two-phase API:
 2. Create `.claude-plugin/plugin.json` from template
 3. Create `README.md` from template
 4. Create `.gitignore` from template
-5. Create empty directories: `agents/`, `commands/`, `skills/`
+5. Create empty directories: `agents/`, `skills/`
 6. Return success with file paths
 
 ### Output

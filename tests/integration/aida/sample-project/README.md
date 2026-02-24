@@ -11,8 +11,7 @@ This is a sample AIDA project for testing AIDA functionality across different en
 ## Structure
 
 - `.claude/` - AIDA configuration
-  - `commands/` - Custom slash commands
-  - `skills/` - Auto-triggered behaviors
+  - `skills/` - Skills and auto-triggered behaviors
   - `agents/` - Personality configurations
   - `knowledge/` - Project-specific knowledge
 
@@ -21,7 +20,7 @@ This is a sample AIDA project for testing AIDA functionality across different en
 Used for testing:
 
 - AIDA installation
-- Command execution
+- Skill execution
 - Memory management
-- Workflow commands
+- Workflow automation
 - Project-specific behavior

@@ -25,19 +25,20 @@ Validation checks components against:
 
 | Field         | Rule                                       | Example                     |
 | ------------- | ------------------------------------------ | --------------------------- |
-| `type`        | Required, enum value                       | `agent`, `command`, `skill` |
+| `type`        | Required, enum value                       | `agent`, `skill`            |
 | `name`        | Required, `^[a-z][a-z0-9-]*$`, 2-50 chars  | `my-agent`                  |
 | `description` | Required, 10-500 chars                     | `Agent that handles...`     |
 | `version`     | Required, `^\d+\.\d+\.\d+$`                | `0.1.0`                     |
 | `tags`        | Required array, each tag kebab-case        | `["core", "api"]`           |
 
-### Command-Specific
+### Skill-Specific (Optional)
 
-| Field           | Rule            | Example       |
-| --------------- | --------------- | ------------- |
-| `args`          | Optional string | `""`          |
-| `allowed-tools` | Optional string | `"*"`         |
-| `argument-hint` | Optional string | `"[options]"` |
+| Field                      | Rule             | Example       |
+| -------------------------- | ---------------- | ------------- |
+| `allowed-tools`            | Optional string  | `"*"`         |
+| `argument-hint`            | Optional string  | `"[options]"` |
+| `user-invocable`           | Optional boolean | `true`        |
+| `disable-model-invocation` | Optional boolean | `false`       |
 
 ### Plugin-Specific
 

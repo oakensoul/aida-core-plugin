@@ -28,8 +28,7 @@ Create an agent when you need:
 
 Don't create an agent for:
 
-- Step-by-step procedures (use a [command](HOWTO_CREATE_COMMAND.md))
-- Execution capabilities (use a [skill](HOWTO_CREATE_SKILL.md))
+- Step-by-step procedures (use a [skill](HOWTO_CREATE_SKILL.md))
 - One-off tasks (just ask Claude directly)
 
 ## Interactive Creation
@@ -119,7 +118,7 @@ Once created, your agent is available via the Task tool:
 "Please have the security-engineer review this authentication code"
 ```
 
-Or reference it in commands/skills you create.
+Or reference it in skills you create.
 
 ## Adding Knowledge
 
@@ -191,6 +190,5 @@ These documents provide context the agent can reference.
 
 ## Next Steps
 
-- [Create a Command](HOWTO_CREATE_COMMAND.md) - Define procedures that use your agent
 - [Create a Skill](HOWTO_CREATE_SKILL.md) - Add execution capabilities
 - [Extension Framework](EXTENSION_FRAMEWORK.md) - Understand the architecture

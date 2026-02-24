@@ -319,5 +319,5 @@ Key files:
 ## Next Steps
 
 - [Create an Agent](HOWTO_CREATE_AGENT.md) - Build custom expertise
-- [Create a Command](HOWTO_CREATE_COMMAND.md) - Define workflows
+- [Create a Skill](HOWTO_CREATE_SKILL.md) - Define workflows and capabilities
 - [Getting Started](GETTING_STARTED.md) - Overview of AIDA features

@@ -43,55 +43,38 @@ to apply knowledge to problems.
 **Analogy:** Hiring a specialist consultant. You (the orchestrator) describe the
 problem; they apply their domain expertise. When done, control returns to you.
 
-### Command (WHAT)
+### Skill (HOW)
 
-Commands are **instructions/recipes/process definitions**. They define what should
-happen - both thinking steps and doing steps - but they don't execute anything
-themselves.
+Skills provide **process definitions and execution capabilities**. They are the
+operational playbook that covers both what should happen and how to make it happen.
+
+Skills range from simple user-invocable entry points to complex automation
+workflows with Python scripts, Jinja2 templates, and reference documentation.
 
 **Contains:**
 
 - Process steps (thinking, deciding, doing)
-- Skill invocations (when execution capabilities are needed)
+- Activation triggers
+- Workflow phases (get-questions, execute)
+- Script invocations and parameters
+- Output contracts for agent spawning
+- Templates and path resolution
 - Agent spawns (when specialized expertise is needed)
 - Decision points and judgment criteria
 - Argument hints and user-facing help
 
 **Does NOT contain:**
 
-- Script code (that belongs in Skills)
-- Domain expertise (that belongs in Agents)
-- The actual execution (the orchestrator does that)
-
-**Analogy:** Instructions for assembling furniture or a recipe for baking a cake.
-The instructions say "attach part A to part B" or "mix ingredients, taste and
-adjust, bake at 350°" - but the instructions don't assemble or bake. The person
-following them (orchestrator/subagent) does.
-
-**Key insight:** Commands are inert text. They define a process that includes
-cognitive steps ("analyze this", "decide which approach") and execution steps
-("invoke the setup skill"). The orchestrator reads the command and actually
-performs those steps.
-
-### Skill (HOW)
-
-Skills provide **execution capabilities**. They are the operational playbook.
-
-**Contains:**
-
-- Activation triggers
-- Workflow phases (get-questions, execute)
-- Script invocations and parameters
-- Output contracts for agent spawning
-- Templates and path resolution
-
-**Does NOT contain:**
-
 - Domain expertise ("why X is better than Y")
-- Best practices (unless operational)
-- Quality judgments
+- Quality judgments (that belongs in Agents)
 
-**Analogy:** An operations manual. Anyone trained on it can execute the workflow.
+**Analogy:** A recipe combined with kitchen tools. The skill defines the process
+("mix ingredients, bake at 350") and provides the automation to execute it.
+
+**Key insight:** Skills are inert text. They define a process that includes
+cognitive steps ("analyze this", "decide which approach") and execution steps
+("run this script"). The orchestrator reads the skill and actually performs
+those steps.
 
 ### Knowledge (CONTEXT)
 
@@ -147,12 +130,12 @@ to know about how this project/team works. Always in their mind, not looked up.
 
 ### Plugin (DISTRIBUTION)
 
-Plugins are **distribution containers**. They package agents, commands, skills,
+Plugins are **distribution containers**. They package agents, skills,
 and knowledge for installation and sharing.
 
 **Contains:**
 
-- Bundled agents, commands, skills
+- Bundled agents and skills
 - Plugin metadata (plugin.json)
 - Documentation (README)
 
@@ -161,7 +144,7 @@ and knowledge for installation and sharing.
 - Behavior definitions (that's what the bundled components do)
 - User configuration
 
-**Analogy:** A cookbook that contains recipes (commands), techniques (skills),
+**Analogy:** A cookbook that contains recipes and techniques (skills)
 and chef expertise (agents) - packaged for distribution.
 
 ### Hooks (AUTOMATION)
@@ -179,7 +162,7 @@ guaranteed execution - things that MUST happen.
 **Does NOT contain:**
 
 - LLM-guided logic (hooks are deterministic)
-- Complex workflows (use Commands/Skills)
+- Complex workflows (use Skills)
 - Domain expertise (use Agents)
 
 **Analogy:** Factory automation - quality checks that run on every widget,
@@ -188,7 +171,7 @@ scanner; no human judgment required.
 
 **Key distinction from other types:**
 
-- **Commands/Skills** = LLM decides when/how to use them
+- **Skills** = LLM decides when/how to use them
 - **Hooks** = Automatically triggered, always execute
 
 **Lifecycle events:**
@@ -209,9 +192,9 @@ The `/context` command shows this as **Memory files** - persistent context that'
 always loaded for every request:
 
 ```text
-Memory files · /memory
-└ User (~/.claude/CLAUDE.md): 43 tokens
-└ Project (./CLAUDE.md): 282 tokens
+Memory files - /memory
++- User (~/.claude/CLAUDE.md): 43 tokens
++- Project (./CLAUDE.md): 282 tokens
 ```
 
 ### Visual Model
@@ -220,7 +203,7 @@ Memory files · /memory
 graph TB
     subgraph "Runtime Context"
         CONV[/"5. Conversation<br/>Current task & discussion"/]
-        EXT[/"4. Extension Context<br/>Active command/skill/subagent<br/>+ Knowledge files"/]
+        EXT[/"4. Extension Context<br/>Active skill or spawned subagent<br/>+ Knowledge files"/]
     end
 
     subgraph "Memory Files (CLAUDE.md)"
@@ -244,23 +227,23 @@ graph TB
 ### Layer Stack
 
 ```text
-┌─────────────────────────────────────────────────────┐
-│  5. Conversation Context                            │
-│     What's been discussed, current task             │
-├─────────────────────────────────────────────────────┤
-│  4. Extension Context                               │
-│     Active command, skill, or spawned subagent      │
-│     + Subagent's knowledge files                    │
-├─────────────────────────────────────────────────────┤
-│  3. Project CLAUDE.md  ─┐                           │
-│     ./CLAUDE.md         │ "Memory files"            │
-├─────────────────────────┤ Always loaded             │
-│  2. User CLAUDE.md     ─┘                           │
-│     ~/.claude/CLAUDE.md                             │
-├─────────────────────────────────────────────────────┤
-│  1. Base Claude                                     │
-│     Core capabilities and knowledge                 │
-└─────────────────────────────────────────────────────┘
++-----------------------------------------------------+
+|  5. Conversation Context                            |
+|     What's been discussed, current task             |
++-----------------------------------------------------+
+|  4. Extension Context                               |
+|     Active skill or spawned subagent                |
+|     + Subagent's knowledge files                    |
++-----------------------------------------------------+
+|  3. Project CLAUDE.md  --+                          |
+|     ./CLAUDE.md          | "Memory files"           |
++--------------------------+ Always loaded             |
+|  2. User CLAUDE.md     --+                          |
+|     ~/.claude/CLAUDE.md                             |
++-----------------------------------------------------+
+|  1. Base Claude                                     |
+|     Core capabilities and knowledge                 |
++-----------------------------------------------------+
 ```
 
 **How layers combine:**
@@ -268,15 +251,15 @@ graph TB
 - Lower layers provide defaults
 - Higher layers can override or extend
 - Project settings override user settings for project-specific concerns
-- Extension context (command/subagent) adds task-specific guidance
+- Extension context (skill/subagent) adds task-specific guidance
 - Conversation context is the immediate task at hand
 
 **Example flow:**
 
 1. User has `~/.claude/CLAUDE.md` with preference: "Use pnpm"
 2. Project has `./CLAUDE.md` with: "Use npm for this legacy project"
-3. User invokes `/test` command
-4. Orchestrator reads the command (testing process recipe)
+3. User invokes `/test` skill
+4. Orchestrator reads the skill (testing process definition)
 5. Orchestrator spawns `test-expert` subagent with testing knowledge
 6. Subagent applies expertise within project context (uses npm, not pnpm)
 
@@ -313,8 +296,7 @@ All extension types are **inert text** - they define behavior but don't execute 
 | Type | Role | Defines | Loaded |
 | ---- | ---- | ------- | ------ |
 | **Subagent** | WHO | Expertise to embody | When spawned |
-| **Command** | WHAT | Process to follow (recipe) | When invoked |
-| **Skill** | HOW | Execution capabilities | When activated |
+| **Skill** | HOW | Process + execution capabilities | When activated |
 | **Knowledge** | CONTEXT | Facts to reference | With extension |
 | **CLAUDE.md** | MEMORY | Environment context | Always |
 | **Plugin** | DISTRIBUTION | Container | When installed |
@@ -325,11 +307,8 @@ specialists spawned for specific expertise - they live in `/agents` folders.
 
 **Nothing happens until the orchestrator reads these definitions and acts.**
 
-A Command says "analyze X, decide Y, invoke skill Z" - but doesn't analyze, decide,
-or invoke. The orchestrator does.
-
-A Skill says "run this script, write this file" - but doesn't run or write. The
-orchestrator (or the script itself) does.
+A Skill says "analyze X, decide Y, run this script" - but doesn't analyze, decide,
+or run. The orchestrator does.
 
 A Subagent definition says "you are an expert in X with these standards" - but
 doesn't think. Claude embodies that expertise when spawned via the Task tool.
@@ -339,7 +318,7 @@ Knowledge just sits there until someone reads it.
 **This matters because:**
 
 - Don't confuse the definition with the execution
-- Commands can define complex processes (they're just instructions)
+- Skills can define complex processes (they're just instructions + automation)
 - The orchestrator is always the one doing the work
 
 ---
@@ -391,66 +370,42 @@ Return JSON: { "files": [...], "validation": {...} }
 
 ---
 
-## Quality Standards: Commands
-
-### What Belongs
-
-- Clear process definition (the recipe)
-- Thinking steps (analyze, evaluate, decide)
-- Skill invocations for execution needs
-- Agent spawns for expertise needs
-- Decision criteria and judgment points
-- Argument hints and user-facing help
-
-### What Does NOT Belong
-
-- Python/script code (use Skills)
-- Domain expertise definitions (use Agents)
-- Reference material (use Knowledge)
-
-### Good Enough
-
-- Clear process steps
-- Proper frontmatter with argument hints
-- Invokes appropriate skills/agents when needed
-
-### Excellent
-
-- Well-structured recipe with clear phases
-- Appropriate separation (thinking in command, execution in skills)
-- Clear decision points with criteria
-- Handles edge cases gracefully
-
----
-
 ## Quality Standards: Skills
 
 ### What Belongs
 
+- Clear process definition (the recipe + the tools)
 - Activation triggers (when this skill is relevant)
+- Thinking steps (analyze, evaluate, decide)
 - Workflow phases (get-questions, execute)
 - Script invocations and parameters
 - Output contracts for agent spawning
 - Path resolution for resources
+- Agent spawns for expertise needs
+- Argument hints and user-facing help
 
 ### What Does NOT Belong
 
 - Domain expertise ("why X is better than Y")
 - Best practices (unless operational)
-- Quality judgments
+- Quality judgments (use Agents for this)
 
 ### Good Enough
 
 - Clear activation criteria
 - Working script invocations
+- Proper frontmatter with argument hints (if user-invocable)
 - Basic workflow documented
 
 ### Excellent
 
-- Two-phase API pattern (get-questions → execute)
+- Well-structured process with clear phases
+- Two-phase API pattern (get-questions -> execute)
 - Complete output contracts for agent spawning
+- Appropriate separation (thinking in skill, execution in scripts)
 - Error handling documented
 - Resources clearly organized (scripts/, templates/, references/)
+- Handles edge cases gracefully
 
 ---
 
@@ -490,7 +445,7 @@ Return JSON: { "files": [...], "validation": {...} }
 ### What Belongs
 
 - Plugin manifest (plugin.json)
-- Bundled agents, commands, skills
+- Bundled agents and skills
 - README documentation
 - Proper directory structure
 
@@ -502,7 +457,7 @@ Return JSON: { "files": [...], "validation": {...} }
 ### Good Enough
 
 - Valid plugin.json with required fields
-- At least one agent, command, or skill
+- At least one agent or skill
 - Basic README
 
 ### Excellent
@@ -554,7 +509,7 @@ Return JSON: { "files": [...], "validation": {...} }
 
 ### What Does NOT Belong
 
-- Complex conditional logic (use Commands)
+- Complex conditional logic (use Skills)
 - LLM-dependent decisions
 - Interactive prompts (hooks are non-interactive)
 - Long-running processes without timeout handling

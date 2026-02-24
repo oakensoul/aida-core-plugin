@@ -30,7 +30,7 @@ jobs:
         run: |
           # Check required files exist
           test -f .claude-plugin/plugin.json
-          test -f commands/aida.md
+          test -f skills/aida/SKILL.md
           test -f skills/aida-dispatch/SKILL.md
           echo "Plugin structure valid"
 

@@ -78,10 +78,10 @@ python scripts/install.py
 packages/aida-core-plugin/
 ├── .claude-plugin/               # Plugin metadata (planned)
 │   └── plugin.json
-├── commands/                     # /aida commands (planned)
-│   ├── install.md
-│   ├── configure.md
-│   └── [13 more commands]
+├── skills/                      # /aida skills
+│   ├── aida/                   # Entry point skill
+│   ├── aida-dispatch/          # Dispatch routing
+│   └── [more skills]
 ├── scripts/                      # Python scripts
 │   ├── install.py               # Installation wizard
 │   ├── configure.py             # Configuration wizard (planned)
@@ -453,26 +453,29 @@ def test_get_aida_plugin_dir():
 Add the new function to docs/API.md with proper documentation including parameters,
 return values, and usage examples.
 
-### Adding a New Command (Planned)
+### Adding a New Skill
 
-**1. Create command markdown**:
+**1. Create skill directory and SKILL.md**:
 
 ```markdown
-<!-- commands/doctor.md -->
+<!-- skills/doctor/SKILL.md -->
 ---
+type: skill
 name: doctor
 description: Run health check and diagnostics
+version: 0.1.0
+tags:
+  - core
+  - diagnostics
 ---
 
 # /aida doctor
 
 Run health check and diagnostics.
 
-## Usage
+## Activation
 
-\`\`\`bash
-/aida doctor
-\`\`\`
+This skill activates when the user runs `/aida doctor`.
 
 ## What It Checks
 
@@ -525,19 +528,10 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-**3. Add to plugin.json**:
+**3. Register in dispatch skill**:
 
-```json
-{
-  "commands": [
-    {
-      "name": "doctor",
-      "script": "scripts/doctor.py",
-      "description": "Run health check"
-    }
-  ]
-}
-```
+Update `skills/aida-dispatch/SKILL.md` to route the new subcommand
+to your skill.
 
 ### Adding a New Question to Questionnaire
 

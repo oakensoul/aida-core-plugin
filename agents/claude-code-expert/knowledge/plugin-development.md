@@ -7,15 +7,14 @@ description: Comprehensive guide to creating, structuring, and distributing Clau
 # Plugin Development
 
 Plugins are the unit of distribution for Claude Code extensions. They package
-agents, commands, skills, and shared resources into installable bundles.
+agents, skills, and shared resources into installable bundles.
 
 ## What is a Plugin?
 
 A plugin is a **distributable package** that contains:
 
 - Agents (expert personas)
-- Commands (user entry points)
-- Skills (automation capabilities)
+- Skills (process definitions + automation capabilities)
 - Shared resources (templates, scripts, references)
 - Metadata for installation and discovery
 
@@ -60,8 +59,6 @@ my-plugin/
 │       └── knowledge/
 │           ├── index.md
 │           └── domain.md
-├── commands/
-│   └── my-command.md
 ├── skills/
 │   └── my-skill/
 │       ├── SKILL.md
@@ -296,8 +293,8 @@ Follow Semantic Versioning (SemVer):
 
 Breaking changes:
 
-- Removing agents, commands, or skills
-- Changing command argument formats
+- Removing agents or skills
+- Changing skill invocation argument formats
 - Incompatible schema changes
 - Renamed entry points
 
@@ -305,7 +302,7 @@ Breaking changes:
 
 New features (backwards compatible):
 
-- Adding new agents, commands, or skills
+- Adding new agents or skills
 - New optional parameters
 - Enhanced functionality
 - New knowledge files
@@ -375,7 +372,7 @@ Include in README.md:
 1. **What it does** - Clear value proposition
 2. **Installation** - How to install
 3. **Quick start** - Basic usage example
-4. **Components** - List of agents/commands/skills
+4. **Components** - List of agents and skills
 5. **Configuration** - Any setup required
 6. **Examples** - Common use cases
 
@@ -408,10 +405,8 @@ For focused functionality:
 
 ```text
 linting-plugin/
-├── commands/
-│   └── lint.md           # Entry point
 └── skills/
-    └── linting/          # The automation
+    └── lint/             # Entry point + automation
 ```
 
 ### Toolkit Plugin
@@ -422,12 +417,10 @@ For related tools:
 testing-toolkit/
 ├── agents/
 │   └── test-advisor/     # Strategy guidance
-├── commands/
-│   ├── test.md           # Run tests
-│   └── coverage.md       # Coverage reports
 └── skills/
-    ├── test-runner/      # Execution
-    └── coverage/         # Analysis
+    ├── test/             # Run tests (user-invocable)
+    ├── coverage/         # Coverage reports (user-invocable)
+    └── test-runner/      # Execution (internal)
 ```
 
 ### Framework Plugin
@@ -438,9 +431,8 @@ For framework-specific support:
 react-plugin/
 ├── agents/
 │   └── react-expert/     # React expertise
-├── commands/
-│   └── react.md          # Namespace command
 └── skills/
+    ├── react/            # Namespace skill (user-invocable)
     ├── component-gen/    # Component generation
     └── hooks/            # Hook templates
 ```
@@ -471,7 +463,7 @@ template_path = plugin_dir / "templates" / "my-template.jinja2"
 
 ### Missing Components
 
-**Problem:** Commands reference skills that don't exist.
+**Problem:** Skills reference other skills that don't exist.
 
 **Solution:**
 

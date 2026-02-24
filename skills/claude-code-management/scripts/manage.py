@@ -2,7 +2,7 @@
 """Claude Code Management Script - Unified Two-Phase API
 
 This script provides a unified entry point for managing Claude Code artifacts:
-- Extensions: agents, commands, skills, plugins
+- Extensions: agents, skills, plugins
 - Hooks: lifecycle automation (settings.json)
 - Configuration: CLAUDE.md files
 
@@ -89,7 +89,7 @@ def is_claude_md_operation(context: Dict[str, Any]) -> bool:
 
     # Has scope (CLAUDE.md specific)
     if "scope" in context and context.get("type") not in [
-        "agent", "command", "skill", "plugin", "hook"
+        "agent", "skill", "plugin", "hook"
     ]:
         return True
 

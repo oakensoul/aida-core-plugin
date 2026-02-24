@@ -1,11 +1,12 @@
 ---
-type: command
+type: skill
 name: aida
-description: AIDA command dispatcher - routes to aida-dispatch skill for configuration, diagnostics, feedback, extension management, session persistence, and CLAUDE.md management
-version: 0.7.0
+description: AIDA command dispatcher - routes to aida-dispatch skill for configuration,
+  diagnostics, feedback, extension management, session persistence, and CLAUDE.md management
+version: 0.8.0
 tags:
   - core
-args: ""
+user-invocable: true
 allowed-tools: "*"
 argument-hint: "[command] [subcommand] [options]"
 ---
@@ -22,4 +23,4 @@ Use Skill tool with: skill = "aida-core:aida-dispatch"
 
 The skill contains all command routing logic, help text, and execution workflows.
 
-This command file is ONLY a redirect - it has no implementation.
+This skill file is ONLY a redirect - it has no implementation.

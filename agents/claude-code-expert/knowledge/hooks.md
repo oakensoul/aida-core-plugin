@@ -12,15 +12,15 @@ actions always happen rather than relying on the LLM to choose.
 
 ## Hooks vs Other Extension Types
 
-| Aspect | Hooks | Commands/Skills |
-| ------ | ----- | --------------- |
+| Aspect | Hooks | Skills |
+| ------ | ----- | ------ |
 | **Trigger** | Automatic (lifecycle events) | Manual (user invocation) |
 | **Control** | Deterministic | LLM-guided |
 | **Purpose** | Enforcement, automation | Workflows, expertise |
 | **Execution** | Shell commands | Claude orchestration |
 
 **Use Hooks for:** Things that MUST happen (formatting, logging, blocking)
-**Use Commands/Skills for:** Things that SHOULD happen (workflows, analysis)
+**Use Skills for:** Things that SHOULD happen (workflows, analysis)
 
 ## Hook Lifecycle Events
 

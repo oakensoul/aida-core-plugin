@@ -25,12 +25,11 @@ Create a skill when you need:
 - **Execution scripts** - Python/bash scripts that perform actions
 - **Templates** - Jinja2 templates for generating files
 - **Reference materials** - Documentation Claude should follow
-- **Reusable capabilities** - Tools used across multiple commands
+- **Reusable capabilities** - Tools used across multiple skills
 
 Don't create a skill for:
 
 - Domain expertise (use an [agent](HOWTO_CREATE_AGENT.md))
-- Workflow procedures (use a [command](HOWTO_CREATE_COMMAND.md))
 - Background context (use a knowledge file in an agent)
 
 ## Interactive Creation
@@ -241,10 +240,10 @@ DROP TABLE IF EXISTS {{ table_name }};
 
 ## Using Your Skill
 
-Skills are invoked from commands or directly by Claude:
+Skills are invoked directly by Claude or from other skills:
 
 ```markdown
-# In a command definition:
+# In a skill definition:
 
 ### Step 3: Create Migration
 
@@ -267,7 +266,6 @@ python {skill:db-migrate}/scripts/migrate.py --create "{{ migration_name }}"
 ### Don't
 
 - Include domain expertise (use agents)
-- Define workflows (use commands)
 - Hardcode project-specific values
 
 ## Examples
@@ -313,5 +311,4 @@ python {skill:db-migrate}/scripts/migrate.py --create "{{ migration_name }}"
 ## Next Steps
 
 - [Create an Agent](HOWTO_CREATE_AGENT.md) - Add expertise for your skill
-- [Create a Command](HOWTO_CREATE_COMMAND.md) - Define workflows using your skill
 - [Extension Framework](EXTENSION_FRAMEWORK.md) - Understand the architecture

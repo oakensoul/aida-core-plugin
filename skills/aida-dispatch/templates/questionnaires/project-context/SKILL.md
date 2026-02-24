@@ -26,7 +26,8 @@ This skill should be invoked when you need to:
 - Get context about the project's focus areas and active development
 - Reference project-specific conventions or patterns
 
-The skill uses progressive disclosure - supporting files are only loaded when the skill is invoked, keeping token usage efficient.
+The skill uses progressive disclosure - supporting files are only loaded when
+the skill is invoked, keeping token usage efficient.
 
 ## Supporting Files
 

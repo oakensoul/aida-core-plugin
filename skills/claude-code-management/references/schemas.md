@@ -15,7 +15,7 @@ These fields are required for all component types:
 
 | Field         | Type   | Required | Pattern               | Description                                  |
 | ------------- | ------ | -------- | --------------------- | -------------------------------------------- |
-| `type`        | string | Yes      | enum                  | Component type: `agent`, `command`, `skill`  |
+| `type`        | string | Yes      | enum                  | Component type: `agent`, `skill`             |
 | `name`        | string | Yes      | `^[a-z][a-z0-9-]*$`   | Unique identifier (2-50 chars)               |
 | `description` | string | Yes      | -                     | Purpose description (10-500 chars)           |
 | `version`     | string | Yes      | `^\d+\.\d+\.\d+$`     | Semantic version                             |
@@ -58,38 +58,6 @@ agents/
         └── domain.md    # Domain-specific docs
 ```
 
-## Command Schema
-
-```yaml
----
-type: command
-name: my-command
-description: Command that performs a specific action
-version: 0.1.0
-tags:
-  - core
-  - utility
-args: ""                    # Argument specification
-allowed-tools: "*"          # Tools this command can use
-argument-hint: "[options]"  # Help text for arguments
----
-```
-
-### Command-Specific Fields
-
-| Field           | Type   | Required | Description               |
-| --------------- | ------ | -------- | ------------------------- |
-| `args`          | string | No       | Argument specification    |
-| `allowed-tools` | string | No       | Tools allowed (`*` = all) |
-| `argument-hint` | string | No       | Hint shown for arguments  |
-
-### Command File Location
-
-```text
-commands/
-└── my-command.md    # Command definition
-```
-
 ## Skill Schema
 
 ```yaml
@@ -101,8 +69,20 @@ version: 0.1.0
 tags:
   - core
   - automation
+user-invocable: true          # Optional: allow /skill-name invocation
+argument-hint: "[args]"       # Optional: shown to user at invocation
+allowed-tools: "Read,Bash"    # Optional: restrict tool access
 ---
 ```
+
+### Skill-Specific Fields
+
+| Field                      | Type    | Required | Description                            |
+| -------------------------- | ------- | -------- | -------------------------------------- |
+| `user-invocable`           | boolean | No       | Allow `/skill-name` invocation         |
+| `argument-hint`            | string  | No       | Hint shown to user at invocation       |
+| `allowed-tools`            | string  | No       | Restrict tool access (e.g., `"*"`)     |
+| `disable-model-invocation` | boolean | No       | Prevent model from invoking the skill  |
 
 ### Skill Directory Structure
 
@@ -269,7 +249,6 @@ my-plugin/
 │   ├── plugin.json       # Standard Claude Code metadata
 │   └── aida-config.json  # AIDA config + permissions
 ├── agents/               # Plugin agents
-├── commands/             # Plugin commands
 ├── skills/               # Plugin skills
 ├── templates/            # Optional: shared templates
 ├── README.md             # Plugin documentation
