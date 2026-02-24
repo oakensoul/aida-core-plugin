@@ -23,8 +23,8 @@ to develop and publish.
 
 This skill activates when:
 
-- User invokes `/aida plugin scaffold` or `/aida plugin new`
-- Routed from `aida-dispatch` for plugin scaffolding commands
+- User invokes `/aida plugin scaffold`
+- Routed from `aida` skill for plugin scaffolding commands
 
 ## Path Resolution
 

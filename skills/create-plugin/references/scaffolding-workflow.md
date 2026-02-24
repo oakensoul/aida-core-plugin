@@ -9,7 +9,7 @@ Detailed reference for the create-plugin scaffolding process.
 
 ## End-to-End Flow
 
-1. User invokes `/aida plugin scaffold` or `/aida plugin new`
+1. User invokes `/aida plugin scaffold`
 2. Dispatch routes to `create-plugin` skill
 3. Skill runs `scaffold.py --get-questions` with any provided context
 4. Script infers git config, checks gh availability, returns questions

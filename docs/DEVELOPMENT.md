@@ -79,8 +79,7 @@ packages/aida-core-plugin/
 ├── .claude-plugin/               # Plugin metadata (planned)
 │   └── plugin.json
 ├── skills/                      # /aida skills
-│   ├── aida/                   # Entry point skill
-│   ├── aida-dispatch/          # Dispatch routing
+│   ├── aida/                   # /aida skill - routing, scripts, references, templates
 │   └── [more skills]
 ├── scripts/                      # Python scripts
 │   ├── install.py               # Installation wizard
@@ -530,7 +529,7 @@ if __name__ == "__main__":
 
 **3. Register in dispatch skill**:
 
-Update `skills/aida-dispatch/SKILL.md` to route the new subcommand
+Update `skills/aida/SKILL.md` to route the new subcommand
 to your skill.
 
 ### Adding a New Question to Questionnaire
