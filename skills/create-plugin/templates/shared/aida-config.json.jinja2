@@ -1,7 +1,7 @@
 {
   "config": {
-    "label": "{{ plugin_display_name }} Configuration",
-    "description": "Configure {{ plugin_display_name }} preferences",
+    "label": {{ (plugin_display_name + " Configuration") | tojson }},
+    "description": {{ ("Configure " + plugin_display_name + " preferences") | tojson }},
     "preferences": []
   },
   "recommendedPermissions": {},

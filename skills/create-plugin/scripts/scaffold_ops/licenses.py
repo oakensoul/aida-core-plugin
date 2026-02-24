@@ -135,4 +135,7 @@ def get_license_text(license_id: str, year: str, author_name: str) -> str:
             f"Supported: {', '.join(SUPPORTED_LICENSES)}"
         )
 
-    return LICENSES[license_id].format(year=year, author_name=author_name)
+    text = LICENSES[license_id]
+    text = text.replace("{year}", year)
+    text = text.replace("{author_name}", author_name)
+    return text

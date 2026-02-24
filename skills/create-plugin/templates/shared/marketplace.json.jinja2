@@ -1,15 +1,15 @@
 {
-  "name": "{{ plugin_display_name }}",
+  "name": {{ plugin_display_name | tojson }},
   "owner": {
-    "name": "{{ author_name }}",
-    "email": "{{ author_email }}"
+    "name": {{ author_name | tojson }},
+    "email": {{ author_email | tojson }}
   },
-  "description": "{{ description }}",
+  "description": {{ description | tojson }},
   "plugins": [
     {
-      "name": "{{ plugin_name }}",
-      "description": "{{ description }}",
-      "version": "{{ version }}",
+      "name": {{ plugin_name | tojson }},
+      "description": {{ description | tojson }},
+      "version": {{ version | tojson }},
       "source": "./"
     }
   ]
