@@ -652,7 +652,7 @@ None in current design. All operations are synchronous for simplicity.
 **Claude Code Plugin Loading**:
 
 - Claude Code emits "plugin load" event
-- AIDA registers commands and skills
+- AIDA registers skills
 
 ## Error Handling
 

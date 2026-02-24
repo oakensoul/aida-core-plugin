@@ -14,7 +14,7 @@ AIDA Development Project
 
 ## Testing Focus
 
-- Command execution
+- Skill execution
 - Memory system
 - Workflow automation
 - Plugin loading

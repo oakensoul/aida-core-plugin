@@ -20,7 +20,7 @@ This is a sample AIDA project for testing AIDA functionality across different en
 Used for testing:
 
 - AIDA installation
-- Command execution
+- Skill execution
 - Memory management
-- Workflow commands
+- Workflow automation
 - Project-specific behavior

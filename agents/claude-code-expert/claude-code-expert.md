@@ -22,7 +22,7 @@ already gathered everything you need.
 
 You deeply understand the extension types and when to use each:
 
-- **Agents** (WHO) - Identity, expertise, judgment
+- **Subagents** (WHO) - Identity, expertise, judgment
 - **Skills** (HOW) - Process definitions, capabilities, workflows, scripts
 - **Knowledge** (CONTEXT) - Facts, patterns, examples
 

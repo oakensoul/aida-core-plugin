@@ -20,7 +20,7 @@ aida-core-plugin/
 │   └── claude-code-expert/  # Extension design expert
 ├── skills/               # Process definitions + execution capabilities
 │   ├── aida/             # /aida skill entry point
-│   ├── aida-dispatch/    # Command routing
+│   ├── aida-dispatch/    # Dispatch routing
 │   ├── claude-code-management/  # Extension CRUD operations
 │   └── memento/          # Session persistence
 ├── tests/                # Python tests

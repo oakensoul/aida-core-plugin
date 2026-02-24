@@ -92,7 +92,7 @@ Resume later with:
 
 ## Key Concepts
 
-AIDA extends Claude Code with specialized capabilities organized into three types:
+AIDA extends Claude Code with specialized capabilities organized into two types:
 
 ### Agents
 
@@ -101,21 +101,16 @@ AIDA extends Claude Code with specialized capabilities organized into three type
 - `aida` - AIDA assistant for configuration and management
 - `claude-code-expert` - Expert on Claude Code extension patterns
 
-### Commands
-
-**WHAT** - User-invoked actions via `/aida [action]`:
-
-- `/aida config` - Configure AIDA settings
-- `/aida status` - Check installation status
-- `/aida doctor` - Run diagnostics
-- `/aida memento` - Manage session persistence
-
 ### Skills
 
-**HOW** - Background knowledge that Claude automatically uses:
+**HOW** - Process definitions, workflows, and execution capabilities:
 
-- `user-context` - Your environment and preferences
-- `project-context` - Project-specific patterns and conventions
+- `/aida config` - Configure AIDA settings (user-invocable)
+- `/aida status` - Check installation status (user-invocable)
+- `/aida doctor` - Run diagnostics (user-invocable)
+- `/aida memento` - Manage session persistence (user-invocable)
+- `user-context` - Your environment and preferences (auto-triggered)
+- `project-context` - Project-specific patterns and conventions (auto-triggered)
 
 ## Next Steps
 
@@ -127,11 +122,10 @@ Save and restore context across sessions:
 
 ### Create Custom Extensions
 
-Build your own agents, commands, and skills:
+Build your own agents and skills:
 
 - [Creating Agents](HOWTO_CREATE_AGENT.md) - Expert personas
-- [Creating Commands](HOWTO_CREATE_COMMAND.md) - Workflows and procedures
-- [Creating Skills](HOWTO_CREATE_SKILL.md) - Execution capabilities
+- [Creating Skills](HOWTO_CREATE_SKILL.md) - Workflows and execution capabilities
 - [Using Hooks](HOWTO_HOOKS.md) - Lifecycle automation
 
 ### Explore Examples

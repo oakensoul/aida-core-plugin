@@ -80,7 +80,7 @@ packages/aida-core-plugin/
 │   └── plugin.json
 ├── skills/                      # /aida skills
 │   ├── aida/                   # Entry point skill
-│   ├── aida-dispatch/          # Command routing
+│   ├── aida-dispatch/          # Dispatch routing
 │   └── [more skills]
 ├── scripts/                      # Python scripts
 │   ├── install.py               # Installation wizard
