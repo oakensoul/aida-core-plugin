@@ -5,12 +5,12 @@ title: Plugin Scaffolding Workflow
 
 # Plugin Scaffolding Workflow
 
-Detailed reference for the create-plugin scaffolding process.
+Detailed reference for the plugin-manager scaffolding process.
 
 ## End-to-End Flow
 
 1. User invokes `/aida plugin scaffold`
-2. Dispatch routes to `create-plugin` skill
+2. Dispatch routes to `plugin-manager` skill
 3. Skill runs `scaffold.py --get-questions` with any provided context
 4. Script infers git config, checks gh availability, returns questions
 5. Skill presents questions to user, collects answers

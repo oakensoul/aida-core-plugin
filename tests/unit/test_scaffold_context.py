@@ -1,4 +1,4 @@
-"""Unit tests for create-plugin context operations."""
+"""Unit tests for plugin-manager context operations."""
 
 import os
 import sys
@@ -9,11 +9,16 @@ from unittest.mock import patch, MagicMock
 
 # Add scripts directories to path
 _project_root = Path(__file__).parent.parent.parent
-_scaffold_scripts = _project_root / "skills" / "create-plugin" / "scripts"
+_plugin_scripts = _project_root / "skills" / "plugin-manager" / "scripts"
 sys.path.insert(0, str(_project_root / "scripts"))
-sys.path.insert(0, str(_scaffold_scripts))
+sys.path.insert(0, str(_plugin_scripts))
 
-from scaffold_ops.context import (  # noqa: E402
+# Clear cached operations modules to avoid cross-manager conflicts in pytest
+for _mod_name in list(sys.modules):
+    if _mod_name == "operations" or _mod_name.startswith("operations."):
+        del sys.modules[_mod_name]
+
+from operations.scaffold_ops.context import (  # noqa: E402
     infer_git_config,
     validate_target_directory,
     check_gh_available,
@@ -24,7 +29,7 @@ from scaffold_ops.context import (  # noqa: E402
 class TestInferGitConfig(unittest.TestCase):
     """Test git config inference."""
 
-    @patch("scaffold_ops.context.subprocess.run")
+    @patch("operations.scaffold_ops.context.subprocess.run")
     def test_success(self, mock_run):
         """Should return name and email from git config."""
         def side_effect(cmd, **kwargs):
@@ -41,7 +46,7 @@ class TestInferGitConfig(unittest.TestCase):
         self.assertEqual(config["author_name"], "Test User")
         self.assertEqual(config["author_email"], "test@example.com")
 
-    @patch("scaffold_ops.context.subprocess.run")
+    @patch("operations.scaffold_ops.context.subprocess.run")
     def test_failure(self, mock_run):
         """Should return empty strings if git config fails."""
         mock_run.side_effect = FileNotFoundError("git not found")
@@ -49,7 +54,7 @@ class TestInferGitConfig(unittest.TestCase):
         self.assertEqual(config["author_name"], "")
         self.assertEqual(config["author_email"], "")
 
-    @patch("scaffold_ops.context.subprocess.run")
+    @patch("operations.scaffold_ops.context.subprocess.run")
     def test_partial_failure(self, mock_run):
         """Should return partial results if one config fails."""
         def side_effect(cmd, **kwargs):
@@ -132,19 +137,19 @@ class TestValidateTargetDirectory(unittest.TestCase):
 class TestCheckGhAvailable(unittest.TestCase):
     """Test GitHub CLI availability check."""
 
-    @patch("scaffold_ops.context.subprocess.run")
+    @patch("operations.scaffold_ops.context.subprocess.run")
     def test_available(self, mock_run):
         """Should return True when gh is available."""
         mock_run.return_value = MagicMock(returncode=0)
         self.assertTrue(check_gh_available())
 
-    @patch("scaffold_ops.context.subprocess.run")
+    @patch("operations.scaffold_ops.context.subprocess.run")
     def test_not_available(self, mock_run):
         """Should return False when gh is not installed."""
         mock_run.side_effect = FileNotFoundError("gh not found")
         self.assertFalse(check_gh_available())
 
-    @patch("scaffold_ops.context.subprocess.run")
+    @patch("operations.scaffold_ops.context.subprocess.run")
     def test_timeout(self, mock_run):
         """Should return False on timeout."""
         import subprocess

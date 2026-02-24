@@ -58,14 +58,15 @@ _PROJECT_ROOT = _SKILL_DIR.parent.parent
 SCAFFOLD_TEMPLATES_DIR = _SKILL_DIR / "templates" / "scaffold"
 EXTENSION_TEMPLATES_DIR = _SKILL_DIR / "templates" / "extension"
 
-# CCM templates for agent/skill stubs -- these reference the
-# claude-code-management templates which contain agent.md.jinja2
-# and SKILL.md.jinja2 used by render_stub_agent/skill.
-CCM_TEMPLATES_DIR = (
-    _PROJECT_ROOT
-    / "skills"
-    / "claude-code-management"
-    / "templates"
+# Stub templates for agent/skill stubs live in their respective
+# manager skills.  The render_stub_agent/skill helpers expect a
+# base directory containing ``agent/agent.md.jinja2`` or
+# ``skill/SKILL.md.jinja2`` respectively.
+AGENT_TEMPLATES_DIR = (
+    _PROJECT_ROOT / "skills" / "agent-manager" / "templates"
+)
+SKILL_TEMPLATES_DIR = (
+    _PROJECT_ROOT / "skills" / "skill-manager" / "templates"
 )
 
 GENERATOR_VERSION = "0.9.0"
@@ -487,7 +488,7 @@ def execute(context: dict[str, Any]) -> dict[str, Any]:
                 target,
                 variables["agent_stub_name"],
                 variables["agent_stub_description"],
-                CCM_TEMPLATES_DIR,
+                AGENT_TEMPLATES_DIR,
                 timestamp=variables["timestamp"],
             )
             all_files.extend(stub_files)
@@ -498,7 +499,7 @@ def execute(context: dict[str, Any]) -> dict[str, Any]:
                 variables["skill_stub_name"],
                 variables["skill_stub_description"],
                 language,
-                CCM_TEMPLATES_DIR,
+                SKILL_TEMPLATES_DIR,
                 timestamp=variables["timestamp"],
             )
             all_files.extend(stub_files)

@@ -1,7 +1,8 @@
 """Shared utilities for AIDA Core Plugin scripts.
 
-Common functions used across multiple skills including
-claude-code-management and create-plugin.
+Common functions used across multiple manager skills including
+agent-manager, skill-manager, plugin-manager, hook-manager,
+and claude-md-manager.
 """
 
 import json

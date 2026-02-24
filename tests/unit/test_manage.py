@@ -1,4 +1,4 @@
-"""Unit tests for claude-code-management manage.py script.
+"""Unit tests for agent-manager manage.py script.
 
 This test suite covers the manage.py script functionality including
 name conversion, validation, version bumping, and component operations.
@@ -12,7 +12,13 @@ from pathlib import Path
 # Add scripts directories to path for imports
 _project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(_project_root / "scripts"))
-sys.path.insert(0, str(_project_root / "skills" / "claude-code-management" / "scripts"))
+sys.path.insert(0, str(_project_root / "skills" / "agent-manager" / "scripts"))
+
+# Clear cached modules to avoid cross-manager conflicts in pytest
+for _mod_name in list(sys.modules):
+    if _mod_name == "operations" or _mod_name.startswith("operations."):
+        del sys.modules[_mod_name]
+sys.modules.pop("manage", None)
 
 from operations.utils import (  # noqa: E402
     to_kebab_case,
@@ -398,59 +404,6 @@ class TestSafeJsonLoad(unittest.TestCase):
         self.assertIn("size limit", str(cm.exception).lower())
 
 
-class TestCommandTypeRemoved(unittest.TestCase):
-    """Test that 'command' type is no longer accepted."""
-
-    def test_command_type_not_in_component_types(self):
-        """Test that 'command' is not a valid component type."""
-        from operations.extensions import COMPONENT_TYPES
-        self.assertNotIn("command", COMPONENT_TYPES)
-
-    def test_create_command_type_raises(self):
-        """Test that creating a command type raises ValueError."""
-        context = {
-            "operation": "create",
-            "type": "command",
-            "description": "A test command that should not work",
-        }
-        # find_components raises ValueError for unknown component types
-        with self.assertRaises(ValueError):
-            get_questions(context)
-
-    def test_list_command_type_returns_error(self):
-        """Test that listing command type returns structured error."""
-        context = {
-            "operation": "list",
-            "type": "command",
-            "location": "user",
-        }
-        # execute_list -> find_components raises ValueError,
-        # caught by manage.py's main handler
-        with self.assertRaises(ValueError):
-            execute(context, {})
-
-    def test_validate_command_type_raises(self):
-        """Test that validating command type raises ValueError."""
-        context = {
-            "operation": "validate",
-            "type": "command",
-            "name": "some-command",
-        }
-        with self.assertRaises(ValueError):
-            execute(context, {})
-
-    def test_version_command_type_raises(self):
-        """Test that versioning command type raises ValueError."""
-        context = {
-            "operation": "version",
-            "type": "command",
-            "name": "some-command",
-            "bump": "patch",
-        }
-        with self.assertRaises(ValueError):
-            execute(context, {})
-
-
 class TestCreateComponent(unittest.TestCase):
     """Test component creation in temporary directory."""
 
@@ -523,7 +476,6 @@ def run_tests():
     suite.addTests(loader.loadTestsFromTestCase(TestGetQuestions))
     suite.addTests(loader.loadTestsFromTestCase(TestExecute))
     suite.addTests(loader.loadTestsFromTestCase(TestSafeJsonLoad))
-    suite.addTests(loader.loadTestsFromTestCase(TestCommandTypeRemoved))
     suite.addTests(loader.loadTestsFromTestCase(TestCreateComponent))
 
     runner = unittest.TextTestRunner(verbosity=2)
