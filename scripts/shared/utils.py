@@ -11,11 +11,11 @@ from pathlib import Path
 from typing import Any, Optional
 
 
-def safe_json_load(json_str: str) -> dict[str, Any]:
+def safe_json_load(json_str: Optional[str]) -> dict[str, Any]:
     """Safely load JSON string with size limits.
 
     Args:
-        json_str: JSON string to parse
+        json_str: JSON string to parse, or None
 
     Returns:
         Parsed dictionary
@@ -149,12 +149,22 @@ def bump_version(version: str, bump_type: str) -> str:
         patch = 0
     elif bump_type == "patch":
         patch += 1
+    else:
+        raise ValueError(
+            f"Invalid bump_type: {bump_type!r}. "
+            "Must be 'major', 'minor', or 'patch'"
+        )
 
     return f"{major}.{minor}.{patch}"
 
 
 def parse_frontmatter(content: str) -> tuple[dict[str, Any], str]:
     """Parse YAML frontmatter from markdown content.
+
+    Uses simple line-by-line parsing (not a full YAML parser). Known
+    limitations: does not handle multi-line values, block scalars, nested
+    objects, or list items as values. Values containing colons are handled
+    via split(':', 1). For full YAML support, use PyYAML directly.
 
     Args:
         content: Full markdown content
@@ -230,8 +240,10 @@ def get_project_root() -> Path:
     return cwd
 
 
-# Location mappings for extensions - computed at import time for backward
-# compatibility (existing code references LOCATION_PATHS directly)
+# DEPRECATED: Computed at import time; "project" path may be stale if cwd
+# changes after import. Use get_location_path() instead for runtime-correct
+# paths. Kept for backward compatibility with existing code that references
+# LOCATION_PATHS directly.
 LOCATION_PATHS = {
     "user": Path.home() / ".claude",
     "project": Path.cwd() / ".claude",

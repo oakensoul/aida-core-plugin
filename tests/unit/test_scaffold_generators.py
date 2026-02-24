@@ -18,6 +18,7 @@ from scaffold_ops.generators import (  # noqa: E402
     assemble_gitignore,
     assemble_makefile,
     initialize_git,
+    create_initial_commit,
 )
 
 TEMPLATES_DIR = _project_root / "skills" / "create-plugin" / "templates"
@@ -32,6 +33,7 @@ class TestCreateDirectoryStructure(unittest.TestCase):
             target = Path(tmp)
             created = create_directory_structure(target, "python")
             self.assertIn(".claude-plugin", created)
+            self.assertIn(".github/workflows", created)
             self.assertIn("agents", created)
             self.assertIn("skills", created)
             self.assertIn("scripts", created)
@@ -41,6 +43,7 @@ class TestCreateDirectoryStructure(unittest.TestCase):
             self.assertTrue((target / ".claude-plugin").is_dir())
             self.assertTrue((target / "scripts").is_dir())
             self.assertTrue((target / "tests").is_dir())
+            self.assertTrue((target / ".github" / "workflows").is_dir())
 
     def test_typescript_structure(self):
         """Should create TypeScript-specific directories."""
@@ -48,6 +51,7 @@ class TestCreateDirectoryStructure(unittest.TestCase):
             target = Path(tmp)
             created = create_directory_structure(target, "typescript")
             self.assertIn(".claude-plugin", created)
+            self.assertIn(".github/workflows", created)
             self.assertIn("agents", created)
             self.assertIn("skills", created)
             self.assertIn("src", created)
@@ -57,6 +61,7 @@ class TestCreateDirectoryStructure(unittest.TestCase):
             self.assertTrue((target / ".claude-plugin").is_dir())
             self.assertTrue((target / "src").is_dir())
             self.assertTrue((target / "tests").is_dir())
+            self.assertTrue((target / ".github" / "workflows").is_dir())
 
     def test_python_does_not_create_src(self):
         """Python should not create src/ directory."""
@@ -231,6 +236,41 @@ class TestInitializeGit(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             result = initialize_git(Path(tmp))
             self.assertFalse(result)
+
+
+class TestCreateInitialCommit(unittest.TestCase):
+    """Test initial commit creation."""
+
+    @patch("scaffold_ops.generators.subprocess.run")
+    def test_success(self, mock_run):
+        """Should return True when both add and commit succeed."""
+        mock_run.return_value = MagicMock(returncode=0)
+        result = create_initial_commit(Path("/tmp/test"))
+        self.assertTrue(result)
+        self.assertEqual(mock_run.call_count, 2)
+
+    @patch("scaffold_ops.generators.subprocess.run")
+    def test_failure_on_add(self, mock_run):
+        """Should return False when git add fails."""
+        mock_run.return_value = MagicMock(returncode=1)
+        result = create_initial_commit(Path("/tmp/test"))
+        self.assertFalse(result)
+
+    @patch("scaffold_ops.generators.subprocess.run")
+    def test_failure_on_commit(self, mock_run):
+        """Should return False when git commit fails after add succeeds."""
+        add_result = MagicMock(returncode=0)
+        commit_result = MagicMock(returncode=1)
+        mock_run.side_effect = [add_result, commit_result]
+        result = create_initial_commit(Path("/tmp/test"))
+        self.assertFalse(result)
+
+    @patch("scaffold_ops.generators.subprocess.run")
+    def test_failure_on_file_not_found(self, mock_run):
+        """Should return False when git is not available."""
+        mock_run.side_effect = FileNotFoundError("git not found")
+        result = create_initial_commit(Path("/tmp/test"))
+        self.assertFalse(result)
 
 
 if __name__ == "__main__":

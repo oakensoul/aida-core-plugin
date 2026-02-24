@@ -2,9 +2,25 @@
   "config": {
     "label": {{ (plugin_display_name + " Configuration") | tojson }},
     "description": {{ ("Configure " + plugin_display_name + " preferences") | tojson }},
-    "preferences": []
+    "preferences": [
+      {
+        "key": {{ (plugin_name + ".enabled") | tojson }},
+        "type": "boolean",
+        "label": {{ ("Enable " + plugin_display_name) | tojson }},
+        "default": true,
+        "required": true
+      }
+    ]
   },
   "recommendedPermissions": {},
-  "agents": [],
-  "skills": []
+  "agents": [
+    {% for name in [agent_stub_name] if include_agent_stub %}
+    {{ name | tojson }}{{ "," if not loop.last else "" }}
+    {% endfor %}
+  ],
+  "skills": [
+    {% for name in [skill_stub_name] if include_skill_stub %}
+    {{ name | tojson }}{{ "," if not loop.last else "" }}
+    {% endfor %}
+  ]
 }
