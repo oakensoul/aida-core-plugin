@@ -160,7 +160,7 @@ Python script
 
 #### File
 
-`skills/aida-dispatch/scripts/install.py`
+`skills/aida/scripts/install.py`
 
 #### Responsibilities
 
@@ -196,7 +196,7 @@ Python script
 
 #### File
 
-`skills/aida-dispatch/scripts/configure.py`
+`skills/aida/scripts/configure.py`
 
 #### Responsibilities
 
@@ -231,7 +231,7 @@ Python script
 
 #### File
 
-`skills/aida-dispatch/scripts/feedback.py`
+`skills/aida/scripts/feedback.py`
 
 #### Responsibilities
 
@@ -293,7 +293,7 @@ Python script
 
 #### File
 
-`skills/aida-dispatch/scripts/upgrade.py`
+`skills/aida/scripts/upgrade.py`
 
 #### Responsibilities
 
@@ -321,7 +321,7 @@ Python script
 
 #### File
 
-`skills/aida-dispatch/scripts/status.py`
+`skills/aida/scripts/status.py`
 
 #### Responsibilities
 
@@ -341,7 +341,7 @@ Python script
 
 #### File
 
-`skills/aida-dispatch/scripts/doctor.py`
+`skills/aida/scripts/doctor.py`
 
 #### Responsibilities
 
@@ -361,7 +361,7 @@ Python package
 
 #### Location
 
-`skills/aida-dispatch/scripts/utils/`
+`skills/aida/scripts/utils/`
 
 #### Purpose
 
@@ -536,7 +536,7 @@ Files (Jinja2 .jinja2, YAML .yml)
 
 #### Location
 
-`skills/aida-dispatch/templates/`
+`skills/aida/templates/`
 
 #### Responsibilities
 
@@ -547,7 +547,7 @@ Files (Jinja2 .jinja2, YAML .yml)
 #### Contents
 
 ```text
-skills/aida-dispatch/templates/
+skills/aida/templates/
 ├── blueprints/
 │   ├── user-context/
 │   │   └── SKILL.md.jinja2
