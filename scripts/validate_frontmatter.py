@@ -3,7 +3,7 @@
 
 All markdown files must have frontmatter with a 'type' field that determines
 which validation rules apply. Supported types:
-  - skill, agent, command: require name, description, version, tags
+  - skill, agent: require name, description, version, tags
   - adr: requires title, status, date
   - documentation, guide, reference, readme: require title
   - diagram: requires title, diagram-type
@@ -47,6 +47,8 @@ IGNORE_PATTERNS = [
     '.ruff_cache',
     'venv',
     '.venv',
+    'issues',
+    '.issues',
 ]
 
 

@@ -10,8 +10,7 @@
 # Core agents and their knowledge
 /agents/ @oakensoul
 
-# Commands and skills
-/commands/ @oakensoul
+# Skills
 /skills/ @oakensoul
 
 # Documentation

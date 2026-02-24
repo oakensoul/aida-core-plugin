@@ -1,13 +1,13 @@
 ---
 type: documentation
-title: "Command Examples"
-description: "Real-world examples of using AIDA commands in different scenarios"
+title: "AIDA Examples"
+description: "Real-world examples of using AIDA skills in different scenarios"
 audience: users
 ---
 
-# AIDA Command Examples
+# AIDA Examples
 
-Real-world examples of using AIDA commands in different scenarios.
+Real-world examples of using AIDA skills in different scenarios.
 
 ## Scenario 1: New Developer Setup
 

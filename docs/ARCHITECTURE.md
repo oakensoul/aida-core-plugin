@@ -44,7 +44,7 @@ architecture for personal and project-specific context management.
 
 1. **< 5 Minute Setup**: Fast onboarding with intelligent defaults
 2. **Lovable UX**: Delightful interactions, not just functional
-3. **Extensibility**: Users can create their own skills/commands/agents
+3. **Extensibility**: Users can create their own skills and agents
 4. **Cross-Platform**: Works on macOS, Linux, and WSL
 5. **Maintainability**: Clean separation of concerns
 
@@ -117,12 +117,10 @@ See [C4 Diagrams](architecture/c4/) for visual representations.
 │  ┌───────────────────────────────────────────────────┐ │
 │  │           AIDA Core Plugin                        │ │
 │  │                                                   │ │
-│  │  ┌─────────────┐  ┌──────────────┐              │ │
-│  │  │  Commands   │  │    Skills     │              │ │
-│  │  │  (15 /aida) │  │  (auto-load)  │              │ │
-│  │  └──────┬──────┘  └───────┬───────┘              │ │
-│  │         │                 │                       │ │
-│  │         └────────┬────────┘                       │ │
+│  │  ┌──────────────────────────┐                     │ │
+│  │  │     Skills               │                     │ │
+│  │  │  (user-invocable + auto) │                     │ │
+│  │  └────────────┬─────────────┘                     │ │
 │  │                  │                                │ │
 │  │         ┌────────▼────────┐                       │ │
 │  │         │  Python Scripts  │                       │ │
@@ -159,8 +157,7 @@ See [C4 Diagrams](architecture/c4/) for visual representations.
 
 #### Layer 1: Claude Code Interface
 
-- **Commands**: User-invoked `/aida` commands
-- **Skills**: Auto-loaded context (SKILL.md files)
+- **Skills**: User-invocable and auto-loaded (SKILL.md files)
 - **Agents**: Persona definitions
 
 #### Layer 2: Python Scripts
@@ -474,8 +471,6 @@ Skills Active
 │   └── aida-core/         # This plugin
 │       ├── .claude-plugin/
 │       │   └── plugin.json     # Plugin metadata
-│       ├── commands/
-│       │   └── aida.md             # Command entry point
 │       ├── scripts/
 │       │   ├── install.py
 │       │   ├── feedback.py
@@ -536,26 +531,7 @@ scope: global|project
 Content here...
 ```
 
-### 2. Custom Commands
-
-**Location**: `.claude/commands/` (project)
-
-**Create with**: `/aida command create`
-
-**Structure**:
-
-```markdown
----
-name: my-command
-description: What it does
----
-
-# My Command
-
-Instructions for Claude when user runs /my-command
-```
-
-### 3. Custom Agents
+### 2. Custom Agents
 
 **Location**: `.claude/agents/` (project)
 
@@ -574,14 +550,14 @@ description: Agent persona
 You are [persona description]...
 ```
 
-### 4. Template Customization
+### 3. Template Customization
 
 Users can modify templates in:
 
 - `templates/blueprints/` - Skill templates
 - `templates/questionnaires/` - Question sets
 
-### 5. Python Utilities Extension
+### 4. Python Utilities Extension
 
 Developers can extend the utils module:
 

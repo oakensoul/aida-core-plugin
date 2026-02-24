@@ -7,7 +7,7 @@ tags:
   - core
   - meta
   - configuration
-model: claude-sonnet-4.5
+model: sonnet
 skills:
   - aida-dispatch
   - memento

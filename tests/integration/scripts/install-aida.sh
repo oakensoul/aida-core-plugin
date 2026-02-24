@@ -56,12 +56,6 @@ if [ -d "$PLUGIN_MOUNT/skills" ]; then
     ls -la "$PLUGIN_MOUNT/skills/"
 fi
 
-# Check for commands directory
-if [ -d "$PLUGIN_MOUNT/commands" ]; then
-    log_info "Found commands directory:"
-    ls -la "$PLUGIN_MOUNT/commands/"
-fi
-
 # Check for agents directory
 if [ -d "$PLUGIN_MOUNT/agents" ]; then
     log_info "Found agents directory:"

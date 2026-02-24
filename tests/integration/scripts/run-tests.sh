@@ -117,13 +117,6 @@ test_aida_installation() {
             record_test "Skills directory exists" "fail" "skills/ not found"
         fi
 
-        # Check for commands directory
-        if [ -d "/mnt/aida-plugin/commands" ]; then
-            record_test "Commands directory exists" "pass" ""
-        else
-            record_test "Commands directory exists" "fail" "commands/ not found"
-        fi
-
         # Check for agents directory
         if [ -d "/mnt/aida-plugin/agents" ]; then
             record_test "Agents directory exists" "pass" ""

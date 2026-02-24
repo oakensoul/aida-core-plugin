@@ -16,8 +16,7 @@ graph TB
     Claude[Claude Code CLI]
 
     subgraph "AIDA Core Plugin"
-        Commands[Commands<br/>/aida command<br/>Markdown files]
-        Skills[Skills<br/>Auto-loaded context<br/>SKILL.md files]
+        Skills[Skills<br/>/aida entry points &amp; capabilities<br/>SKILL.md files]
 
         subgraph "Python Scripts"
             InstallScript[install.py<br/>Global setup wizard]
@@ -49,20 +48,19 @@ graph TB
     ProjectFS[Project Storage<br/>.claude/]
     GitHub[GitHub API<br/>via gh CLI]
 
-    User -->|Runs command| Commands
+    User -->|Runs /aida| Skills
     User -->|Interacts with| InstallScript
     User -->|Interacts with| FeedbackScript
 
     Claude -->|Loads| Skills
-    Claude -->|Executes| Commands
 
-    Commands -->|Call| InstallScript
-    Commands -->|Call| ConfigScript
-    Commands -->|Call| FeedbackScript
-    Commands -->|Call| MementoScript
-    Commands -->|Call| UpgradeScript
-    Commands -->|Call| StatusScript
-    Commands -->|Call| DoctorScript
+    Skills -->|Call| InstallScript
+    Skills -->|Call| ConfigScript
+    Skills -->|Call| FeedbackScript
+    Skills -->|Call| MementoScript
+    Skills -->|Call| UpgradeScript
+    Skills -->|Call| StatusScript
+    Skills -->|Call| DoctorScript
 
     InstallScript -->|Uses| VersionUtil
     InstallScript -->|Uses| PathsUtil
@@ -95,7 +93,6 @@ graph TB
 
     style User fill:#08427b
     style Claude fill:#1168bd
-    style Commands fill:#438dd5
     style Skills fill:#438dd5
     style InstallScript fill:#85bbf0
     style ConfigScript fill:#85bbf0
@@ -121,37 +118,6 @@ graph TB
 ```
 
 ## Container Descriptions
-
-### Commands Container
-
-#### Type
-
-Markdown files
-
-#### Technology
-
-Claude Code command system
-
-#### Location
-
-`commands/`
-
-#### Responsibilities
-
-- Define `/aida` command interface
-- Provide user-facing documentation
-- Delegate to Python scripts
-
-#### Contents
-
-- `aida.md` command entry point
-- Defines usage, arguments, examples
-
-#### Interactions
-
-- User invokes commands
-- Commands call Python scripts
-- Claude Code loads and parses
 
 ### Skills Container
 
@@ -686,7 +652,7 @@ None in current design. All operations are synchronous for simplicity.
 **Claude Code Plugin Loading**:
 
 - Claude Code emits "plugin load" event
-- AIDA registers commands and skills
+- AIDA registers skills
 
 ## Error Handling
 

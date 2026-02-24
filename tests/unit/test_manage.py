@@ -396,6 +396,58 @@ class TestSafeJsonLoad(unittest.TestCase):
         self.assertIn("size limit", str(cm.exception).lower())
 
 
+class TestCommandTypeRemoved(unittest.TestCase):
+    """Test that 'command' type is no longer accepted."""
+
+    def test_command_type_not_in_component_types(self):
+        """Test that 'command' is not a valid component type."""
+        from operations.extensions import COMPONENT_TYPES
+        self.assertNotIn("command", COMPONENT_TYPES)
+
+    def test_create_command_type_raises(self):
+        """Test that creating a command type raises KeyError."""
+        context = {
+            "operation": "create",
+            "type": "command",
+            "description": "A test command that should not work",
+        }
+        # get_questions calls find_components which raises KeyError
+        # for unknown types
+        with self.assertRaises(KeyError):
+            get_questions(context)
+
+    def test_list_command_type_raises(self):
+        """Test that listing command type raises KeyError."""
+        context = {
+            "operation": "list",
+            "type": "command",
+            "location": "user",
+        }
+        with self.assertRaises(KeyError):
+            execute(context, {})
+
+    def test_validate_command_type_raises(self):
+        """Test that validating command type raises KeyError."""
+        context = {
+            "operation": "validate",
+            "type": "command",
+            "name": "some-command",
+        }
+        with self.assertRaises(KeyError):
+            execute(context, {})
+
+    def test_version_command_type_raises(self):
+        """Test that versioning command type raises KeyError."""
+        context = {
+            "operation": "version",
+            "type": "command",
+            "name": "some-command",
+            "bump": "patch",
+        }
+        with self.assertRaises(KeyError):
+            execute(context, {})
+
+
 class TestCreateComponent(unittest.TestCase):
     """Test component creation in temporary directory."""
 
@@ -468,6 +520,7 @@ def run_tests():
     suite.addTests(loader.loadTestsFromTestCase(TestGetQuestions))
     suite.addTests(loader.loadTestsFromTestCase(TestExecute))
     suite.addTests(loader.loadTestsFromTestCase(TestSafeJsonLoad))
+    suite.addTests(loader.loadTestsFromTestCase(TestCommandTypeRemoved))
     suite.addTests(loader.loadTestsFromTestCase(TestCreateComponent))
 
     runner = unittest.TextTestRunner(verbosity=2)

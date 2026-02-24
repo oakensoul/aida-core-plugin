@@ -1,7 +1,7 @@
 ---
 type: skill
 name: claude-code-management
-description: Unified management for Claude Code artifacts - extensions (agents, commands, skills, plugins, hooks) and configuration files (CLAUDE.md) using templates and a two-phase API.
+description: Unified management for Claude Code artifacts - extensions (agents, skills, plugins, hooks) and configuration files (CLAUDE.md) using templates and a two-phase API.
 version: 0.4.0
 tags:
   - core
@@ -15,7 +15,7 @@ tags:
 
 Unified management interface for Claude Code artifacts:
 
-- **Extensions**: agents, commands, skills, plugins
+- **Extensions**: agents, skills, plugins
 - **Hooks**: lifecycle automation (settings.json configuration)
 - **Configuration**: CLAUDE.md files
 
@@ -24,7 +24,6 @@ Unified management interface for Claude Code artifacts:
 This skill activates when:
 
 - User invokes `/aida agent [create|validate|version|list]`
-- User invokes `/aida command [create|validate|version|list]`
 - User invokes `/aida skill [create|validate|version|list]`
 - User invokes `/aida plugin [create|validate|version|list|add|remove]`
 - User invokes `/aida hook [list|add|remove|validate]`
@@ -37,7 +36,7 @@ This skill activates when:
 
 Parse the command to determine:
 
-1. **Component type**: `agent`, `command`, `skill`, `plugin`, or `hook`
+1. **Component type**: `agent`, `skill`, `plugin`, or `hook`
 2. **Operation**: `create`, `validate`, `version`, `list`, `add`, `remove`
 3. **Arguments**: name, description, options
 
@@ -220,27 +219,6 @@ Return a JSON object with this exact structure:
     {"path": "agents/{name}/{name}.md", "content": "..."},
     {"path": "agents/{name}/knowledge/index.md", "content": "..."},
     {"path": "agents/{name}/knowledge/{topic}.md", "content": "..."}
-  ],
-  "summary": {
-    "created": ["list of relative paths"],
-    "next_steps": ["actionable items for user"]
-  }
-}
-```
-
-### For Commands
-
-```text
-Output Format:
-Return a JSON object with this exact structure:
-
-{
-  "validation": {
-    "passed": boolean,
-    "issues": [...]
-  },
-  "files": [
-    {"path": "commands/{name}.md", "content": "..."}
   ],
   "summary": {
     "created": ["list of relative paths"],
@@ -616,7 +594,7 @@ User: /aida claude optimize
 - **manage.py** - Main dispatcher script
 - **operations/** - Operation modules
   - **utils.py** - Shared utilities
-  - **extensions.py** - Extension operations (agent/command/skill/plugin)
+  - **extensions.py** - Extension operations (agent/skill/plugin)
   - **claude_md.py** - CLAUDE.md operations
   - **hooks.py** - Hook operations (list/add/remove/validate)
 
