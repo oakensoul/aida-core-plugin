@@ -1,0 +1,25 @@
+
+# Python targets
+.PHONY: lint-py test format install
+
+lint-py: ## Run ruff linter on Python files
+	ruff check .
+
+lint: lint-py lint-md lint-yaml lint-frontmatter ## Run all linters
+
+test: ## Run pytest
+	pytest tests/ -v
+
+format: ## Auto-format Python code
+	ruff check . --fix
+	ruff format .
+
+install: ## Install Python dependencies
+	pip install -e ".[dev]"
+
+clean: ## Remove build artifacts
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete 2>/dev/null || true
+	find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name ".ruff_cache" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
