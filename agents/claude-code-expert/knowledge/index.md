@@ -78,23 +78,53 @@ Contains:
 
 - Settings file locations and precedence
 - Core settings (model, env, permissions, hooks)
+- MCP server configuration (transports, scopes, OAuth)
 - Advanced settings (status line, sandbox, plugins)
+- Expanded sandbox options (network, filesystem, commands)
 - Authentication configuration
 - Environment variables reference
 - Example configurations for different scenarios
 
-### hooks.md
+### skills.md
 
-**When to use:** When implementing deterministic automation via hooks
+**When to use:** When creating or configuring skills (SKILL.md files)
 
 Contains:
 
-- Hook lifecycle events (PreToolUse, PostToolUse, etc.)
+- Skill frontmatter fields and locations
+- Skill discovery and invocation patterns
+- String substitution syntax (`$ARGUMENTS`, `$N`, etc.)
+- Context fork mode for running skills in subagents
+- Agent Skills open standard (agentskills.io)
+- Dynamic context injection with shell preprocessing
+
+### subagents.md
+
+**When to use:** When creating or configuring subagents (.md agent files)
+
+Contains:
+
+- Built-in subagent types (Explore, Plan, Bash, etc.)
+- Subagent frontmatter fields and scopes
+- Permission modes (default, acceptEdits, dontAsk, etc.)
+- Persistent memory for subagents
+- Background execution and worktree isolation
+- Agent teams overview
+
+### hooks.md
+
+**When to use:** When implementing lifecycle automation via hooks
+
+Contains:
+
+- 17 hook lifecycle events across 6 categories
+- 3 hook types: command (deterministic), prompt (LLM), agent (agentic)
 - Configuration structure and matcher patterns
-- Hook execution model (stdin JSON, exit codes)
+- Hook execution model (stdin JSON, exit codes, JSON output)
+- Async hooks for background execution
+- hookSpecificOutput and decision control patterns
 - Security considerations
-- Common patterns (formatting, logging, blocking)
-- Hooks vs other extension types comparison
+- Common patterns (formatting, logging, blocking, quality gates)
 
 ## Quick Reference
 
@@ -111,6 +141,12 @@ Contains:
 | "What goes in plugin.json?"             | plugin-development.md          |
 | "How do I publish a plugin?"            | plugin-development.md          |
 | "How do plugins work?"                  | plugin-development.md          |
+| "How do I create a skill?"              | skills.md                      |
+| "What frontmatter does a skill use?"    | skills.md                      |
+| "What are the built-in agents?"         | subagents.md                   |
+| "How do I create a custom agent?"       | subagents.md                   |
+| "How do agent teams work?"              | subagents.md                   |
+| "What permission modes exist?"          | subagents.md                   |
 | "What should CLAUDE.md contain?"        | claude-md-files.md             |
 | "Where do CLAUDE.md files go?"          | claude-md-files.md             |
 | "How do I write project instructions?"  | claude-md-files.md             |
@@ -129,8 +165,8 @@ Contains:
 For edge cases or latest features not covered here, fetch the official
 Claude Code documentation:
 
-- Claude Code Docs: <https://docs.anthropic.com/en/docs/claude-code>
-- Agent SDK: <https://github.com/anthropics/claude-code/tree/main/sdk>
+- Claude Code Docs: <https://code.claude.com/docs/en/overview>
+- Agent SDK: <https://platform.claude.com/docs/en/agent-sdk/overview>
 
 Use WebFetch tool to retrieve current documentation when:
 
