@@ -1,7 +1,9 @@
 ---
 type: reference
+name: index
 title: Claude Code Expert Knowledge Index
-description: Catalog of knowledge documents for the claude-code-expert agent - guides for agents, skills, plugins, hooks, and configuration
+description: Catalog of knowledge documents for the claude-code-expert agent
+version: "1.0.0"
 ---
 
 # Knowledge Index
@@ -65,7 +67,10 @@ Contains:
 
 - Memory vs Settings distinction
 - Memory file hierarchy (Enterprise, Project, User, Parent)
-- Import system (`@path/to/file` syntax)
+- CLAUDE.local.md for personal project-specific overrides
+- Modular rules system (`.claude/rules/` with glob patterns)
+- Auto memory vs user-maintained CLAUDE.md distinction
+- Import system (`@path/to/file` syntax, home-directory imports)
 - `/memory` command usage
 - Content guidelines and best practices
 - Multi-file organization patterns
@@ -79,7 +84,8 @@ Contains:
 - Settings file locations and precedence
 - Core settings (model, env, permissions, hooks)
 - MCP server configuration (transports, scopes, OAuth)
-- Advanced settings (status line, sandbox, plugins)
+- Sandbox network configuration and filesystem controls
+- Advanced settings (status line, sandbox, plugins, 23+ new fields)
 - Expanded sandbox options (network, filesystem, commands)
 - Authentication configuration
 - Environment variables reference
@@ -117,7 +123,7 @@ Contains:
 
 Contains:
 
-- 17 hook lifecycle events across 6 categories
+- 17 hook lifecycle events across 6 categories, async hooks support
 - 3 hook types: command (deterministic), prompt (LLM), agent (agentic)
 - Configuration structure and matcher patterns
 - Hook execution model (stdin JSON, exit codes, JSON output)
@@ -128,37 +134,40 @@ Contains:
 
 ## Quick Reference
 
-| Question                                | Document                       |
-| --------------------------------------- | ------------------------------ |
-| "What's the architecture framework?"    | framework-design-principles.md |
-| "What belongs in an agent vs skill?"    | framework-design-principles.md |
-| "What does 'excellent' look like?"      | framework-design-principles.md |
-| "Should I create an agent or skill?"    | extension-types.md             |
-| "What's the difference between types?"  | extension-types.md             |
-| "How should I structure my agent?"      | design-patterns.md             |
-| "What are best practices?"              | design-patterns.md             |
-| "How do I organize a plugin?"           | design-patterns.md             |
-| "What goes in plugin.json?"             | plugin-development.md          |
-| "How do I publish a plugin?"            | plugin-development.md          |
-| "How do plugins work?"                  | plugin-development.md          |
-| "How do I create a skill?"              | skills.md                      |
-| "What frontmatter does a skill use?"    | skills.md                      |
-| "What are the built-in agents?"         | subagents.md                   |
-| "How do I create a custom agent?"       | subagents.md                   |
-| "How do agent teams work?"              | subagents.md                   |
-| "What permission modes exist?"          | subagents.md                   |
-| "What should CLAUDE.md contain?"        | claude-md-files.md             |
-| "Where do CLAUDE.md files go?"          | claude-md-files.md             |
-| "How do I write project instructions?"  | claude-md-files.md             |
-| "How do memory files work?"             | claude-md-files.md             |
-| "How do I import files in CLAUDE.md?"   | claude-md-files.md             |
-| "What goes in settings.json?"           | settings.md                    |
-| "How do I configure permissions?"       | settings.md                    |
-| "Memory vs settings - when to use?"     | settings.md, claude-md-files.md|
-| "How do hooks work?"                    | hooks.md                       |
-| "How do I auto-format code?"            | hooks.md                       |
-| "How do I block dangerous operations?"  | hooks.md                       |
-| "What lifecycle events exist?"          | hooks.md                       |
+| Question                                        | Document                        |
+| ----------------------------------------------- | ------------------------------- |
+| "What's the architecture framework?"            | framework-design-principles.md  |
+| "What belongs in an agent vs skill?"            | framework-design-principles.md  |
+| "What does 'excellent' look like?"              | framework-design-principles.md  |
+| "Should I create an agent or skill?"            | extension-types.md              |
+| "What's the difference between types?"          | extension-types.md              |
+| "How should I structure my agent?"              | design-patterns.md              |
+| "What are best practices?"                      | design-patterns.md              |
+| "How do I organize a plugin?"                   | design-patterns.md              |
+| "What goes in plugin.json?"                     | plugin-development.md           |
+| "How do I publish a plugin?"                    | plugin-development.md           |
+| "How do plugins work?"                          | plugin-development.md           |
+| "How do I create a skill?"                      | skills.md                       |
+| "What frontmatter does a skill use?"            | skills.md                       |
+| "What are the built-in agents?"                 | subagents.md                    |
+| "How do I create a custom agent?"               | subagents.md                    |
+| "How do agent teams work?"                      | subagents.md                    |
+| "What permission modes exist?"                  | subagents.md                    |
+| "What should CLAUDE.md contain?"                | claude-md-files.md              |
+| "Where do CLAUDE.md files go?"                  | claude-md-files.md              |
+| "How do I write project instructions?"          | claude-md-files.md              |
+| "How do memory files work?"                     | claude-md-files.md              |
+| "How do I import files in CLAUDE.md?"           | claude-md-files.md              |
+| "What goes in settings.json?"                   | settings.md                     |
+| "How do I configure permissions?"               | settings.md                     |
+| "Memory vs settings - when to use?"             | settings.md, claude-md-files.md |
+| "How do I configure MCP servers?"               | settings.md                     |
+| "What are prompt and agent hooks?"              | hooks.md                        |
+| "How do I set up agent team quality gates?"     | hooks.md, subagents.md          |
+| "How do hooks work?"                            | hooks.md                        |
+| "How do I auto-format code?"                    | hooks.md                        |
+| "How do I block dangerous operations?"          | hooks.md                        |
+| "What lifecycle events exist?"                  | hooks.md                        |
 
 ## External Resources
 

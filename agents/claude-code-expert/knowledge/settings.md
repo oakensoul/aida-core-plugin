@@ -1,7 +1,9 @@
 ---
 type: reference
+name: settings
 title: Claude Code Settings Guide
 description: Understanding settings.json configuration for Claude Code behavior
+version: "1.0.0"
 ---
 
 # Claude Code Settings
@@ -156,9 +158,9 @@ Adjust response style:
 
 ## Permissions
 
-Control tool access with allow/deny/ask rules. Rules are evaluated in order:
-**deny -> ask -> allow**. The first matching rule wins, so deny rules always
-take precedence.
+Control tool access with allow/deny/ask rules. Rules are evaluated by priority:
+**deny** rules are checked first, then **ask**, then **allow**. The
+highest-priority matching rule wins, so deny always takes precedence over allow.
 
 ```json
 {
@@ -295,7 +297,8 @@ Prevent users from using `bypassPermissions` mode (managed settings only):
 ## Hooks Configuration
 
 Hooks are user-defined commands that execute at specific lifecycle points.
-For full hook documentation, see the dedicated hooks knowledge file.
+For complete hook documentation including exit codes, JSON output format,
+and security considerations, see knowledge/hooks.md.
 
 ### Hook Structure
 
@@ -372,7 +375,7 @@ Common fields for all hook types:
 | `type` | yes | `"command"`, `"prompt"`, or `"agent"` |
 | `timeout` | no | Seconds before canceling (command: 600, prompt: 30, agent: 60) |
 | `statusMessage` | no | Custom spinner message during execution |
-| `once` | no | If `true`, runs only once per session (skills only) |
+| `once` | no | If `true`, runs only once per session (skills/agents only) |
 
 Additional fields for command hooks:
 
@@ -417,7 +420,7 @@ MCP (Model Context Protocol) servers extend Claude Code with external tools.
 
 | Scope | Location | Description |
 | ----- | -------- | ----------- |
-| Local | `~/.claude.json` | User-level MCP servers |
+| Local | `~/.claude.json` | User-level MCP servers (note: this is a separate file from `~/.claude/settings.json`) |
 | Project | `.mcp.json` | Project-level (supports env var expansion) |
 | User settings | `~/.claude/settings.json` | Via MCP management settings |
 
@@ -638,6 +641,13 @@ These settings are only effective in managed settings files:
 | `allowManagedHooksOnly` | Only managed and SDK hooks are allowed |
 | `strictKnownMarketplaces` | Restrict plugin marketplace sources |
 
+### Server-Managed Settings (Beta)
+
+A public beta feature for centralized settings management from a server,
+beyond file-based managed settings. This allows organizations to push
+configuration updates without deploying files to each machine. See official
+documentation for current status.
+
 ## File and Project Settings
 
 ### File Suggestion
@@ -732,7 +742,19 @@ Control marketplace plugins:
 
 ## Environment Variables
 
-Claude Code recognizes these environment variables:
+Claude Code recognizes these environment variables.
+
+**Most commonly used:**
+
+| Variable | Purpose |
+| -------- | ------- |
+| `ANTHROPIC_API_KEY` | API key for Claude SDK |
+| `ANTHROPIC_MODEL` | Model name to use |
+| `CLAUDE_CODE_USE_BEDROCK` | Use AWS Bedrock |
+| `CLAUDE_CODE_USE_VERTEX` | Use Google Vertex AI |
+| `CLAUDE_CODE_EFFORT_LEVEL` | `low`, `medium`, `high` (Opus 4.6) |
+| `CLAUDE_CODE_DISABLE_AUTO_MEMORY` | Disable auto memory (0/1) |
+| `ENABLE_TOOL_SEARCH` | MCP tool search (`auto`, `true`, `false`, `auto:N`) |
 
 ### Authentication
 
@@ -1065,7 +1087,7 @@ Organization-wide managed settings:
         "hooks": [
           {
             "type": "command",
-            "command": "prettier --write \"$(jq -r '.tool_input.file_path')\""
+            "command": "jq -r '.tool_input.file_path' | xargs -I {} prettier --write {}"
           }
         ]
       }

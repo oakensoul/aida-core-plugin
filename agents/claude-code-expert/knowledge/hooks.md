@@ -1,7 +1,9 @@
 ---
 type: reference
+name: hooks
 title: Claude Code Hooks Guide
 description: Understanding hooks for deterministic control in Claude Code
+version: "1.0.0"
 ---
 
 # Claude Code Hooks
@@ -19,7 +21,7 @@ Claude Code supports three hook types:
 Only command hooks are deterministic. Prompt and agent hooks involve LLM
 judgment and may produce different results across runs.
 
-## Hooks vs Other Extension Types
+## Hooks vs Skills
 
 | Aspect | Hooks | Skills |
 | ------ | ----- | ------ |
@@ -185,7 +187,7 @@ Claude Code supports 17 hook events organized into lifecycle categories.
 | `TeammateIdle` | Teammate about to go idle | Yes | Quality gates before a teammate stops working |
 | `TaskCompleted` | Task marked as completed | Yes | Enforce completion criteria (tests, lint) |
 
-These events fire in [agent teams](/en/agent-teams) contexts.
+These events fire in agent teams (see knowledge/subagents.md, Agent Teams section) contexts.
 `TeammateIdle` hooks receive `teammate_name` and `team_name` fields.
 `TaskCompleted` hooks receive `task_id`, `task_subject`, and optionally
 `task_description`, `teammate_name`, and `team_name`.
@@ -260,7 +262,7 @@ hooks
 │           ├── timeout: seconds before canceling
 │           ├── async: run in background (command type only)
 │           ├── statusMessage: custom spinner text
-│           └── once: run only once per session (skills only)
+│           └── once: run only once per session (skills/agents only)
 ```
 
 ### Common Handler Fields
@@ -285,6 +287,15 @@ hooks
 | ----- | -------- | ----------- |
 | `prompt` | Yes | Prompt text. Use `$ARGUMENTS` for hook input JSON |
 | `model` | No | Model to use. Defaults to a fast model |
+
+### Multiple Hook Ordering
+
+When multiple matcher groups match the same tool or event, all matching hooks
+run sequentially in the order they appear in the configuration. Hooks from
+higher-priority settings files (managed policies, then local, then project,
+then user) run first. Within the same settings file, matcher groups execute
+in array order. If any hook blocks (exit 2), subsequent hooks for that event
+still run but the action is already blocked.
 
 ## Matcher Patterns
 
@@ -379,7 +390,7 @@ Example for a `PreToolUse` hook:
 | `SubagentStop` | Yes | Prevents the subagent from stopping |
 | `TeammateIdle` | Yes | Prevents teammate from going idle |
 | `TaskCompleted` | Yes | Prevents task from being marked completed |
-| `ConfigChange` | Yes | Blocks config change (except `policy_settings`) |
+| `ConfigChange` | Yes* | Blocks config change (*except `policy_settings`; hook fires but block is ignored) |
 | `WorktreeCreate` | Yes | Worktree creation fails |
 | `PostToolUse` | No | Shows stderr to Claude (tool already ran) |
 | `PostToolUseFailure` | No | Shows stderr to Claude (tool already failed) |
@@ -495,6 +506,11 @@ on `type: "command"` hooks.
 - Output delivered on next conversation turn (waits if session is idle)
 - Each execution creates a separate background process (no deduplication)
 
+**Warning:** Use specific matchers with async hooks. A broad matcher like
+`Write|Edit` on `PostToolUse` spawns a new background process for every
+matching tool call. In a session with many file writes, this can create
+excessive concurrent processes (e.g., parallel test runs for every edit).
+
 ## Common Patterns
 
 ### Auto-Format on Write
@@ -528,7 +544,7 @@ on `type: "command"` hooks.
         "hooks": [
           {
             "type": "command",
-            "command": "jq -e '.tool_input.file_path | test(\"\\\\.env|\\\\.git/\")' && exit 1 || exit 0"
+            "command": "jq -e '.tool_input.file_path | test(\"\\\\.env|\\\\.git/\")' && exit 2 || exit 0"
           }
         ]
       }

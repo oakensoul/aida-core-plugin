@@ -1,7 +1,9 @@
 ---
 type: reference
+name: extension-types
 title: Extension Types Decision Guide
 description: How to choose between agents, skills, plugins, and hooks
+version: "1.0.0"
 ---
 
 # Extension Types
@@ -20,8 +22,8 @@ quality criteria for each type.
 | **Skill** | HOW | Process definitions, execution capabilities (scripts, templates) |
 | **Knowledge** | CONTEXT | Facts, schemas, patterns (loaded with extensions) |
 | **CLAUDE.md** | MEMORY | Project/user conventions (always loaded) |
-| **Plugin** | DISTRIBUTION | Container for subagents, skills, knowledge |
-| **Hooks** | AUTOMATION | Shell commands triggered on lifecycle events |
+| **Plugin** | DISTRIBUTION | Container for agents, skills, hooks, MCP/LSP servers, output styles, settings |
+| **Hooks** | AUTOMATION | Handlers triggered on lifecycle events (command, prompt, agent types) |
 
 **Key insight:** Claude Code (the orchestrator) is the primary agent. All extensions
 are inert definitions that the orchestrator reads and acts upon. Subagents are
@@ -44,7 +46,7 @@ Is this a distributable package of multiple components?
     |
 Should it run AUTOMATICALLY on lifecycle events (not user-invoked)?
     |
-    +- YES -> Hook (deterministic automation)
+    +- YES -> Hook (command: deterministic / prompt, agent: LLM-guided)
     |
     v NO
     |
@@ -143,7 +145,8 @@ Subagents are specialist personas with domain knowledge. The orchestrator
 guidance, make decisions, and can use skills to accomplish tasks.
 
 **Note:** The `/agents` folder contains subagent definitions. The orchestrator
-itself is the primary agent.
+itself is the primary agent. Agent teams provide multi-agent coordination
+(experimental, disabled by default) -- see `subagents.md` for details.
 
 ### When to Use
 
@@ -184,8 +187,9 @@ agents/
 
 ### What They Are
 
-Plugins are distributable packages that contain agents and skills.
-They're the unit of distribution and installation.
+Plugins are distributable packages that contain agents, skills, hooks, MCP
+servers, LSP servers, output styles, and settings. They're the unit of
+distribution and installation.
 
 ### When to Use
 
@@ -198,7 +202,7 @@ They're the unit of distribution and installation.
 
 - Contains multiple component types
 - Has plugin.json metadata
-- Installable via `/plugin add`
+- Installable via `claude plugin install` CLI or `/plugin` in interactive mode
 - Can depend on other plugins
 - Self-contained and portable
 
@@ -217,6 +221,11 @@ my-plugin/
 |   +-- plugin.json
 +-- agents/
 +-- skills/
++-- hooks/
++-- outputStyles/
++-- .mcp.json
++-- .lsp.json
++-- settings.json
 +-- README.md
 +-- .gitignore
 ```
@@ -225,9 +234,16 @@ my-plugin/
 
 ### What They Are
 
-Hooks are shell commands that execute automatically at specific lifecycle
-events. Unlike other extensions that rely on LLM judgment, hooks provide
-deterministic control - things that MUST happen, every time.
+Hooks are user-defined handlers that execute automatically at specific lifecycle
+events. They ensure certain actions always happen rather than relying on the LLM
+to choose. Claude Code supports three hook types:
+
+- **Command hooks** (`type: "command"`) run shell commands deterministically
+- **Prompt hooks** (`type: "prompt"`) send a prompt to an LLM for evaluation
+- **Agent hooks** (`type: "agent"`) spawn agentic verifiers with tool access
+
+Only command hooks are deterministic. Prompt and agent hooks involve LLM
+judgment and may produce different results across runs.
 
 ### When to Use
 
@@ -237,15 +253,15 @@ deterministic control - things that MUST happen, every time.
 - Blocking dangerous operations
 - Custom notifications
 - Integration with external tools
+- Quality gates with LLM-based evaluation (prompt/agent hooks)
 
 ### Characteristics
 
 - Triggered automatically (not user-invoked)
-- Deterministic (same input = same output)
-- Execute shell commands
-- Receive JSON input via stdin
-- Can block operations (PreToolUse) with non-zero exit
-- Configured in settings.json, not as separate files
+- Deterministic (command type) or LLM-guided (prompt, agent types)
+- Receive JSON input via stdin (command) or event context (prompt/agent)
+- Can block operations (PreToolUse) with non-zero exit or LLM decision
+- Configured in settings.json or hooks/hooks.json (plugins)
 
 ### Example Use Cases
 
@@ -280,9 +296,9 @@ deterministic control - things that MUST happen, every time.
 | Aspect | Hooks | Skills |
 | ------ | ----- | ------ |
 | **Trigger** | Automatic | User-invoked |
-| **Control** | Deterministic | LLM-guided |
-| **Purpose** | Enforcement | Workflows |
-| **Execution** | Shell commands | Claude orchestration |
+| **Control** | Deterministic (command) / LLM-guided (prompt, agent) | LLM-guided |
+| **Purpose** | Enforcement, quality gates | Workflows |
+| **Execution** | Shell commands, LLM prompts, agentic verifiers | Claude orchestration |
 
 **Key insight:** Use hooks when something MUST happen. Use skills
 when something SHOULD happen based on context and judgment.

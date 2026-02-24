@@ -1,7 +1,9 @@
 ---
 type: reference
-title: Plugin Development Guide
+name: plugin-development
+title: Claude Code Plugin Development Guide
 description: Comprehensive guide to creating, structuring, and distributing Claude Code plugins
+version: "1.0.0"
 ---
 
 # Plugin Development
@@ -75,7 +77,7 @@ name. Use a manifest when you need metadata or custom component paths.
 my-plugin/
 ├── .claude-plugin/
 │   └── plugin.json           # Plugin manifest
-├── commands/                 # Legacy skills as markdown files
+├── commands/                 # Legacy (use skills/ for new development)
 │   └── quick-action.md
 ├── skills/                   # Agent Skills with SKILL.md files
 │   └── code-review/
@@ -236,7 +238,7 @@ skills/
 Plugin skills are automatically discovered when installed. Claude can invoke
 them based on task context, and users invoke them via `/plugin-name:skill-name`.
 
-For complete skill authoring guidance, see the skills knowledge file.
+For complete skill authoring guidance, see `knowledge/skills.md`.
 
 ### Agents in Plugins
 
@@ -279,11 +281,8 @@ format is the same as hooks in `settings.json`:
 
 Hooks can also be defined inline in `plugin.json` under the `hooks` field.
 
-Three hook types are supported:
-
-- `command` -- Execute shell commands or scripts
-- `prompt` -- Evaluate a prompt with an LLM (uses `$ARGUMENTS` for context)
-- `agent` -- Run an agentic verifier with tool access
+All three hook types (`command`, `prompt`, `agent`) are supported in
+plugins. For complete hook type documentation, see `knowledge/hooks.md`.
 
 Use `${CLAUDE_PLUGIN_ROOT}` in hook commands to reference files within the
 plugin directory (see Environment Variables section below).
@@ -516,7 +515,9 @@ Load multiple plugins simultaneously:
 claude --plugin-dir ./plugin-one --plugin-dir ./plugin-two
 ```
 
-Restart Claude Code to pick up changes during development.
+Unlike `--add-dir` which supports live skill reloading, `--plugin-dir`
+requires a restart to detect changes because plugin components (hooks,
+MCP servers, settings) are loaded at startup.
 
 ### Debugging
 
@@ -737,6 +738,10 @@ definitions:
 
 ## aida-config.json Schema
 
+> **AIDA-specific.** This file is part of the AIDA framework, not the
+> Claude Code plugin standard. Only include `aida-config.json` when
+> building plugins for the AIDA ecosystem.
+
 AIDA-specific fields (`config` and `recommendedPermissions`) live in a
 separate `aida-config.json` inside `.claude-plugin/`. This keeps the
 standard `plugin.json` clean for the Claude Code plugin validator.
@@ -845,6 +850,11 @@ When version is set in both `plugin.json` and `marketplace.json`, the
 
 ## Dependencies
 
+> **Note:** Plugin dependency resolution may not yet be enforced by
+> Claude Code. The version operators below describe the intended
+> behavior. Verify against the current Claude Code release before
+> relying on automatic dependency resolution.
+
 ### Declaring Dependencies
 
 ```json
@@ -907,6 +917,19 @@ Before publishing:
 - Use parameter validation in scripts
 - Prefer read operations over write operations
 - Use `${CLAUDE_PLUGIN_ROOT}` for all file paths in hooks and MCP configs
+
+### Trust Model
+
+Installing a plugin grants it significant access:
+
+- **Hooks** execute with your system user's permissions on every
+  lifecycle event they match
+- **MCP servers** provide tools that Claude can invoke
+- **Agents** can be spawned automatically based on task context
+- **Skills** can execute scripts bundled with the plugin
+
+Review plugin source code before installation. Only install plugins
+from trusted marketplaces and authors.
 
 ## Plugin Organization Patterns
 
