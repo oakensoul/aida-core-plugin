@@ -64,5 +64,5 @@ Contains:
 
 For workflow details, consult the skill references:
 
-- **aida-dispatch skill**: `references/config.md`, `references/diagnostics.md`, `references/feedback.md`
+- **aida skill**: `references/config.md`, `references/diagnostics.md`, `references/feedback.md`
 - **memento skill**: Memento operation workflows

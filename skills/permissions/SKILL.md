@@ -21,7 +21,7 @@ the selected configuration to `settings.json`.
 ## Activation
 
 This skill activates when `/aida config permissions` is invoked
-through the aida-dispatch routing system.
+through the aida skill routing system.
 
 ## Command Routing
 

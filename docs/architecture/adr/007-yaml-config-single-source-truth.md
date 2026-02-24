@@ -128,7 +128,7 @@ User runs /aida config
 
 - [ADR-004: YAML for Questionnaires](004-yaml-questionnaires.md) - Uses YAML for questions
 - [ADR-005: Local-First Storage](005-local-first-storage.md) - Where YAML files are stored
-- [config-driven-approach.md](../../skills/aida-dispatch/references/config-driven-approach.md) - Implementation guide
+- [config-driven-approach.md](../../skills/aida/references/config-driven-approach.md) - Implementation guide
 
 ---
 
