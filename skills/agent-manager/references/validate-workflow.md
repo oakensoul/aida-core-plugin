@@ -69,17 +69,21 @@ python manage.py --execute \
 ```json
 {
   "success": true,
-  "all_valid": true,
+  "operation": "validate",
   "results": [
     {
       "name": "my-agent",
-      "location": "user",
       "path": "~/.claude/agents/my-agent/my-agent.md",
       "valid": true,
-      "errors": []
+      "errors": [],
+      "warnings": []
     }
   ],
-  "summary": "Validated 1 agent(s): 1 valid, 0 invalid"
+  "summary": {
+    "total": 1,
+    "valid": 1,
+    "invalid": 0
+  }
 }
 ```
 
@@ -88,26 +92,30 @@ python manage.py --execute \
 ```json
 {
   "success": true,
-  "all_valid": false,
+  "operation": "validate",
   "results": [
     {
       "name": "my-agent",
-      "location": "user",
       "path": "~/.claude/agents/my-agent/my-agent.md",
       "valid": true,
-      "errors": []
+      "errors": [],
+      "warnings": []
     },
     {
       "name": "bad-agent",
-      "location": "user",
       "path": "~/.claude/agents/bad-agent/bad-agent.md",
       "valid": false,
       "errors": [
         "Description: must be at least 10 characters"
-      ]
+      ],
+      "warnings": []
     }
   ],
-  "summary": "Validated 2 agent(s): 1 valid, 1 invalid"
+  "summary": {
+    "total": 2,
+    "valid": 1,
+    "invalid": 1
+  }
 }
 ```
 
