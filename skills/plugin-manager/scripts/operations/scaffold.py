@@ -46,6 +46,8 @@ from .scaffold_ops.generators import (
     initialize_git,
     create_initial_commit,
 )
+from .constants import SUPPORTED_LANGUAGES
+from .shared import build_template_variables
 
 logger = logging.getLogger(__name__)
 
@@ -68,9 +70,6 @@ AGENT_TEMPLATES_DIR = (
 SKILL_TEMPLATES_DIR = (
     _PROJECT_ROOT / "skills" / "skill-manager" / "templates"
 )
-
-GENERATOR_VERSION = "0.9.0"
-SUPPORTED_LANGUAGES = ("python", "typescript")
 
 
 def get_questions(
@@ -359,78 +358,30 @@ def execute(context: dict[str, Any]) -> dict[str, Any]:
         }
 
     # Build template variables
-    year = str(datetime.now(timezone.utc).year)
-    timestamp = datetime.now(timezone.utc).isoformat()
-
     try:
         license_text = get_license_text(
-            license_id, year, author_name
+            license_id,
+            str(datetime.now(timezone.utc).year),
+            author_name,
         )
     except ValueError as e:
         return {"success": False, "message": str(e)}
 
-    keywords_raw = context.get("keywords", "")
-    if isinstance(keywords_raw, str):
-        keywords = [
-            k.strip()
-            for k in keywords_raw.split(",")
-            if k.strip()
-        ]
-    else:
-        keywords = (
-            list(keywords_raw) if keywords_raw else []
-        )
-
-    script_extension = (
-        ".py" if language == "python" else ".ts"
-    )
-    plugin_display_name = (
-        plugin_name.replace("-", " ").title()
-    )
-
-    variables: dict[str, Any] = {
+    # Build context dict for the shared variable builder
+    build_context = dict(context)
+    build_context.update({
         "plugin_name": plugin_name,
-        "plugin_display_name": plugin_display_name,
         "description": description,
         "version": version,
         "author_name": author_name,
         "author_email": author_email,
         "license_id": license_id,
-        "license_text": license_text,
-        "year": year,
         "language": language,
-        "script_extension": script_extension,
-        "python_version": _normalize_python_version(
-            context.get("python_version", "3.11")
-        ),
-        "node_version": context.get("node_version", "22"),
-        "keywords": keywords,
-        "repository_url": context.get(
-            "repository_url", ""
-        ),
-        "include_agent_stub": context.get(
-            "include_agent_stub", False
-        ),
-        "agent_stub_name": context.get(
-            "agent_stub_name", plugin_name
-        ),
-        "agent_stub_description": context.get(
-            "agent_stub_description",
-            f"Agent for {plugin_display_name}",
-        ),
-        "include_skill_stub": context.get(
-            "include_skill_stub", False
-        ),
-        "skill_stub_name": context.get(
-            "skill_stub_name", plugin_name
-        ),
-        "skill_stub_description": context.get(
-            "skill_stub_description",
-            f"Skill for {plugin_display_name}",
-        ),
-        "timestamp": timestamp,
-        "generator_version": GENERATOR_VERSION,
-    }
+    })
+
+    variables = build_template_variables(
+        build_context, license_text
+    )
 
     # Create the project
     all_files: list[str] = []
@@ -542,14 +493,6 @@ def execute(context: dict[str, Any]) -> dict[str, Any]:
             context.get("create_github_repo", False),
         ),
     }
-
-
-def _normalize_python_version(version: str) -> str:
-    """Normalize python version to X.Y format."""
-    parts = version.split(".")
-    if len(parts) >= 2:
-        return f"{parts[0]}.{parts[1]}"
-    return version
 
 
 def _build_next_steps(
