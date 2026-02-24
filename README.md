@@ -138,7 +138,7 @@ See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed design.
 
 ## Roadmap
 
-### Current: v0.7.x - Launch & Polish
+### Current: v0.8.x - Upstream Alignment
 
 - Session persistence (mementos)
 - Smart configuration with auto-detection
