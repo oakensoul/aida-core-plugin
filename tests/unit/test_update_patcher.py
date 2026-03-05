@@ -23,6 +23,7 @@ for _mod_name in list(sys.modules):
         "operations."
     ):
         del sys.modules[_mod_name]
+sys.modules.pop("_paths", None)
 
 from operations.update_ops.patcher import (  # noqa: E402
     _atomic_write,
@@ -48,6 +49,14 @@ from operations.update_ops.models import (  # noqa: E402
 from operations.constants import (  # noqa: E402
     GENERATOR_VERSION,
 )
+from operations.update_ops.scanner import (  # noqa: E402
+    scan_plugin,
+)
+
+_ops_snapshot = {
+    k: v for k, v in sys.modules.items()
+    if k == "operations" or k.startswith("operations.")
+}
 
 
 def _make_diff_report(
@@ -990,20 +999,9 @@ class TestScannerErrorFallback(unittest.TestCase):
             )
             (plugin_dir / "pyproject.toml").write_text("")
 
-            # Import scan_plugin for this test
-            from operations.update_ops.scanner import (
-                scan_plugin,
-            )
-
             # Use a bogus templates dir to trigger errors
             bogus_templates = Path(tmp) / "no-templates"
             bogus_templates.mkdir()
-
-            # scan_plugin should handle errors gracefully
-            # and mark files as OUTDATED rather than crashing
-            from operations.update_ops.models import (
-                FileStatus as FS,
-            )
 
             report = scan_plugin(
                 plugin_dir, bogus_templates
@@ -1013,7 +1011,7 @@ class TestScannerErrorFallback(unittest.TestCase):
             errored = [
                 f
                 for f in report.files
-                if f.status == FS.OUTDATED
+                if f.status == FileStatus.OUTDATED
                 and "Error" in f.diff_summary
             ]
             self.assertGreater(
