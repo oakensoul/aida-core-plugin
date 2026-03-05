@@ -16,6 +16,7 @@ sys.path.insert(0, str(_plugin_scripts))
 for _mod_name in list(sys.modules):
     if _mod_name == "operations" or _mod_name.startswith("operations."):
         del sys.modules[_mod_name]
+sys.modules.pop("_paths", None)
 
 import operations.scaffold_ops.generators as _generators_mod  # noqa: E402
 
@@ -29,6 +30,11 @@ from operations.scaffold_ops.generators import (  # noqa: E402
 )
 
 TEMPLATES_DIR = _project_root / "skills" / "plugin-manager" / "templates" / "scaffold"
+
+_ops_snapshot = {
+    k: v for k, v in sys.modules.items()
+    if k == "operations" or k.startswith("operations.")
+}
 
 
 class TestCreateDirectoryStructure(unittest.TestCase):

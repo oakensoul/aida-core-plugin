@@ -24,27 +24,25 @@ for _mod_name in list(sys.modules):
         "operations."
     ):
         del sys.modules[_mod_name]
+sys.modules.pop("_paths", None)
 
 from operations import update as update_mod  # noqa: E402
 from operations import scaffold as scaffold_mod  # noqa: E402
 from operations.constants import (  # noqa: E402
     GENERATOR_VERSION,
 )
+import operations.scaffold_ops.context as _context_mod  # noqa: E402
+import operations.scaffold_ops.generators as _generators_mod  # noqa: E402
 
-_GIT_MOCK_PATH = (
-    "operations.scaffold_ops.context.infer_git_config"
-)
+_ops_snapshot = {
+    k: v for k, v in sys.modules.items()
+    if k == "operations" or k.startswith("operations.")
+}
+
 _GIT_MOCK_RETURN = {
     "author_name": "Test Author",
     "author_email": "test@test.com",
 }
-_GIT_INIT_PATH = (
-    "operations.scaffold_ops.generators.initialize_git"
-)
-_GIT_COMMIT_PATH = (
-    "operations.scaffold_ops.generators"
-    ".create_initial_commit"
-)
 
 
 def _scaffold_plugin(
@@ -103,16 +101,16 @@ class TestUpdatePhase1(unittest.TestCase):
                 "plugin.json", result["message"]
             )
 
-    @patch(
-        _GIT_COMMIT_PATH,
+    @patch.object(
+        _generators_mod, "create_initial_commit",
         return_value=True,
     )
-    @patch(
-        _GIT_INIT_PATH,
+    @patch.object(
+        _generators_mod, "initialize_git",
         return_value=True,
     )
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_up_to_date_plugin_no_questions(
@@ -134,16 +132,16 @@ class TestUpdatePhase1(unittest.TestCase):
                 ]
             )
 
-    @patch(
-        _GIT_COMMIT_PATH,
+    @patch.object(
+        _generators_mod, "create_initial_commit",
         return_value=True,
     )
-    @patch(
-        _GIT_INIT_PATH,
+    @patch.object(
+        _generators_mod, "initialize_git",
         return_value=True,
     )
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_outdated_plugin_has_questions(
@@ -175,16 +173,16 @@ class TestUpdatePhase1(unittest.TestCase):
                 ".markdownlint.json", outdated_paths
             )
 
-    @patch(
-        _GIT_COMMIT_PATH,
+    @patch.object(
+        _generators_mod, "create_initial_commit",
         return_value=True,
     )
-    @patch(
-        _GIT_INIT_PATH,
+    @patch.object(
+        _generators_mod, "initialize_git",
         return_value=True,
     )
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_missing_only_no_boilerplate_question(
@@ -214,16 +212,16 @@ class TestUpdatePhase1(unittest.TestCase):
                 "boilerplate_strategy", question_ids
             )
 
-    @patch(
-        _GIT_COMMIT_PATH,
+    @patch.object(
+        _generators_mod, "create_initial_commit",
         return_value=True,
     )
-    @patch(
-        _GIT_INIT_PATH,
+    @patch.object(
+        _generators_mod, "initialize_git",
         return_value=True,
     )
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_inferred_contains_scan_result(
@@ -261,16 +259,16 @@ class TestUpdatePhase1(unittest.TestCase):
 class TestUpdatePhase2(unittest.TestCase):
     """Tests for update_mod.execute (Phase 2)."""
 
-    @patch(
-        _GIT_COMMIT_PATH,
+    @patch.object(
+        _generators_mod, "create_initial_commit",
         return_value=True,
     )
-    @patch(
-        _GIT_INIT_PATH,
+    @patch.object(
+        _generators_mod, "initialize_git",
         return_value=True,
     )
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_up_to_date_returns_no_changes(
@@ -292,16 +290,16 @@ class TestUpdatePhase2(unittest.TestCase):
             self.assertEqual(result["files_created"], [])
             self.assertEqual(result["files_updated"], [])
 
-    @patch(
-        _GIT_COMMIT_PATH,
+    @patch.object(
+        _generators_mod, "create_initial_commit",
         return_value=True,
     )
-    @patch(
-        _GIT_INIT_PATH,
+    @patch.object(
+        _generators_mod, "initialize_git",
         return_value=True,
     )
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_restores_deleted_boilerplate(
@@ -326,16 +324,16 @@ class TestUpdatePhase2(unittest.TestCase):
             data = json.loads(ml_path.read_text())
             self.assertIsInstance(data, dict)
 
-    @patch(
-        _GIT_COMMIT_PATH,
+    @patch.object(
+        _generators_mod, "create_initial_commit",
         return_value=True,
     )
-    @patch(
-        _GIT_INIT_PATH,
+    @patch.object(
+        _generators_mod, "initialize_git",
         return_value=True,
     )
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_preserves_custom_claudemd(
@@ -362,16 +360,16 @@ class TestUpdatePhase2(unittest.TestCase):
                 claude_md.read_text(), custom_content
             )
 
-    @patch(
-        _GIT_COMMIT_PATH,
+    @patch.object(
+        _generators_mod, "create_initial_commit",
         return_value=True,
     )
-    @patch(
-        _GIT_INIT_PATH,
+    @patch.object(
+        _generators_mod, "initialize_git",
         return_value=True,
     )
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_updates_generator_version(
@@ -421,16 +419,16 @@ class TestUpdatePhase2(unittest.TestCase):
 class TestUpdateRoundTrip(unittest.TestCase):
     """Full round-trip tests (Phase 1 -> Phase 2)."""
 
-    @patch(
-        _GIT_COMMIT_PATH,
+    @patch.object(
+        _generators_mod, "create_initial_commit",
         return_value=True,
     )
-    @patch(
-        _GIT_INIT_PATH,
+    @patch.object(
+        _generators_mod, "initialize_git",
         return_value=True,
     )
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_full_round_trip(
@@ -490,16 +488,16 @@ class TestUpdateRoundTrip(unittest.TestCase):
 class TestUpdateIdempotent(unittest.TestCase):
     """Test that updates are idempotent."""
 
-    @patch(
-        _GIT_COMMIT_PATH,
+    @patch.object(
+        _generators_mod, "create_initial_commit",
         return_value=True,
     )
-    @patch(
-        _GIT_INIT_PATH,
+    @patch.object(
+        _generators_mod, "initialize_git",
         return_value=True,
     )
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_double_update_no_changes(
@@ -538,16 +536,16 @@ class TestUpdateIdempotent(unittest.TestCase):
 class TestUpdatePreservesContent(unittest.TestCase):
     """Test that updates preserve user-owned content."""
 
-    @patch(
-        _GIT_COMMIT_PATH,
+    @patch.object(
+        _generators_mod, "create_initial_commit",
         return_value=True,
     )
-    @patch(
-        _GIT_INIT_PATH,
+    @patch.object(
+        _generators_mod, "initialize_git",
         return_value=True,
     )
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_preserves_readme(
@@ -572,16 +570,16 @@ class TestUpdatePreservesContent(unittest.TestCase):
 
             self.assertEqual(readme.read_text(), custom)
 
-    @patch(
-        _GIT_COMMIT_PATH,
+    @patch.object(
+        _generators_mod, "create_initial_commit",
         return_value=True,
     )
-    @patch(
-        _GIT_INIT_PATH,
+    @patch.object(
+        _generators_mod, "initialize_git",
         return_value=True,
     )
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_preserves_license(
