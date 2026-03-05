@@ -45,6 +45,11 @@ from operations.extensions import (  # noqa: E402
     validate_file_frontmatter,
 )
 
+_ops_snapshot = {
+    k: v for k, v in sys.modules.items()
+    if k == "operations" or k.startswith("operations.")
+}
+
 # ------------------------------------------------------------------
 # Helpers
 # ------------------------------------------------------------------

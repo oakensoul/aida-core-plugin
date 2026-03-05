@@ -61,6 +61,11 @@ from operations.extensions import (  # noqa: E402
     get_questions,
 )
 
+_ops_snapshot = {
+    k: v for k, v in sys.modules.items()
+    if k == "operations" or k.startswith("operations.")
+}
+
 # Templates directory for execute_create tests
 _EXTENSION_TEMPLATES = (
     _project_root

@@ -24,6 +24,7 @@ for _mod_name in list(sys.modules):
         "operations."
     ):
         del sys.modules[_mod_name]
+sys.modules.pop("_paths", None)
 
 from operations.update_ops.scanner import (  # noqa: E402
     _detect_language,
@@ -39,14 +40,17 @@ from operations.update_ops.models import (  # noqa: E402
 from operations.constants import (  # noqa: E402
     GENERATOR_VERSION,
 )
+import operations.scaffold_ops.context as _context_mod  # noqa: E402
+
+_ops_snapshot = {
+    k: v for k, v in sys.modules.items()
+    if k == "operations" or k.startswith("operations.")
+}
 
 TEMPLATES_DIR = (
     _plugin_scripts.parent / "templates" / "scaffold"
 )
 
-_GIT_MOCK_PATH = (
-    "operations.scaffold_ops.context.infer_git_config"
-)
 _GIT_MOCK_RETURN = {
     "author_name": "Test Author",
     "author_email": "test@test.com",
@@ -231,8 +235,8 @@ class TestDetectLanguage(unittest.TestCase):
 class TestScanPluginValid(unittest.TestCase):
     """Test scan_plugin with a valid plugin directory."""
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_scan_reports_correct_plugin_name(
@@ -250,8 +254,8 @@ class TestScanPluginValid(unittest.TestCase):
                 report.plugin_name, "my-scanner-test"
             )
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_scan_reports_correct_language(
@@ -265,8 +269,8 @@ class TestScanPluginValid(unittest.TestCase):
             )
             self.assertEqual(report.language, "python")
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_scan_reports_generator_version(
@@ -287,8 +291,8 @@ class TestScanPluginValid(unittest.TestCase):
                 report.current_version, GENERATOR_VERSION
             )
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_scan_up_to_date_boilerplate(
@@ -316,8 +320,8 @@ class TestScanPluginValid(unittest.TestCase):
 class TestScanPluginMissingFiles(unittest.TestCase):
     """Test scan_plugin detects missing files."""
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_missing_markdownlint_detected(
@@ -344,8 +348,8 @@ class TestScanPluginMissingFiles(unittest.TestCase):
                 ml_diffs[0].status, FileStatus.MISSING
             )
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_missing_gitignore_detected(
@@ -367,8 +371,8 @@ class TestScanPluginMissingFiles(unittest.TestCase):
                 gi_diffs[0].status, FileStatus.MISSING
             )
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_missing_makefile_detected(
@@ -394,8 +398,8 @@ class TestScanPluginMissingFiles(unittest.TestCase):
 class TestScanPluginCustomFiles(unittest.TestCase):
     """Test scan_plugin marks custom files correctly."""
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_claudemd_always_custom_skip(
@@ -421,8 +425,8 @@ class TestScanPluginCustomFiles(unittest.TestCase):
                 FileStatus.CUSTOM_SKIP,
             )
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_readme_always_custom_skip(
@@ -448,8 +452,8 @@ class TestScanPluginCustomFiles(unittest.TestCase):
                 FileStatus.CUSTOM_SKIP,
             )
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_aida_config_always_custom_skip(
@@ -477,8 +481,8 @@ class TestScanPluginCustomFiles(unittest.TestCase):
 class TestScanPluginOutdated(unittest.TestCase):
     """Test scan_plugin detects outdated boilerplate."""
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_outdated_boilerplate_detected(
@@ -512,8 +516,8 @@ class TestScanPluginOutdated(unittest.TestCase):
 class TestScanPluginInvalid(unittest.TestCase):
     """Test scan_plugin with invalid inputs."""
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_raises_on_missing_plugin_json(
@@ -529,8 +533,8 @@ class TestScanPluginInvalid(unittest.TestCase):
                 "plugin.json", str(ctx.exception)
             )
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_raises_on_nonexistent_path(
@@ -545,8 +549,8 @@ class TestScanPluginInvalid(unittest.TestCase):
 class TestScanPluginDependencyConfig(unittest.TestCase):
     """Test scan_plugin dependency config handling."""
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_pyproject_flagged_manual_review(
@@ -582,8 +586,8 @@ class TestScanPluginDependencyConfig(unittest.TestCase):
 class TestScanPluginComposites(unittest.TestCase):
     """Test scan_plugin composite file handling."""
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_gitignore_missing_entries_detected(
@@ -616,8 +620,8 @@ class TestScanPluginComposites(unittest.TestCase):
                 "entries", gi_diffs[0].diff_summary
             )
 
-    @patch(
-        _GIT_MOCK_PATH,
+    @patch.object(
+        _context_mod, "infer_git_config",
         return_value=_GIT_MOCK_RETURN,
     )
     def test_makefile_missing_targets_detected(
