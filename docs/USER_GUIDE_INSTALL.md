@@ -46,8 +46,13 @@ python3 --version
 **If you need to install/upgrade Python:**
 
 - macOS: `brew install python3` or download from [python.org](https://www.python.org/downloads/)
-- Linux: `sudo apt install python3` (Debian/Ubuntu) or `sudo yum install python3` (RHEL/CentOS)
-- Windows (WSL): `sudo apt install python3`
+- Linux: `sudo apt install python3 python3-venv` (Debian/Ubuntu) or `sudo yum install python3` (RHEL/CentOS)
+- Windows (WSL): `sudo apt install python3 python3-venv`
+
+> **Note:** On Debian/Ubuntu, the `python3-venv` package is required
+> for AIDA to create its managed virtual environment. AIDA
+> automatically manages a venv at `~/.aida/venv/` so you do not need
+> to install Python packages manually.
 
 ### 3. GitHub CLI
 

@@ -268,11 +268,6 @@ def render_template(templates_dir: Path, template_name: str, variables: dict[str
     Returns:
         Rendered template string
     """
-    try:
-        import jinja2  # noqa: F401
-    except ImportError:
-        raise RuntimeError("Jinja2 is required. Install with: pip install jinja2")
-
     env = _get_jinja_env(str(templates_dir))
     template = env.get_template(template_name)
     return template.render(**variables)

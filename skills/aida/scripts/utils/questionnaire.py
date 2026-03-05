@@ -8,10 +8,7 @@ progress tracking.
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-try:
-    import yaml
-except ImportError:
-    yaml = None
+import yaml
 
 from .errors import FileOperationError, ConfigurationError
 from .files import read_file
@@ -264,13 +261,6 @@ def load_questionnaire(questionnaire_file: Path) -> List[Question]:
         FileOperationError: If file cannot be read
         ConfigurationError: If YAML is invalid or questionnaire format is wrong
     """
-    # Check if PyYAML is available
-    if yaml is None:
-        raise ConfigurationError(
-            "PyYAML is not installed",
-            "Install with: pip install PyYAML"
-        )
-
     # Read file content
     try:
         content = read_file(questionnaire_file)

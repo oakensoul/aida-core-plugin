@@ -42,6 +42,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any
 
+import _paths  # noqa: F401
+
 # Import utilities from the foundation module
 from utils import (
     get_claude_dir,
@@ -59,12 +61,8 @@ from utils import (
     InstallationError,
 )
 
-# Try to import yaml for config file reading
-try:
-    import yaml
-    HAS_YAML = True
-except ImportError:
-    HAS_YAML = False
+import yaml
+HAS_YAML = True
 
 # Configure logging
 logging.basicConfig(
@@ -791,12 +789,6 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
             raise FileOperationError(
                 f"Project config not found: {config_path}",
                 "Run 'python configure.py --get-questions' first to detect project facts"
-            )
-
-        if not HAS_YAML:
-            raise InstallationError(
-                "PyYAML is not available",
-                "Install PyYAML to use project configuration: pip install pyyaml"
             )
 
         with open(config_path) as f:

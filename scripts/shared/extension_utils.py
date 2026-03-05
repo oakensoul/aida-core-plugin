@@ -352,6 +352,7 @@ def execute_extension_create(
     location: str,
     templates_dir: Path,
     plugin_path: Optional[str] = None,
+    extra_vars: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Execute extension creation using a Jinja2 template.
 
@@ -367,6 +368,7 @@ def execute_extension_create(
         location: Where to create.
         templates_dir: Path to templates directory.
         plugin_path: Path to plugin directory.
+        extra_vars: Additional template variables to merge in.
 
     Returns:
         Result dictionary with success status and details.
@@ -391,6 +393,8 @@ def execute_extension_create(
         "tags": tags,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
+    if extra_vars:
+        template_vars.update(extra_vars)
 
     try:
         content = render_template(
@@ -1010,6 +1014,12 @@ def execute_extension(
                 ),
             }
 
+        # Collect extra template variables from context
+        extra_keys = {"use_aida_bootstrap"}
+        extra_vars = {
+            k: context[k] for k in extra_keys if k in context
+        } or None
+
         executor = create_fn or execute_extension_create
         if executor is execute_extension_create:
             return executor(
@@ -1021,6 +1031,7 @@ def execute_extension(
                 location,
                 templates_dir,
                 plugin_path,
+                extra_vars=extra_vars,
             )
         else:
             return executor(
