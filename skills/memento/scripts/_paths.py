@@ -1,4 +1,4 @@
-"""Path configuration for permissions scripts.
+"""Path configuration for memento scripts.
 
 Sets up sys.path so that shared utilities can be imported
 from the project-level scripts/shared/ directory.
@@ -10,11 +10,13 @@ import sys
 from pathlib import Path
 
 # Directory layout:
-#   skills/permissions/scripts/_paths.py  <- this file
-#   scripts/shared/utils.py              <- shared utils
+#   skills/memento/scripts/_paths.py   <- this file
+#   skills/memento/templates/          <- templates
+#   scripts/shared/utils.py            <- shared utils
 SCRIPT_DIR = Path(__file__).resolve().parent
 SKILL_DIR = SCRIPT_DIR.parent
 PROJECT_ROOT = SKILL_DIR.parent.parent
+TEMPLATES_DIR = SKILL_DIR / "templates"
 
 # Make local operations and shared utilities importable
 if str(SCRIPT_DIR) not in sys.path:
@@ -25,8 +27,3 @@ if str(_shared_scripts) not in sys.path:
 
 from shared.bootstrap import ensure_aida_environment  # noqa: E402
 ensure_aida_environment()
-
-
-def get_home_dir() -> Path:
-    """Return the user's home directory."""
-    return Path.home()

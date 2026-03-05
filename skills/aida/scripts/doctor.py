@@ -15,6 +15,9 @@ import sys
 import subprocess
 from pathlib import Path
 
+import _paths  # noqa: F401
+from shared.bootstrap import VENV_DIR, STAMP_FILE, is_aida_environment_ready
+
 def check_python_version():
     """Check if Python 3.8+ is installed."""
     version = sys.version_info
@@ -106,24 +109,71 @@ def check_github_cli():
         print(f"⚠ GitHub CLI: error checking ({e})")
         return True  # Not required
 
+def check_aida_venv():
+    """Check if the AIDA managed virtual environment is healthy."""
+    print("Checking AIDA virtual environment...")
+
+    if not VENV_DIR.exists():
+        print("• AIDA venv: not created yet (will be created on first use)")
+        return True  # Not an error, lazy init
+
+    # Check venv Python interpreter
+    bin_dir = VENV_DIR / "bin"
+    venv_python = bin_dir / "python3"
+    if not venv_python.exists():
+        print("✗ AIDA venv: corrupted (missing python3 interpreter)")
+        print(f"  → Remove and let AIDA recreate: rm -rf {VENV_DIR}")
+        return False
+
+    # Check pip
+    venv_pip = bin_dir / "pip"
+    if not venv_pip.exists():
+        print("✗ AIDA venv: corrupted (missing pip)")
+        print(f"  → Remove and let AIDA recreate: rm -rf {VENV_DIR}")
+        return False
+
+    # Check if deps are up to date
+    if is_aida_environment_ready():
+        print(f"✓ AIDA venv: {VENV_DIR} (healthy, deps up to date)")
+    else:
+        if STAMP_FILE.exists():
+            print("⚠ AIDA venv: exists but dependencies are outdated")
+            print("  → Dependencies will update automatically on next script run")
+        else:
+            print("⚠ AIDA venv: exists but no stamp file")
+            print("  → Dependencies will install automatically on next script run")
+
+    # Check installed packages
+    try:
+        result = subprocess.run(
+            [str(venv_pip), "list", "--format=columns"],
+            capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode == 0:
+            installed = result.stdout
+            required = ["jinja2", "pyyaml", "jsonschema"]
+            for pkg in required:
+                if pkg.lower() in installed.lower():
+                    print(f"  ✓ {pkg}: installed")
+                else:
+                    print(f"  ✗ {pkg}: missing")
+    except (subprocess.TimeoutExpired, subprocess.SubprocessError):
+        print("  ⚠ Could not verify installed packages")
+
+    return True
+
+
 def validate_yaml_file(path, name):
     """Validate a YAML file."""
     if not path.exists():
         return True  # Not an error if doesn't exist yet
 
     try:
-        # Try to import yaml, but if not available, just check if file is readable
-        try:
-            import yaml
-            with open(path, 'r') as f:
-                yaml.safe_load(f)
-        except ImportError:
-            # yaml not installed, just check file is readable
-            with open(path, 'r') as f:
-                f.read()
+        import yaml
+        with open(path, 'r') as f:
+            yaml.safe_load(f)
         return True
     except (FileNotFoundError, PermissionError):
-        # File doesn't exist or can't be read
         return False
     except yaml.YAMLError as e:
         print(f"✗ {name}: Invalid YAML - {e}")
@@ -213,6 +263,11 @@ def main():
     if not check_github_cli():
         # gh is optional, already handles its own messaging
         pass
+
+    print()
+
+    if not check_aida_venv():
+        issues.append("AIDA virtual environment")
 
     print()
 

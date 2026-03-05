@@ -159,21 +159,26 @@ mkdir -p ~/.claude/memento
 **Possible Causes:**
 
 1. Python not installed or not in PATH
-2. Missing dependencies
+2. AIDA venv missing or corrupted
 3. Wrong Python version
 4. Script not executable
+5. `python3-venv` package not installed (Debian/Ubuntu)
 
 **Diagnostic Steps:**
 
 1. Check Python: `which python3`
 2. Check version: `python3 --version`
-3. Check dependencies: `pip list`
+3. Run diagnostics: `/aida doctor` (checks venv health)
 
 **Fixes:**
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
+# AIDA manages its own venv at ~/.aida/venv/
+# If the venv is corrupted, remove it and let AIDA recreate:
+rm -rf ~/.aida/venv ~/.aida/.venv-stamp
+
+# On Debian/Ubuntu, ensure python3-venv is installed:
+sudo apt install python3-venv
 
 # Make scripts executable
 chmod +x scripts/*.py

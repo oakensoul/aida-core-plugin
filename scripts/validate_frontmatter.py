@@ -23,17 +23,12 @@ import sys
 from pathlib import Path
 from typing import Optional, List
 
-try:
-    import yaml
-except ImportError:
-    print("Error: PyYAML required. Install with: pip install pyyaml", file=sys.stderr)
-    sys.exit(1)
+# Bootstrap AIDA environment to ensure dependencies are available
+from shared.bootstrap import ensure_aida_environment
+ensure_aida_environment()
 
-try:
-    import jsonschema
-except ImportError:
-    print("Error: jsonschema required. Install with: pip install jsonschema", file=sys.stderr)
-    sys.exit(1)
+import yaml  # noqa: E402
+import jsonschema  # noqa: E402
 
 
 FRONTMATTER_PATTERN = re.compile(r'^---\s*\n(.*?)\n---\s*\n', re.DOTALL)

@@ -10,12 +10,8 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-# Try to import yaml for YAML file operations
-try:
-    import yaml
-    HAS_YAML = True
-except ImportError:
-    HAS_YAML = False
+import yaml
+HAS_YAML = True
 
 # Try to import fcntl for Unix file locking
 try:
@@ -24,8 +20,8 @@ try:
 except ImportError:
     HAS_FCNTL = False
 
-from .errors import FileOperationError, ConfigurationError
-from .paths import ensure_directory
+from .errors import FileOperationError, ConfigurationError  # noqa: E402
+from .paths import ensure_directory  # noqa: E402
 
 
 # File operation constants
@@ -245,12 +241,6 @@ def write_yaml(path: Path, data: Dict[str, Any], create_parents: bool = True) ->
     Example:
         >>> write_yaml(Path("config.yml"), {"setting": "value"})
     """
-    if not HAS_YAML:
-        raise ConfigurationError(
-            "PyYAML is not available",
-            "Install PyYAML to write YAML files: pip install pyyaml"
-        )
-
     try:
         content = yaml.dump(data, default_flow_style=False, sort_keys=False, allow_unicode=True)
         write_file(path, content, create_parents=create_parents)
