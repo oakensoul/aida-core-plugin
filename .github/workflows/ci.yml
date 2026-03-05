@@ -69,7 +69,7 @@ jobs:
       - name: Install linters
         run: |
           pip install ruff yamllint -r requirements.txt
-          npm install -g markdownlint-cli
+          npm install -g markdownlint-cli@0.43.0
 
       - name: Run all linters
         run: make lint
