@@ -16,11 +16,17 @@ sys.path.insert(0, str(_plugin_scripts))
 for _mod_name in list(sys.modules):
     if _mod_name == "operations" or _mod_name.startswith("operations."):
         del sys.modules[_mod_name]
+sys.modules.pop("_paths", None)
 
 from operations import scaffold as _scaffold_mod  # noqa: E402
 
 get_questions = _scaffold_mod.get_questions
 execute = _scaffold_mod.execute
+
+_ops_snapshot = {
+    k: v for k, v in sys.modules.items()
+    if k == "operations" or k.startswith("operations.")
+}
 
 
 class TestGetQuestionsNoContext(unittest.TestCase):

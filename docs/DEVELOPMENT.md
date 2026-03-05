@@ -46,17 +46,28 @@ gh --version
 # Clone the aida-core-plugin repository
 git clone git@github.com:oakensoul/aida-core-plugin.git
 cd aida-core-plugin
+```
 
-# Create virtual environment (recommended)
+### Dependencies
+
+AIDA manages its own virtual environment at `~/.aida/venv/`. When
+any AIDA script runs for the first time, it automatically:
+
+1. Creates the venv (if it doesn't exist)
+2. Installs packages from `requirements.txt`
+3. Tracks a stamp file so subsequent runs skip installation
+
+**You do not need to manually install dependencies.** The bootstrap
+handles everything transparently.
+
+For **development** (linting, testing), you may still want a local
+venv:
+
+```bash
 python3 -m venv venv
 source venv/bin/activate  # On macOS/Linux
-# venv\Scripts\activate   # On Windows
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Install development dependencies
-pip install -r requirements-dev.txt  # (planned)
+pip install pytest pytest-cov ruff yamllint
 ```
 
 ### Set Up Local Testing

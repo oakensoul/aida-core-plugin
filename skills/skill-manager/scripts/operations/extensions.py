@@ -108,7 +108,35 @@ def get_questions(
         Dictionary containing questions, inferred values,
         validation results, and project context.
     """
-    return get_extension_questions(SKILL_CONFIG, context)
+    result = get_extension_questions(SKILL_CONFIG, context)
+
+    operation = context.get("operation", "create")
+    if operation == "create":
+        # Detect if AIDA is available to offer managed environment
+        aida_dir = Path.home() / ".aida"
+        aida_available = aida_dir.exists()
+
+        result["questions"].append(
+            {
+                "id": "use_aida_bootstrap",
+                "question": (
+                    "Use AIDA managed environment for Python "
+                    "dependencies?"
+                ),
+                "type": "boolean",
+                "required": False,
+                "default": aida_available,
+                "help": (
+                    "When enabled, generated scripts will use "
+                    "the AIDA virtual environment for third-party "
+                    "packages instead of requiring manual pip "
+                    "install. This creates a dependency on AIDA."
+                ),
+            }
+        )
+        result["inferred"]["use_aida_bootstrap"] = aida_available
+
+    return result
 
 
 # ------------------------------------------------------------------

@@ -17,6 +17,7 @@ sys.path.insert(0, str(_plugin_scripts))
 for _mod_name in list(sys.modules):
     if _mod_name == "operations" or _mod_name.startswith("operations."):
         del sys.modules[_mod_name]
+sys.modules.pop("_paths", None)
 
 import operations.scaffold_ops.context as _context_mod  # noqa: E402
 
@@ -26,6 +27,11 @@ from operations.scaffold_ops.context import (  # noqa: E402
     check_gh_available,
     resolve_default_target,
 )
+
+_ops_snapshot = {
+    k: v for k, v in sys.modules.items()
+    if k == "operations" or k.startswith("operations.")
+}
 
 
 class TestInferGitConfig(unittest.TestCase):

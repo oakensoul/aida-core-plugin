@@ -10,6 +10,24 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-03-05
+
+### Added
+
+#### AIDA-managed Virtual Environment (#34)
+
+- Bootstrap module (`scripts/shared/bootstrap.py`) that lazily creates
+  and maintains a virtual environment at `~/.aida/venv/`
+- Unified dependency management -- no manual `pip install` required
+- Stamp file tracking to skip reinstall when dependencies haven't changed
+- Venv health check in `/aida doctor`
+- Optional AIDA bootstrap integration for skill creation flow
+- Standardized `_paths.py` across all 8 skills
+
+### Removed
+
+- Ad-hoc "Install with: pip install ..." error messages from 6 scripts
+
 ## [1.0.0] - 2026-02-24
 
 ### Added
