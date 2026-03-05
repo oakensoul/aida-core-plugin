@@ -30,7 +30,13 @@ from operations.utils import (  # noqa: E402
     safe_json_load,
 )
 from operations.extensions import infer_from_description  # noqa: E402
+import operations.utils as _utils_mod  # noqa: E402
 from manage import get_questions, execute  # noqa: E402
+
+_ops_snapshot = {
+    k: v for k, v in sys.modules.items()
+    if k == "operations" or k.startswith("operations.")
+}
 
 
 class TestKebabCase(unittest.TestCase):
@@ -444,7 +450,7 @@ class TestCreateComponent(unittest.TestCase):
         }
 
         # Mock get_project_root to return our temp directory
-        with patch('operations.utils.get_project_root', return_value=self.temp_path):
+        with patch.object(_utils_mod, 'get_project_root', return_value=self.temp_path):
             result = execute(context, {})
 
         # Verify success

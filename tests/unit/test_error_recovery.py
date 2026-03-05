@@ -27,10 +27,16 @@ sys.path.insert(
 for _mod_name in list(sys.modules):
     if _mod_name == "operations" or _mod_name.startswith("operations."):
         del sys.modules[_mod_name]
+sys.modules.pop("_paths", None)
 
 from operations.utils import safe_json_load, parse_frontmatter  # noqa: E402
 from scanner import read_plugin_manifest, read_aida_config  # noqa: E402
 from settings_manager import write_permissions  # noqa: E402
+
+_ops_snapshot = {
+    k: v for k, v in sys.modules.items()
+    if k == "operations" or k.startswith("operations.")
+}
 
 
 class TestCorruptedJsonFiles(unittest.TestCase):
