@@ -31,3 +31,6 @@ if not (SHARED_UTILS / "shared" / "utils.py").exists():
 # Add to sys.path so `from shared.utils import ...` works
 sys.path.insert(0, str(SCRIPT_DIR))
 sys.path.insert(0, str(SHARED_UTILS))
+
+from shared.bootstrap import ensure_aida_environment  # noqa: E402
+ensure_aida_environment()

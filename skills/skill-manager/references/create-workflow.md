@@ -168,6 +168,38 @@ python manage.py --execute \
 | Template error   | Jinja2 rendering failed    | Check template syntax       |
 | Permission error | Cannot write to location   | Check directory permissions |
 
+## AIDA Bootstrap Option
+
+During skill creation, users are asked whether to use the AIDA
+managed virtual environment for Python dependencies. This is
+**optional** and defaults to yes if `~/.aida/` exists.
+
+When enabled (`use_aida_bootstrap: true`):
+
+- The generated SKILL.md includes guidance for using `_paths.py`
+  and the bootstrap in script entry points
+- Scripts should call `ensure_aida_environment()` via the
+  `_paths.py` pattern to ensure dependencies are available
+- This creates a soft dependency on AIDA being installed
+
+When disabled:
+
+- Scripts should use standard `try/except ImportError` patterns
+  with user-facing install messages
+- No dependency on AIDA infrastructure
+
+### Script Bootstrap Pattern
+
+```python
+# In scripts/_paths.py:
+from shared.bootstrap import ensure_aida_environment  # noqa: E402
+ensure_aida_environment()
+
+# In scripts/my_script.py:
+import _paths  # noqa: F401  (sets up sys.path + bootstrap)
+import yaml  # now available via AIDA venv
+```
+
 ## Best Practices
 
 1. **Let inference work** - Only ask questions when necessary

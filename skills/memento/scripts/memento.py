@@ -42,6 +42,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 
+import _paths  # noqa: F401
+
 import yaml
 
 # Configure logging
