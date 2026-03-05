@@ -8,6 +8,8 @@ description: "Foundation plugin for AIDA"
 
 > The foundation for building your custom Claude Code experience.
 
+**Requires:** Claude Code (latest) and Python 3.8+ (on Debian/Ubuntu, also `python3-venv`)
+
 ## Why AIDA?
 
 Claude Code is extensible — but there's no scaffolding. Building agents and skills
@@ -28,25 +30,6 @@ environment settings. Your setup stays consistent across projects and portable a
 **Structured session context.** Mementos capture rich project state — not just facts, but the
 full context of what you're working on. Save mid-task, restore tomorrow, scoped to the project
 or your user profile.
-
-## 30-Second Demo
-
-```bash
-# Add AIDA marketplace (one-time setup)
-/plugin marketplace add oakensoul/aida-marketplace
-
-# Install the core plugin
-/plugin install core@aida
-
-# Configure AIDA (auto-detects your environment)
-/aida config
-
-# Working on a feature? Save your context before ending your session
-/aida memento create "Implementing OAuth flow"
-
-# Tomorrow, restore where you left off
-/aida memento read
-```
 
 ## Features
 
@@ -122,8 +105,12 @@ For detailed walkthrough, see the [Getting Started Guide](docs/GETTING_STARTED.m
 ## Requirements
 
 - **Claude Code** - Latest version
-- **Python 3.8+** - For script execution
+- **Python 3.8+** - For script execution (on Debian/Ubuntu, also `python3-venv`)
 - **gh CLI** (optional) - For feedback features
+
+> Python dependencies are managed automatically. AIDA creates a
+> virtual environment at `~/.aida/venv/` on first use -- no manual
+> `pip install` required.
 
 ## Architecture
 

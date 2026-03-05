@@ -20,3 +20,6 @@ PROJECT_ROOT = SKILL_DIR.parent.parent
 _shared_scripts = PROJECT_ROOT / "scripts"
 if str(_shared_scripts) not in sys.path:
     sys.path.insert(0, str(_shared_scripts))
+
+from shared.bootstrap import ensure_aida_environment  # noqa: E402
+ensure_aida_environment()

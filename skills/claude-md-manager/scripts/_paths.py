@@ -23,3 +23,6 @@ TEMPLATES_DIR = SKILL_DIR / "templates"
 _scripts_path = PROJECT_ROOT / "scripts"
 if str(_scripts_path) not in sys.path:
     sys.path.insert(0, str(_scripts_path))
+
+from shared.bootstrap import ensure_aida_environment  # noqa: E402
+ensure_aida_environment()

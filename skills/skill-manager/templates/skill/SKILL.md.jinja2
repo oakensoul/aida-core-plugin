@@ -58,6 +58,21 @@ Description of operation 2.
 Executable scripts for this skill:
 
 - **script-name.py** - Description
+{% if use_aida_bootstrap | default(false) %}
+
+> **AIDA Bootstrap:** Scripts in this skill use the AIDA managed
+> virtual environment for Python dependencies. Add this to the top
+> of each entry-point script (after stdlib imports):
+>
+> ```python
+> import _paths  # noqa: F401  (sets up sys.path + bootstrap)
+> ```
+>
+> Create a `_paths.py` in the `scripts/` directory following the
+> pattern in other AIDA skills. This ensures third-party packages
+> (jinja2, PyYAML, jsonschema, etc.) are available without requiring
+> users to manually install them.
+{% endif %}
 
 ### references/
 
