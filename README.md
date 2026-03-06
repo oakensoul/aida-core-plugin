@@ -34,6 +34,7 @@ or your user profile.
 ## Features
 
 - **Session Memory** - Save and restore context across sessions with mementos
+- **File Backup** - Versioned backups with checksum dedup and configurable retention
 - **Smart Configuration** - Auto-detects your environment, tools, and project setup
 - **Extension Creation** - Build agents and skills with guided templates
 - **Project Context** - Claude understands your codebase patterns and conventions
@@ -76,6 +77,7 @@ For detailed walkthrough, see the [Getting Started Guide](docs/GETTING_STARTED.m
 | `/aida status`          | Check installation and configuration |
 | `/aida doctor`          | Run health diagnostics               |
 | `/aida memento`         | Save/restore session context         |
+| `/aida backup`          | Back up and restore files            |
 | `/aida agent create`    | Create a custom agent                |
 | `/aida skill create`    | Create a custom skill                |
 | `/aida feedback`        | Submit feedback via GitHub           |

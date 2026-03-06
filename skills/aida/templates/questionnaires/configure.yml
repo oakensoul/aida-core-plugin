@@ -264,6 +264,34 @@ questions:
     conditional:
       when: "has_contributing == false and (has_ci_cd == true or ci_cd_setup)"
 
+  # Backup configuration (always ask)
+  - id: backup_enabled
+    question: "Enable automatic file backups before destructive edits?"
+    type: choice
+    options:
+      - "Yes - Back up files automatically"
+      - "No - I manage my own backups"
+    help: |
+      AIDA can automatically back up files before making changes.
+      Backups use checksum dedup (no duplicates) and are stored
+      in ~/.claude/.backups/ by default.
+
+      Advanced options (storage, retention, custom command) are
+      available via /aida backup config.
+
+  - id: backup_scope
+    question: "When should backups be created?"
+    type: choice
+    options:
+      - "Always - Back up all files"
+      - "Outside git only - Skip git-tracked files"
+    help: |
+      "Always" backs up every file regardless of version control.
+      "Outside git only" skips files tracked by git (they already
+      have version history) but still backs up untracked files.
+    conditional:
+      when: "backup_enabled == 'Yes - Back up files automatically'"
+
   # Project-specific conventions (always ask)
   - id: project_conventions
     question: "What are the key conventions or patterns for this project?"

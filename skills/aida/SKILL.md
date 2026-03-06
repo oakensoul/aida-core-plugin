@@ -3,9 +3,9 @@ type: skill
 name: aida
 description: This skill routes /aida commands to appropriate handlers - configuration,
   diagnostics, feedback, extension management (agent-manager, skill-manager,
-  plugin-manager, hook-manager, claude-md-manager), and session persistence
-  (memento).
-version: 0.8.0
+  plugin-manager, hook-manager, claude-md-manager), session persistence
+  (memento), and file backup (backup).
+version: 1.2.0
 tags:
   - core
 user-invocable: true
@@ -223,6 +223,41 @@ For `memento` commands:
 /aida memento remove my-memento      → memento skill
 ```
 
+### Backup Commands
+
+For `backup` commands:
+
+- **Invoke the `backup` skill** to handle these operations
+- Pass the full command arguments to the skill
+- The skill handles save, restore, diff, list, status, config,
+  and clean operations
+
+**Process:**
+
+1. Parse the command to extract:
+   - Operation: `save`, `restore`, `diff`, `list`, `status`,
+     `config`, `clean`
+   - Arguments: file path, version, message, flags
+
+2. Invoke `backup` skill with the parsed context
+
+**Examples:**
+
+```text
+/aida backup <file>                  → backup skill (save)
+/aida backup <file> -m "message"     → backup skill (save + msg)
+/aida backup restore <file>          → backup skill (restore latest)
+/aida backup restore <file> <ver>    → backup skill (restore version)
+/aida backup diff <file>             → backup skill (latest vs current)
+/aida backup diff <file> <v1> <v2>   → backup skill (v1 vs v2)
+/aida backup list                    → backup skill (all files)
+/aida backup list <file>             → backup skill (file versions)
+/aida backup status                  → backup skill (analytics)
+/aida backup config                  → backup skill (configure)
+/aida backup clean                   → backup skill (enforce retention)
+/aida backup clean --dry-run         → backup skill (preview clean)
+```
+
 ### CLAUDE.md Management Commands
 
 For `claude` commands:
@@ -313,6 +348,18 @@ When displaying help (for `help` command or no arguments), show:
 - `/aida memento update <slug>` - Update memento sections
 - `/aida memento complete <slug>` - Archive completed memento
 
+### File Backup
+- `/aida backup <file>` - Back up a file before changes
+- `/aida backup <file> -m "message"` - Back up with description
+- `/aida backup restore <file>` - Restore latest backup
+- `/aida backup restore <file> <version>` - Restore specific version
+- `/aida backup diff <file>` - Show changes since last backup
+- `/aida backup diff <file> <v1> <v2>` - Compare two versions
+- `/aida backup list [file]` - List backup versions
+- `/aida backup status` - Show backup analytics
+- `/aida backup config` - Configure backup settings
+- `/aida backup clean` - Clean old backups per retention policy
+
 ### CLAUDE.md Management
 - `/aida claude create` - Create CLAUDE.md with auto-detection
 - `/aida claude create --scope user` - Create user-level CLAUDE.md
@@ -331,6 +378,7 @@ If you encounter issues: `/aida doctor`
 To create an agent: `/aida agent create "description"`
 To save work context: `/aida memento create "description"`
 To optimize your CLAUDE.md: `/aida claude optimize`
+To back up a file: `/aida backup <file>`
 To list hooks: `/aida hook list`
 To add a hook: `/aida hook add "auto-format on write"`
 ```

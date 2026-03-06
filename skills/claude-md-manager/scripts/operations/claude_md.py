@@ -6,6 +6,7 @@ for CLAUDE.md files.
 
 import json
 import re
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,6 +28,42 @@ TEMPLATES = {
     "user": "claude-md/user.md.jinja2",
     "plugin": "claude-md/plugin.md.jinja2",
 }
+
+
+def _trigger_backup(file_path: Path, operation: str) -> None:
+    """Trigger backup skill via two-phase API subprocess call.
+
+    Cross-skill communication in AIDA uses subprocess calls rather
+    than direct Python imports (ADR-012). Graceful degradation: if
+    the backup skill is not installed or the call fails, we continue
+    silently. Backup failure must never block a write.
+    """
+    backup_script = (
+        Path(__file__).resolve().parent.parent.parent.parent
+        / "backup" / "scripts" / "backup.py"
+    )
+    if not backup_script.exists():
+        return
+
+    try:
+        subprocess.run(
+            [
+                sys.executable,
+                str(backup_script),
+                "--execute",
+                "--context",
+                json.dumps({
+                    "operation": "save",
+                    "file": str(file_path),
+                    "message": operation,
+                }),
+            ],
+            capture_output=True,
+            timeout=10,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired,
+            subprocess.SubprocessError):
+        pass
 
 
 def get_claude_md_path(
@@ -856,6 +893,10 @@ def execute_create(
     # Ensure directory exists
     target_path.parent.mkdir(parents=True, exist_ok=True)
 
+    # Back up existing file before overwrite (ADR-012)
+    if target_path.is_file():
+        _trigger_backup(target_path, "claude create")
+
     # Write file
     try:
         target_path.write_text(content, encoding="utf-8")
@@ -961,6 +1002,9 @@ def execute_optimize(
                 )
 
     if changes:
+        # Back up before applying optimizations (ADR-012)
+        _trigger_backup(path, "claude optimize")
+
         try:
             path.write_text(content, encoding="utf-8")
         except IOError as e:
