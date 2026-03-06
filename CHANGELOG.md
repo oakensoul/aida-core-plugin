@@ -10,6 +10,27 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-03-05
+
+### Added
+
+#### File Backup Skill
+
+- New `/aida backup` skill with 7 operations: save, restore, diff,
+  list, status, config, clean
+- Built-in Python backup provider with zero external dependencies
+- Checksum deduplication (MD5) to prevent duplicate backups
+- JSON metadata sidecars with git context capture
+- Smart version resolution: `latest`, `current`, or `YYYYMMDD-HHMMSS`
+- Unified diff between any two versions via `difflib`
+- Configurable retention policies (`max_versions`, `max_age_days`)
+- Three storage modes: global (`~/.claude/.backups/`), local, custom
+- Custom command override with `{file}`/`{message}` substitution
+- Auto-backup integration with claude-md-manager (ADR-012)
+- Backup health check in `/aida doctor`
+- Backup questions in `/aida config` flow
+- ADR-012: Cross-skill subprocess communication pattern
+
 ## [1.1.0] - 2026-03-05
 
 ### Added
@@ -316,6 +337,8 @@ See git history for details on versions prior to 0.2.0.
 
 ---
 
+[1.2.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.2.0
+[1.1.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.1.0
 [1.0.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.0.0
 [0.8.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.8.0
 [0.7.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.7.0

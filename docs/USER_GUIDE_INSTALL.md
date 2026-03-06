@@ -701,7 +701,21 @@ Try these commands to explore AIDA:
 /aida agent list         # See available agents
 ```
 
-### 3. Create Custom Skills
+### 3. Set Up File Backups
+
+Enable automatic file backups before destructive edits:
+
+```bash
+/aida backup config
+```
+
+Or back up a file manually:
+
+```bash
+/aida backup important-file.py -m "before refactor"
+```
+
+### 4. Create Custom Skills
 
 Make AIDA truly yours:
 
@@ -711,14 +725,14 @@ Make AIDA truly yours:
 
 See [Development Guide](DEVELOPMENT.md) for creating skills.
 
-### 4. Learn the Architecture
+### 5. Learn the Architecture
 
 Understand how AIDA works:
 
 - [Architecture Documentation](ARCHITECTURE.md)
 - [API Reference](API.md)
 
-### 5. Join the Community
+### 6. Join the Community
 
 - **GitHub**: [aida-core-plugin](https://github.com/oakensoul/aida-core-plugin)
 - **Issues**: Report bugs and request features

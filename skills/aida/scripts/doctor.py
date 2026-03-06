@@ -235,6 +235,87 @@ def count_and_validate_skills(claude_dir, name):
         return valid == total
     return True
 
+def check_backup():
+    """Check backup skill configuration and storage health."""
+    print("Checking backup configuration...")
+
+    config_path = Path.home() / ".claude" / "aida.yml"
+    if not config_path.is_file():
+        print("• Backup: not configured (run /aida backup config)")
+        return True  # Not an error
+
+    try:
+        import yaml
+        with open(config_path) as fh:
+            data = yaml.safe_load(fh)
+        if not isinstance(data, dict) or "backup" not in data:
+            print("• Backup: no backup section in aida.yml")
+            return True  # Not an error
+    except Exception:
+        print("⚠ Backup: could not read aida.yml")
+        return True  # Config issue handled elsewhere
+
+    backup_cfg = data["backup"]
+    enabled = backup_cfg.get("enabled", True)
+
+    if not enabled:
+        print("• Backup: disabled")
+        return True
+
+    print("✓ Backup: enabled")
+
+    # Check storage location
+    storage = backup_cfg.get("storage", "global")
+    if storage == "global":
+        backup_dir = Path.home() / ".claude" / ".backups"
+        if backup_dir.is_dir():
+            print(f"✓ Backup storage: {backup_dir} (exists)")
+        else:
+            print(f"• Backup storage: {backup_dir} (will be created on first backup)")
+    elif storage == "local":
+        print("✓ Backup storage: local (next to files)")
+    else:
+        custom_dir = Path(storage).expanduser().resolve()
+        if custom_dir.is_dir():
+            print(f"✓ Backup storage: {custom_dir} (exists)")
+        else:
+            print(f"⚠ Backup storage: {custom_dir} (not found)")
+            return False
+
+    # Check custom command
+    custom_cmd = backup_cfg.get("custom_command", "")
+    if custom_cmd:
+        cmd_name = custom_cmd.split()[0].replace("{file}", "").replace("{message}", "").strip()
+        if cmd_name:
+            try:
+                result = subprocess.run(
+                    ["which", cmd_name],
+                    capture_output=True, timeout=5,
+                )
+                if result.returncode == 0:
+                    print(f"✓ Custom command: {cmd_name} (found on PATH)")
+                else:
+                    print(f"⚠ Custom command: {cmd_name} (not found on PATH)")
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError):
+                print(f"⚠ Custom command: could not verify {cmd_name}")
+
+    # Show retention summary
+    retention = backup_cfg.get("retention", {})
+    max_v = retention.get("max_versions", 0)
+    max_d = retention.get("max_age_days", 0)
+    if max_v == 0 and max_d == 0:
+        print("• Retention: unlimited (no cleanup policy)")
+    else:
+        parts = []
+        if max_v > 0:
+            parts.append(f"max {max_v} versions")
+        if max_d > 0:
+            parts.append(f"max {max_d} days")
+        print(f"✓ Retention: {', '.join(parts)}")
+
+    return True
+
+
 def main():
     print("AIDA Health Check")
     print("=" * 40)
@@ -268,6 +349,11 @@ def main():
 
     if not check_aida_venv():
         issues.append("AIDA virtual environment")
+
+    print()
+
+    if not check_backup():
+        warnings.append("Backup configuration")
 
     print()
 

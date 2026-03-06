@@ -21,6 +21,7 @@ aida-core-plugin/
 ├── skills/               # Process definitions + execution capabilities
 │   ├── aida/             # /aida skill - routing, scripts, references
 │   ├── agent-manager/    # Agent CRUD operations
+│   ├── backup/           # File backup and restore
 │   ├── claude-md-manager/  # CLAUDE.md management
 │   ├── hook-manager/     # Hook configuration management
 │   ├── memento/          # Session persistence

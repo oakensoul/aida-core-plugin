@@ -140,6 +140,43 @@ When reviewing configs, check for drift:
 | `vcs.remote` doesn't match actual remote | Config incorrect |
 | `config_complete: true` but nulls in preferences | Incomplete config |
 
+## Backup Configuration
+
+Backup settings live in `~/.claude/aida.yml` under the `backup:` key.
+Project-level overrides in `.claude/aida-project-context.yml`.
+
+```yaml
+backup:
+  enabled: true
+  scope: "always"
+  storage: "global"
+  custom_command: ""
+  retention:
+    max_versions: 0
+    max_age_days: 0
+    auto_enforce: true
+```
+
+### Backup Fields
+
+| Field | Type | Default | Valid Values |
+| ----- | ---- | ------- | ------------ |
+| `backup.enabled` | boolean | true | true, false |
+| `backup.scope` | string | "always" | "always", "outside-git-only" |
+| `backup.storage` | string | "global" | "global", "local", absolute path |
+| `backup.custom_command` | string | "" | shell command with {file}/{message} |
+| `backup.retention.max_versions` | integer | 0 | 0 = unlimited, N = keep N newest |
+| `backup.retention.max_age_days` | integer | 0 | 0 = unlimited, N = remove older |
+| `backup.retention.auto_enforce` | boolean | true | true, false |
+
+### Backup Config Merge
+
+1. Built-in defaults (all fields have safe defaults)
+2. Global: `~/.claude/aida.yml` `backup:` section
+3. Project: `.claude/aida-project-context.yml` `backup:` section
+
+Project values override global (shallow merge per key).
+
 ## Example Configuration
 
 ```yaml

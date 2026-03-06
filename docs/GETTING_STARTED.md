@@ -76,6 +76,20 @@ If something seems wrong:
 /aida doctor
 ```
 
+### Back Up a File
+
+Before making risky changes, create a versioned backup:
+
+```bash
+/aida backup important-file.py -m "before refactor"
+```
+
+Restore if needed:
+
+```bash
+/aida backup restore important-file.py
+```
+
 ### Save Your Work Context
 
 Before ending a session, save context for later:
@@ -109,6 +123,7 @@ AIDA extends Claude Code with specialized capabilities organized into two types:
 - `/aida status` - Check installation status (user-invocable)
 - `/aida doctor` - Run diagnostics (user-invocable)
 - `/aida memento` - Manage session persistence (user-invocable)
+- `/aida backup` - File backup and restore (user-invocable)
 - `user-context` - Your environment and preferences (auto-triggered)
 - `project-context` - Project-specific patterns and conventions (auto-triggered)
 
