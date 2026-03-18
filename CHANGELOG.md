@@ -10,6 +10,21 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2026-03-18
+
+### Fixed
+
+#### Scripts invoked with bare python3 instead of AIDA venv (#47)
+
+- Updated all reference docs to invoke scripts via
+  `~/.aida/venv/bin/python3` instead of bare `python3`
+- Fixed Makefile `lint-frontmatter` target to use `$(VENV_BIN)/python3`
+- Updated troubleshooting docs to reference venv Python path
+- Affected files: `config.md`, `diagnostics.md`, `feedback.md`,
+  `permissions-workflow.md`, `troubleshooting.md`, `Makefile`
+
+---
+
 ## [1.1.3] - 2026-03-18
 
 ### Fixed

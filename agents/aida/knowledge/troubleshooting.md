@@ -184,7 +184,7 @@ sudo apt install python3-venv
 chmod +x scripts/*.py
 
 # Use explicit Python path if needed
-/usr/bin/python3 scripts/status.py
+~/.aida/venv/bin/python3 scripts/status.py
 ```
 
 ## Diagnostic Commands
