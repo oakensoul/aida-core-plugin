@@ -33,20 +33,28 @@ aida-core-plugin/
 
 ## Development
 
+### Setup
+
+All Python tools (pytest, ruff, yamllint) live in `~/.aida/venv/`.
+The Makefile targets reference this venv automatically.
+
+```bash
+make install       # Install runtime + dev deps into ~/.aida/venv
+```
+
 ### Commands
 
 ```bash
 make lint          # Run all linters (ruff, yamllint, markdownlint)
 make test          # Run pytest
-make format        # Auto-format Python code
 make clean         # Remove build artifacts
 ```
 
 ### Testing
 
 ```bash
-pytest tests/                    # Run all tests
-pytest tests/test_manage.py -v   # Run specific test file
+make test                                          # Run all tests
+~/.aida/venv/bin/pytest tests/test_manage.py -v    # Run specific test file
 ```
 
 ## Conventions

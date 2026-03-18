@@ -10,6 +10,28 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-03-18
+
+### Fixed
+
+#### Missing `_paths` import in install.py (#42)
+
+- Added `import _paths` to `install.py` before `from utils import`
+  block, fixing `ModuleNotFoundError` when invoked via `/aida config`
+  → "Update global preferences"
+
+### Changed
+
+#### Dev tooling uses AIDA-managed venv (#42)
+
+- Added `requirements-dev.txt` for dev dependencies (pytest, ruff,
+  yamllint)
+- Makefile targets now use `~/.aida/venv/bin/` for all Python tools
+- `make install` installs both runtime and dev deps into the venv
+- Updated CLAUDE.md with setup instructions
+
+---
+
 ## [1.1.0] - 2026-03-05
 
 ### Added
@@ -316,6 +338,8 @@ See git history for details on versions prior to 0.2.0.
 
 ---
 
+[1.1.1]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.1.1
+[1.1.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.1.0
 [1.0.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.0.0
 [0.8.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.8.0
 [0.7.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v0.7.0
