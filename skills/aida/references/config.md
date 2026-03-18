@@ -25,7 +25,7 @@ Three-step flow:
 #### Step 1: Detect State
 
 ```bash
-python3 {base_directory}/scripts/detect.py
+~/.aida/venv/bin/python3 {base_directory}/scripts/detect.py
 ```
 
 Parse JSON response:
@@ -130,7 +130,7 @@ Global installation is completely automatic. It detects environment facts and in
 ##### Phase 1: Detect Environment
 
 ```bash
-python3 {base_directory}/scripts/install.py --get-questions --context '{context_json}'
+~/.aida/venv/bin/python3 {base_directory}/scripts/install.py --get-questions --context '{context_json}'
 ```
 
 Context JSON:
@@ -156,7 +156,7 @@ Returns:
 Since there are no questions, proceed directly to installation:
 
 ```bash
-python3 {base_directory}/scripts/install.py --install \
+~/.aida/venv/bin/python3 {base_directory}/scripts/install.py --install \
   --responses '{}' \
   --inferred '{inferred_json}'
 ```
@@ -180,7 +180,7 @@ Project configuration uses a **config-driven approach** with YAML as single sour
 ##### Phase 1: Detect Facts & Save to YAML
 
 ```bash
-python3 {base_directory}/scripts/configure.py --get-questions --context '{context_json}'
+~/.aida/venv/bin/python3 {base_directory}/scripts/configure.py --get-questions --context '{context_json}'
 ```
 
 Context JSON:
@@ -228,7 +228,7 @@ preferences: {branching_model: null, issue_tracking: "GitHub Issues", ...}
 Collect user responses with `AskUserQuestion`, then:
 
 ```bash
-python3 {base_directory}/scripts/configure.py --configure \
+~/.aida/venv/bin/python3 {base_directory}/scripts/configure.py --configure \
   --responses '{responses_json}'
 ```
 

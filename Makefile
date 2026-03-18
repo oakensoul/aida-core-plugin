@@ -72,7 +72,7 @@ lint-md: ## Run markdownlint on Markdown files
 	markdownlint '**/*.md' --ignore node_modules
 
 lint-frontmatter: ## Validate frontmatter in SKILL.md files
-	python3 scripts/validate_frontmatter.py
+	$(VENV_BIN)/python3 scripts/validate_frontmatter.py
 
 lint-fix: ## Run ruff linter with auto-fix
 	$(VENV_BIN)/ruff check skills/ tests/ scripts/ --fix
