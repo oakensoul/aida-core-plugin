@@ -12,11 +12,14 @@ from pathlib import Path
 # Add shared scripts to path
 _project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(_project_root / "scripts"))
+sys.path.insert(0, str(_project_root / "skills" / "aida" / "scripts"))
 
 from shared.utils import render_template  # noqa: E402
+from utils.template_renderer import render_template as sandbox_render  # noqa: E402
 
 TEMPLATES_DIR = _project_root / "skills" / "aida" / "templates"
 TEMPLATE_NAME = "blueprints/project-context/SKILL.md.jinja2"
+TEMPLATE_PATH = TEMPLATES_DIR / TEMPLATE_NAME
 
 
 def _base_vars(**overrides: str) -> dict[str, str]:
@@ -217,6 +220,72 @@ class TestProjectContextTemplateWhitespace(unittest.TestCase):
                     line,
                     f"Line {i} has trailing whitespace: {line!r}",
                 )
+
+
+class TestSandboxedRenderer(unittest.TestCase):
+    """Test using the production SandboxedEnvironment renderer.
+
+    This is the actual code path used by configure.py via
+    template_renderer.py, which previously lacked trim_blocks
+    and lstrip_blocks settings.
+    """
+
+    def _sandbox_render(self, **overrides: str) -> str:
+        return sandbox_render(TEMPLATE_PATH, _base_vars(**overrides))
+
+    def test_no_triple_blank_lines_all_true(self) -> None:
+        output = self._sandbox_render(
+            has_readme="true",
+            has_license="true",
+            has_gitignore="true",
+            has_changelog="true",
+            changelog_files="CHANGELOG.md",
+            has_contributing="true",
+            has_docs_directory="true",
+            has_tests="true",
+            has_ci_cd="true",
+            has_github_actions="true",
+            uses_docker="true",
+            has_dockerfile="true",
+            readme_length="500",
+            coding_standards="ruff",
+            issue_tracking="GitHub Issues",
+        )
+        self.assertNotRegex(output, r"\n{4,}")
+
+    def test_no_triple_blank_lines_all_false(self) -> None:
+        output = self._sandbox_render()
+        self.assertNotRegex(output, r"\n{4,}")
+
+    def test_no_triple_blank_lines_mixed(self) -> None:
+        """Marketplace-like project: no Docker, no tests, no docs dir."""
+        output = self._sandbox_render(
+            has_readme="true",
+            has_license="true",
+            has_gitignore="true",
+            has_changelog="false",
+            has_contributing="false",
+            has_docs_directory="false",
+            has_tests="false",
+            has_dockerfile="false",
+            has_docker_compose="false",
+            has_ci_cd="true",
+            has_github_actions="true",
+            has_package_json="true",
+            uses_docker="false",
+            issue_tracking="GitHub Issues",
+            readme_length="2500",
+        )
+        self.assertNotRegex(output, r"\n{4,}")
+
+    def test_no_none_literal(self) -> None:
+        output = self._sandbox_render()
+        self.assertNotIn("N, o, n, e", output)
+
+    def test_boolean_false_excluded(self) -> None:
+        output = self._sandbox_render()
+        self.assertNotIn(".gitignore: ✓", output)
+        self.assertNotIn("Contributing guide", output)
 
 
 if __name__ == "__main__":
