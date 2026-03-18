@@ -42,6 +42,8 @@ from pathlib import Path
 from typing import Dict, Any
 from datetime import datetime, timezone
 
+import _paths  # noqa: F401
+
 # Import utilities from the foundation module
 from utils import (
     check_python_version,
