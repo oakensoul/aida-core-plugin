@@ -5,7 +5,7 @@ description: This skill routes /aida commands to appropriate handlers - configur
   diagnostics, feedback, extension management (agent-manager, skill-manager,
   plugin-manager, hook-manager, claude-md-manager), and session persistence
   (memento).
-version: 0.8.0
+version: 0.9.0
 tags:
   - core
 user-invocable: true
@@ -82,7 +82,24 @@ For `feedback`, `bug`, or `feature-request` commands:
 For `help` or no arguments:
 
 - Display the help text inline (see Help Text section below)
-- No additional files need to be loaded
+- Read the plugin version from `{base_directory}/../../.claude-plugin/plugin.json`
+  (the `"version"` field) and include it in the footer
+- No additional reference files need to be loaded
+
+### About Command
+
+For `about`:
+
+- Read `{base_directory}/../../.claude-plugin/plugin.json`
+- Display plugin metadata:
+
+```markdown
+**AIDA Core Plugin**
+
+- **Version:** {version from plugin.json}
+- **Author:** {author.name from plugin.json}
+- **Repository:** {repository from plugin.json}
+```
 
 ### Agent Management Commands
 
@@ -320,8 +337,10 @@ When displaying help (for `help` command or no arguments), show:
 - `/aida claude validate` - Validate CLAUDE.md structure
 - `/aida claude list` - List all CLAUDE.md files in hierarchy
 
-### Help
+### Info
 - `/aida help` or `/aida` - Show this help message
+- `/aida about` - Show plugin version and metadata
+- `/aida status` - Show installation status and version
 
 ## Getting Started
 
@@ -333,6 +352,9 @@ To save work context: `/aida memento create "description"`
 To optimize your CLAUDE.md: `/aida claude optimize`
 To list hooks: `/aida hook list`
 To add a hook: `/aida hook add "auto-format on write"`
+
+---
+aida-core v{version from plugin.json}
 ```
 
 ## Resources
