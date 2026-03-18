@@ -870,8 +870,8 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
             'license_file': 'LICENSE',
             'has_gitignore': 'true' if config['files']['has_gitignore'] else 'false',
             'has_changelog': 'true' if config['files']['has_changelog'] else 'false',
-            'changelog_files': 'None',
-            'changelog_intent': 'None',
+            'changelog_files': '',
+            'changelog_intent': '',
             'has_contributing': 'true' if config['files']['has_contributing'] else 'false',
             'has_docs_directory': 'true' if config['files']['has_docs_directory'] else 'false',
             'docs_directory': 'docs',
@@ -907,12 +907,12 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
             'has_cargo_toml': 'true' if (project_root / "Cargo.toml").exists() else 'false',
 
             # Preferences
-            'issue_tracking': config['preferences']['issue_tracking'] or 'None',
-            'project_conventions': config['preferences']['project_conventions'] or 'None',
-            'api_docs_intent': config['preferences'].get('api_docs_approach') or 'None',
-            'github_project_config': config['preferences'].get('github_project_board') or 'None',
-            'jira_config': config['preferences'].get('jira_config') or 'None',
-            'confluence_config': config['preferences'].get('confluence_spaces') or 'None',
+            'issue_tracking': config['preferences']['issue_tracking'] or '',
+            'project_conventions': config['preferences']['project_conventions'] or '',
+            'api_docs_intent': config['preferences'].get('api_docs_approach') or '',
+            'github_project_config': config['preferences'].get('github_project_board') or '',
+            'jira_config': config['preferences'].get('jira_config') or '',
+            'confluence_config': config['preferences'].get('confluence_spaces') or '',
 
             # Docker & CI/CD intents
             'uses_docker': 'true' if config['files']['has_dockerfile'] or config['files']['has_docker_compose'] else 'false',
@@ -921,7 +921,7 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
             'uses_confluence': 'true' if config['preferences'].get('confluence_spaces') else 'false',
 
             # Coding standards
-            'coding_standards': 'None',
+            'coding_standards': '',
 
             # Timestamp
             'timestamp': datetime.now().isoformat(),
