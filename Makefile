@@ -27,8 +27,9 @@ dev-mode: ## Show dev mode status
 	@python3 scripts/dev_mode.py status
 
 # Testing
+TEST_ARGS ?= tests/
 test: ## Run pytest tests
-	$(VENV_BIN)/pytest tests/ -v
+	$(VENV_BIN)/pytest $(TEST_ARGS) -v
 
 test-coverage: ## Run tests with coverage report
 	$(VENV_BIN)/pytest tests/ -v --cov=skills/aida/scripts --cov-report=term-missing
