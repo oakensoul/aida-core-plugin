@@ -23,7 +23,7 @@ Two-phase interactive flow:
 ### Phase 1: Get Questions
 
 ```bash
-python3 {base_directory}/scripts/permissions.py \
+~/.aida/venv/bin/python3 {base_directory}/scripts/permissions.py \
   --get-questions \
   --context '{"operation": "setup"}'
 ```
@@ -92,7 +92,7 @@ Returns:
 ### Phase 2: Execute
 
 ```bash
-python3 {base_directory}/scripts/permissions.py \
+~/.aida/venv/bin/python3 {base_directory}/scripts/permissions.py \
   --execute '{"preset": "developer-workstation", "scope": "user"}' \
   --context '{"categories": {"file-edit": {"label": "File Edit", "rules": ["Edit"], "suggested": "allow"}}}'
 ```
@@ -162,7 +162,7 @@ Returns:
 ### Audit Mode
 
 ```bash
-python3 {base_directory}/scripts/permissions.py \
+~/.aida/venv/bin/python3 {base_directory}/scripts/permissions.py \
   --audit \
   --context '{"operation": "audit"}'
 ```
