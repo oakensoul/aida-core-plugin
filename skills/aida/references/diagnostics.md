@@ -15,7 +15,7 @@ These are non-interactive commands - just run the script and display output.
 ### /aida status
 
 ```bash
-python3 {base_directory}/scripts/status.py
+~/.aida/venv/bin/python3 {base_directory}/scripts/status.py
 ```
 
 Display the output directly to the user.
@@ -23,7 +23,7 @@ Display the output directly to the user.
 ### /aida doctor
 
 ```bash
-python3 {base_directory}/scripts/doctor.py
+~/.aida/venv/bin/python3 {base_directory}/scripts/doctor.py
 ```
 
 Display the diagnostic results and any recommendations.
@@ -31,7 +31,7 @@ Display the diagnostic results and any recommendations.
 ### /aida upgrade
 
 ```bash
-python3 {base_directory}/scripts/upgrade.py
+~/.aida/venv/bin/python3 {base_directory}/scripts/upgrade.py
 ```
 
 Display upgrade information and follow any instructions provided.
@@ -44,7 +44,7 @@ Display upgrade information and follow any instructions provided.
 
 1. Get the base directory from skill context
 2. Construct the full path to the script
-3. Run `python3 {path_to_script}`
+3. Run `~/.aida/venv/bin/python3 {path_to_script}`
 4. Capture output (stdout and stderr)
 5. Display to user
 
