@@ -10,6 +10,21 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2026-03-18
+
+### Fixed
+
+#### Config bugs: hardcoded version and missing project marker (#45)
+
+- Replaced hardcoded `AIDA_VERSION = "0.7.0"` with dynamic version
+  read from `plugin.json`, so `aida-project-context.yml` reflects
+  the actual plugin version
+- Added call to `render_aida_project_marker()` at the end of the
+  configure flow, writing `.claude/aida.yml` so `detect.py` correctly
+  reports `project_configured: true` after configuration
+
+---
+
 ## [1.1.2] - 2026-03-18
 
 ### Fixed
