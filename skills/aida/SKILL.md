@@ -101,7 +101,6 @@ For `about`:
 - **Author:** {author.name from plugin.json}
 - **Repository:** {repository from plugin.json}
 - **Installed at:** {resolved path to plugin root}
-- **Marketplace:** {owner.name from marketplace.json, if .claude-plugin/marketplace.json exists}
 ```
 
 ### Agent Management Commands
