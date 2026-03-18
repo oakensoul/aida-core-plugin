@@ -91,6 +91,7 @@ For `help` or no arguments:
 For `about`:
 
 - Read `{base_directory}/../../.claude-plugin/plugin.json`
+- Resolve the installed path from `{base_directory}/../..`
 - Display plugin metadata:
 
 ```markdown
@@ -99,6 +100,8 @@ For `about`:
 - **Version:** {version from plugin.json}
 - **Author:** {author.name from plugin.json}
 - **Repository:** {repository from plugin.json}
+- **Installed at:** {resolved path to plugin root}
+- **Marketplace:** {owner.name from marketplace.json, if .claude-plugin/marketplace.json exists}
 ```
 
 ### Agent Management Commands
