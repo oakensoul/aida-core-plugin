@@ -73,7 +73,17 @@ logger = logging.getLogger(__name__)
 
 
 # Constants
-AIDA_VERSION = "0.7.0"
+def _read_plugin_version() -> str:
+    """Read version from plugin.json."""
+    plugin_json = Path(__file__).parent.parent.parent.parent / ".claude-plugin" / "plugin.json"
+    try:
+        data = json.loads(plugin_json.read_text(encoding="utf-8"))
+        return data.get("version", "0.0.0")
+    except (FileNotFoundError, json.JSONDecodeError, KeyError):
+        return "0.0.0"
+
+
+AIDA_VERSION = _read_plugin_version()
 AIDA_MARKER_FILE = "aida.yml"
 PROJECT_CONTEXT_FILE = "aida-project-context.yml"
 PROJECT_CONTEXT_SKILL_DIR = "skills/project-context"
@@ -981,6 +991,16 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
                 " (non-critical): %s",
                 e,
             )
+
+        # Write aida.yml marker so detect.py reports project_configured: true
+        marker_path = project_root / ".claude" / AIDA_MARKER_FILE
+        marker_content = render_aida_project_marker(
+            preferences=config.get("preferences", {}),
+            project_name=config["project_name"],
+        )
+        atomic_write(marker_path, marker_content)
+        files_created.append(str(marker_path))
+        logger.info(f"Created project marker: {marker_path}")
 
         message = (
             "Project configuration complete! "
