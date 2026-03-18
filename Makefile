@@ -3,6 +3,8 @@
 
 PLUGIN_PATH := $(shell pwd)
 PLUGIN_NAME := aida-core
+VENV := $(HOME)/.aida/venv
+VENV_BIN := $(VENV)/bin
 
 .PHONY: help dev-mode-enable dev-mode-disable dev-mode test lint lint-py lint-yaml lint-md lint-frontmatter lint-fix install clean \
         docker-build docker-build-base docker-build-all docker-shell-% docker-clean docker-clean-all \
@@ -26,10 +28,10 @@ dev-mode: ## Show dev mode status
 
 # Testing
 test: ## Run pytest tests
-	pytest tests/ -v
+	$(VENV_BIN)/pytest tests/ -v
 
 test-coverage: ## Run tests with coverage report
-	pytest tests/ -v --cov=skills/aida/scripts --cov-report=term-missing
+	$(VENV_BIN)/pytest tests/ -v --cov=skills/aida/scripts --cov-report=term-missing
 
 # Docker Test Environments
 docker-build-base: ## Build base Docker test image (required first)
@@ -60,10 +62,10 @@ docker-clean-all: ## Remove containers, volumes, and images
 lint: lint-py lint-yaml lint-md lint-frontmatter ## Run all linters (Python, YAML, Markdown, Frontmatter)
 
 lint-py: ## Run ruff linter on Python files
-	ruff check skills/ tests/ scripts/
+	$(VENV_BIN)/ruff check skills/ tests/ scripts/
 
 lint-yaml: ## Run yamllint on YAML files
-	yamllint -c .yamllint.yml .github/ skills/
+	$(VENV_BIN)/yamllint -c .yamllint.yml .github/ skills/
 
 lint-md: ## Run markdownlint on Markdown files
 	markdownlint '**/*.md' --ignore node_modules
@@ -72,15 +74,14 @@ lint-frontmatter: ## Validate frontmatter in SKILL.md files
 	python3 scripts/validate_frontmatter.py
 
 lint-fix: ## Run ruff linter with auto-fix
-	ruff check skills/ tests/ scripts/ --fix
+	$(VENV_BIN)/ruff check skills/ tests/ scripts/ --fix
 
 lint-fix-md: ## Run markdownlint with auto-fix
 	markdownlint '**/*.md' --ignore node_modules --fix
 
 # Dependencies
-install: ## Install Python dependencies
-	pip install -r requirements.txt
-	pip install pytest pytest-cov ruff
+install: ## Install runtime and dev dependencies into ~/.aida/venv
+	$(VENV_BIN)/pip install -r requirements.txt -r requirements-dev.txt
 
 # Cleanup
 clean: ## Clean up generated files
