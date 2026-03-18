@@ -10,6 +10,26 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-03-18
+
+### Fixed
+
+#### Generated project-context SKILL.md fails markdown linting (#41)
+
+- Changed 9 `'None'` string fallbacks to `''` in `configure.py` so
+  Jinja2 conditionals correctly skip missing values
+- Fixed all `{% if has_xxx %}` boolean checks to use
+  `{% if has_xxx == 'true' %}` since values are strings
+- Removed `| join()` and `[0]` indexing on string values that were
+  incorrectly treated as lists
+- Restructured template whitespace control to eliminate MD012
+  (multiple blank lines) and MD032 (blanks around lists)
+- Changed footer emphasis lines to HTML comments (fixes MD036)
+- Fixed `tools` default to handle empty strings
+- Added 19 unit tests for template rendering
+
+---
+
 ## [1.1.1] - 2026-03-18
 
 ### Fixed
