@@ -10,6 +10,23 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] - 2026-03-18
+
+### Fixed
+
+#### Generated SKILL.md has multiple consecutive blank lines (#49)
+
+- Added `trim_blocks`, `lstrip_blocks`, and `keep_trailing_newline`
+  to `template_renderer.py` SandboxedEnvironment — this was the
+  actual production renderer used by `configure.py`, which lacked
+  the whitespace settings present in `shared/utils.py`
+- Added post-processing safety net in `render_skill_directory()` to
+  collapse 3+ consecutive newlines to a single blank line
+- Added 5 tests using the production SandboxedEnvironment renderer
+  covering all-true, all-false, and mixed (marketplace-like) inputs
+
+---
+
 ## [1.1.4] - 2026-03-18
 
 ### Fixed
