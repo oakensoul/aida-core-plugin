@@ -6,6 +6,7 @@ variable substitution in both file contents and filenames.
 """
 
 import os
+import re
 from pathlib import Path
 from typing import Dict
 
@@ -170,7 +171,10 @@ def render_template(template_path: Path, variables: Dict[str, str]) -> str:
             undefined=StrictUndefined,
             autoescape=False,  # Intentionally disabled for markdown templates
             enable_async=False,
-            auto_reload=False
+            auto_reload=False,
+            trim_blocks=True,
+            lstrip_blocks=True,
+            keep_trailing_newline=True,
         )
 
         # Render template from string
@@ -419,6 +423,11 @@ def _render_directory_recursive(
             try:
                 # Render template content
                 rendered_content = render_template(item, variables)
+
+                # Post-process: collapse 3+ consecutive newlines to 2
+                # (one blank line max) as a safety net for template
+                # whitespace issues
+                rendered_content = re.sub(r'\n{3,}', '\n\n', rendered_content)
 
                 # Write rendered content to output file
                 write_file(output_path, rendered_content)
