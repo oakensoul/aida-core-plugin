@@ -23,11 +23,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          pip install pytest pytest-cov
+          python -m venv ~/.aida/venv
+          make install
 
       - name: Run unit tests
-        run: pytest tests/unit/ tests/test_hooks.py -v
+        run: make test TEST_ARGS="tests/unit/ tests/test_hooks.py"
 
       - name: Validate plugin structure
         run: |
@@ -45,11 +45,13 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install test runner
-        run: pip install pytest
+      - name: Install dependencies
+        run: |
+          python -m venv ~/.aida/venv
+          make install
 
       - name: Run bootstrap integration tests
-        run: pytest tests/integration/test_bootstrap_install.py -v
+        run: make test TEST_ARGS="tests/integration/test_bootstrap_install.py"
 
   lint:
     runs-on: ubuntu-latest
@@ -68,7 +70,8 @@ jobs:
 
       - name: Install linters
         run: |
-          pip install ruff yamllint -r requirements.txt
+          python -m venv ~/.aida/venv
+          make install
           npm install -g markdownlint-cli@0.43.0
 
       - name: Run all linters

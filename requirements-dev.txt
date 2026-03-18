@@ -1,0 +1,12 @@
+# AIDA Core Plugin Development Dependencies
+#
+# Installed into ~/.aida/venv/ alongside runtime deps.
+# Install with: make install
+
+# Testing
+pytest>=8.0
+pytest-cov>=4.0
+
+# Linting
+ruff>=0.4.0
+yamllint>=1.35
