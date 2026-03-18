@@ -28,7 +28,7 @@ All feedback commands follow the same pattern:
 ```text
 1. Use AskUserQuestion to collect required fields
 2. Format collected data as JSON
-3. Run: python3 {base_directory}/scripts/feedback.py {command} --json='{...}'
+3. Run: ~/.aida/venv/bin/python3 {base_directory}/scripts/feedback.py {command} --json='{...}'
 4. Parse response and display success message
 ```
 
@@ -107,7 +107,7 @@ Format as:
 #### Command format
 
 ```bash
-python3 {base_directory}/scripts/feedback.py {action} --json='{json_data}'
+~/.aida/venv/bin/python3 {base_directory}/scripts/feedback.py {action} --json='{json_data}'
 ```
 
 Where `{action}` is: `feedback`, `bug`, or `feature-request`
@@ -115,7 +115,7 @@ Where `{action}` is: `feedback`, `bug`, or `feature-request`
 #### Example
 
 ```bash
-python3 /path/to/scripts/feedback.py feedback --json='{"message": "Great tool!", "category": "User Experience", "context": "Love the CLI"}'
+~/.aida/venv/bin/python3 /path/to/scripts/feedback.py feedback --json='{"message": "Great tool!", "category": "User Experience", "context": "Love the CLI"}'
 ```
 
 #### Script returns JSON
