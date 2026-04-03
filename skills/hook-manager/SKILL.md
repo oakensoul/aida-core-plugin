@@ -53,6 +53,31 @@ python {base_directory}/scripts/manage.py --execute \
 
 Add a new hook using the two-phase API.
 
+#### Phase 0: Brainstorm
+
+Before gathering context, invoke the `brainstorm` skill to
+refine the user's hook idea into a structured brief.
+
+**Skip conditions** -- skip Phase 0 when:
+
+- The user's description is already specific and actionable
+  (e.g., "add a prettier formatter hook on PostToolUse")
+- The user explicitly says to skip brainstorming
+  (e.g., "just add it")
+- The user selected a built-in template (the template
+  provides the design)
+
+**Invoke:** Pass the user's description and
+`extension_type: "hook"` to the `brainstorm` skill.
+
+**Result:** Use the brainstorm output to enrich Phase 1
+context:
+
+- `refined_description` replaces the raw user description
+  in the Phase 1 `--context` JSON
+- `constraints` and `scope` are passed as additional fields
+  in the Phase 1 `--context` JSON
+
 #### Phase 1: Gather Context
 
 ```bash
