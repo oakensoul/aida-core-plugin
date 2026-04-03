@@ -190,7 +190,9 @@ Phase 0 is optional. Skip when:
 | `skills/brainstorm/references/` | New directory + prompts file  |
 | `skills/agent-manager/SKILL.md` | Add Phase 0 to create section |
 | `skills/skill-manager/SKILL.md` | Add Phase 0 to create section |
-| `skills/plugin-manager/SKILL.md`| Add Phase 0 to create section |
+| `skills/plugin-manager/SKILL.md`| Add Phase 0 to create/scaffold |
+| `skills/hook-manager/SKILL.md`  | Add Phase 0 to add section    |
+| `skills/permissions/SKILL.md`   | Add Phase 0 to setup flow     |
 | `skills/aida/SKILL.md`          | No change (routing unchanged) |
 
 ## Design Decisions
