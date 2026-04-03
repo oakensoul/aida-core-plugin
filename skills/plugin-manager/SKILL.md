@@ -68,6 +68,33 @@ This skill activates when:
 
 ### Extension Operations (create / validate / version / list)
 
+#### Phase 0: Brainstorm
+
+Before gathering context for `create` operations, invoke the
+`brainstorm` skill to refine the user's idea into a structured
+brief. Skip this phase for `validate`, `version`, and `list`
+operations.
+
+**Skip conditions** -- skip Phase 0 when:
+
+- The user's description is already specific and actionable
+- The user explicitly says to skip brainstorming
+  (e.g., "just create it")
+- The operation is not `create`
+
+**Invoke:** Pass the user's description and
+`extension_type: "plugin"` to the `brainstorm` skill.
+
+**Result:** Use the brainstorm output to enrich Phase 1
+context:
+
+- `refined_description` replaces the raw user description
+  in the Phase 1 `--context` JSON
+- `constraints` and `scope` are passed as additional fields
+  in the Phase 1 `--context` JSON
+- `prior_art` is included in Phase 2 when generating plugin
+  extensions
+
 #### Phase 1: Gather Context
 
 ```bash
@@ -88,6 +115,27 @@ python {base_directory}/scripts/manage.py --execute \
 Creates, validates, versions, or lists plugin extensions.
 
 ### Scaffold Operation
+
+#### Phase 0: Brainstorm
+
+Before gathering context, invoke the `brainstorm` skill to
+refine the user's plugin idea into a structured brief.
+
+**Skip conditions** -- skip Phase 0 when:
+
+- The user's description is already specific and actionable
+- The user explicitly says to skip brainstorming
+  (e.g., "just create it")
+
+**Invoke:** Pass the user's description and
+`extension_type: "plugin"` to the `brainstorm` skill.
+
+**Result:** Use the brainstorm output to enrich Phase 1
+context:
+
+- `refined_description` replaces the raw user description
+- `constraints` and `scope` inform scaffold questions
+- `prior_art` helps determine which stubs to generate
 
 #### Phase 1: Gather Context
 
