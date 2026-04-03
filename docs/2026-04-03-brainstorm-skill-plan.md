@@ -99,9 +99,11 @@ One question. Open-ended.
 
 ### Step 2: Explore Behavior
 
-Ask 2-4 questions about how the extension should work in
+Ask questions about how the extension should work in
 practice. Read `references/extension-prompts.md` for
-type-specific question banks.
+type-specific question banks. Ask as many questions as
+needed to get a good understanding -- there is no fixed
+limit.
 
 **Rules:**
 
@@ -110,6 +112,7 @@ type-specific question banks.
 - Focus on behavior, quality gates, edge cases, and
   integration -- never logistics
 - Adapt questions based on prior answers
+- Stop when you have enough to produce an actionable brief
 
 ### Step 3: Check for Prior Art
 
@@ -122,8 +125,9 @@ findings to the user.
 Present the structured brief as a JSON block. Ask the user
 to confirm or adjust before handing back to the manager skill.
 
-**Question budget:** 2-4 questions total (Steps 1-2 combined).
-This is lightweight ideation, not a full design session.
+**Question budget:** No fixed limit. Ask as many questions as
+needed to get a good understanding of what the user wants.
+Stop when you have enough to produce an actionable brief.
 
 ## Output Contract
 

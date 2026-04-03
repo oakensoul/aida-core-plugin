@@ -92,10 +92,11 @@ When the brainstorm completes, it produces a structured brief:
 Ask what problem the user is solving. Not "what do you want to
 build" but "what's the pain point / workflow gap?"
 
-### Step 2: Explore Behavior (2-4 questions)
+### Step 2: Explore Behavior
 
 Questions about how the extension should work in practice.
 Type-aware but always focused on behavior, not logistics.
+Ask as many questions as needed -- no fixed limit.
 
 **Question categories** (from `references/extension-prompts.md`):
 
@@ -130,8 +131,9 @@ to user.
 Present the structured brief (JSON output contract). User
 confirms or adjusts before handing back to the manager skill.
 
-**Question budget:** 2-4 questions max. Lightweight ideation, not
-a full design session. Goal: go from vague to actionable.
+**Question budget:** No fixed limit. Ask as many questions as
+needed to get a good understanding of what the user wants.
+Stop when you have enough to produce an actionable brief.
 
 **Key principle:** The brainstorm skill never asks about location,
 language, or repo creation. Logistics are Phase 1's job; design
