@@ -89,15 +89,15 @@ Override the default Claude model:
 
 ```json
 {
-  "model": "claude-sonnet-4-6"
+  "model": "sonnet"
 }
 ```
 
 Current model identifiers:
 
-- `claude-opus-4-6` -- Most capable model
-- `claude-sonnet-4-6` -- Balanced performance and speed
-- `claude-haiku-4-5` -- Fastest model
+- `opus` -- Most capable model
+- `sonnet` -- Balanced performance and speed
+- `haiku` -- Fastest model
 
 ### Available Models
 
@@ -752,7 +752,7 @@ Claude Code recognizes these environment variables.
 | `ANTHROPIC_MODEL` | Model name to use |
 | `CLAUDE_CODE_USE_BEDROCK` | Use AWS Bedrock |
 | `CLAUDE_CODE_USE_VERTEX` | Use Google Vertex AI |
-| `CLAUDE_CODE_EFFORT_LEVEL` | `low`, `medium`, `high` (Opus 4.6) |
+| `CLAUDE_CODE_EFFORT_LEVEL` | `low`, `medium`, `high` (Opus) |
 | `CLAUDE_CODE_DISABLE_AUTO_MEMORY` | Disable auto memory (0/1) |
 | `ENABLE_TOOL_SEARCH` | MCP tool search (`auto`, `true`, `false`, `auto:N`) |
 
@@ -776,7 +776,7 @@ Claude Code recognizes these environment variables.
 | `ANTHROPIC_DEFAULT_SONNET_MODEL` | Override Sonnet model |
 | `ANTHROPIC_DEFAULT_OPUS_MODEL` | Override Opus model |
 | `CLAUDE_CODE_SUBAGENT_MODEL` | Model for subagents |
-| `CLAUDE_CODE_EFFORT_LEVEL` | `low`, `medium`, `high` (Opus 4.6) |
+| `CLAUDE_CODE_EFFORT_LEVEL` | `low`, `medium`, `high` (Opus) |
 | `MAX_THINKING_TOKENS` | Override extended thinking budget |
 
 ### Sandbox and Security
@@ -892,7 +892,7 @@ Personal settings for a developer (`~/.claude/settings.json`):
 ```json
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "model": "claude-sonnet-4-6",
+  "model": "sonnet",
   "env": {
     "EDITOR": "code"
   },
@@ -980,7 +980,7 @@ Sandbox-enabled configuration with network restrictions:
 ```json
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "model": "claude-sonnet-4-6",
+  "model": "sonnet",
   "sandbox": {
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
