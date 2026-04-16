@@ -43,7 +43,7 @@ version: 0.1.0
 tags:
   - core
   - domain-specific
-model: claude-sonnet-4.5
+model: sonnet
 color: purple
 skills:
   - skill-name
