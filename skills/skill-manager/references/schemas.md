@@ -68,7 +68,7 @@ agent: devops-expert
 hooks:
   - PreToolUse
   - PostToolUse
-model: claude-sonnet-4
+model: sonnet
 user-invocable: true
 argument-hint: "[deploy|rollback|status] [target]"
 allowed-tools: "Bash,Read,Write"

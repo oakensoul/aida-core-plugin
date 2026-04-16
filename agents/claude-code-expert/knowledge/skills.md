@@ -136,7 +136,7 @@ Only `description` is recommended so Claude knows when to use the skill.
 | Field | Type | Default | Description |
 | ----- | ---- | ------- | ----------- |
 | `allowed-tools` | string (space/comma) | all tools | Tools Claude can use without permission prompts when this skill is active. Example: `Read, Grep, Glob`. |
-| `model` | string | session model | Override the model used when this skill is active. Example: `claude-haiku-4-5`. |
+| `model` | string | session model | Override the model used when this skill is active. Example: `haiku`. |
 | `context` | string | none | Set to `fork` to run in a forked subagent context (isolated from conversation history). |
 | `agent` | string | `general-purpose` | Which subagent type to use when `context: fork` is set. Options: `Explore`, `Plan`, `general-purpose`, or any custom agent name from `.claude/agents/`. |
 | `hooks` | object | none | Hooks scoped to this skill's lifecycle. Same format as hooks in settings.json. |
