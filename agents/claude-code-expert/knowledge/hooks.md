@@ -68,7 +68,7 @@ evaluation. The model returns a yes/no decision as JSON.
 {
   "type": "prompt",
   "prompt": "Evaluate if this action is safe: $ARGUMENTS",
-  "model": "claude-haiku-4-5",
+  "model": "haiku",
   "timeout": 30
 }
 ```
@@ -103,7 +103,7 @@ up to 50 turns of tool use.
 {
   "type": "agent",
   "prompt": "Verify all tests pass and code follows conventions. $ARGUMENTS",
-  "model": "claude-haiku-4-5",
+  "model": "haiku",
   "timeout": 60
 }
 ```
