@@ -28,7 +28,7 @@ import _paths  # noqa: F401
 
 from shared.utils import safe_json_load  # noqa: E402
 
-from operations.registry import (  # noqa: E402
+from expert_ops.registry import (  # noqa: E402
     load_experts_config,
     filter_experts_by_role,
     resolve_active_experts,
@@ -71,7 +71,7 @@ def _build_expert_list(
     all_experts: list[dict] = []
     if discover_agents is not None:
         try:
-            agents = discover_agents()
+            agents = discover_agents(project_root=project_path.parent.parent)
             all_experts = filter_experts_by_role(agents)
         except Exception as exc:  # noqa: BLE001
             warnings.append(f"Agent discovery failed: {exc}")
@@ -146,7 +146,7 @@ def get_questions(context: dict[str, Any]) -> dict[str, Any]:
                 "type": "select",
                 "message": "Save to which config file?",
                 "choices": ["global", "project"],
-                "default": "global",
+                "default": "project",
             }
         )
         return {
@@ -192,11 +192,13 @@ def execute(context: dict[str, Any], responses: dict[str, Any]) -> dict[str, Any
         config_choice = responses.get("config_path", context.get("config_path", "global"))
         save_path = project_path if config_choice == "project" else global_path
 
-        # Preserve existing panels when updating
+        # Preserve existing panels when updating (project-only per spec)
         existing_config = load_experts_config(
             global_path=global_path, project_path=project_path
         )
         panels = existing_config.get("panels") or None
+        if save_path != project_path:
+            panels = None  # Panels are project-only; strip when saving to global
 
         result = save_experts_config(path=save_path, active=active, panels=panels)
         return {

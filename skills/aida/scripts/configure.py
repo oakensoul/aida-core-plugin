@@ -1005,7 +1005,7 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
         # Nudge user toward expert configuration if experts available
         try:
             from utils.agents import discover_agents
-            agents = discover_agents()
+            agents = discover_agents(project_root=project_root)
             has_experts = any(
                 a.get("expert-role") or a.get("expert_role")
                 for a in agents
@@ -1022,7 +1022,7 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
                     "experts are active for this project."
                 )
         except Exception:
-            pass  # Non-critical, don't break config flow
+            logger.debug("Expert nudge check failed", exc_info=True)
 
         message = (
             "Project configuration complete! "

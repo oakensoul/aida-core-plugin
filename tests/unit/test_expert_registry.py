@@ -17,12 +17,7 @@ sys.path.insert(
     ),
 )
 
-# Clear cached operations modules to avoid cross-manager conflicts in pytest
-for _mod_name in list(sys.modules):
-    if _mod_name == "operations" or _mod_name.startswith("operations."):
-        del sys.modules[_mod_name]
-
-from operations.registry import load_experts_config, save_experts_config  # noqa: E402
+from expert_ops.registry import load_experts_config, save_experts_config  # noqa: E402
 
 
 # ---------------------------------------------------------------------------

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import tempfile
 from pathlib import Path
@@ -229,8 +230,6 @@ def filter_experts_by_role(agents: list[dict]) -> list[dict]:
     Agents without ``expert-role`` are silently excluded.
     Agents with an invalid value are skipped with a warning logged.
     """
-    import logging
-
     logger = logging.getLogger(__name__)
     experts: list[dict] = []
     for agent in agents:
