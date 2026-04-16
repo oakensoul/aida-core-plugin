@@ -7,6 +7,8 @@ description: >-
   panel operations for expert-based workflows like code review
   and plan grading.
 version: 0.1.0
+user-invocable: true
+argument-hint: "[list|configure|panels|panel create|panel remove]"
 tags:
   - core
   - management
