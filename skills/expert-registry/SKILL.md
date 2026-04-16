@@ -188,8 +188,8 @@ atomically. No-ops gracefully if the panel does not exist.
 
 | Scope     | Path                                | Panels |
 | --------- | ----------------------------------- | ------ |
-| `project` | `.claude/experts.yml`               | Yes    |
-| `global`  | `~/.claude/experts.yml`             | No     |
+| `project` | `.claude/aida-project-context.yml`  | Yes    |
+| `global`  | `~/.claude/aida.yml`                | No     |
 
 Project config takes priority when `experts.active` is
 present (even when empty). Falls through to global config
@@ -217,7 +217,7 @@ User: /aida expert configure
      --context='{"operation": "configure"}' \
      --responses='{"expert_selection": ["reviewer-agent", "qa-agent"],
                    "save_target": "project"}'
-   - Writes experts.active to .claude/experts.yml
+   - Writes experts.active to .claude/aida-project-context.yml
    - Preserves other keys in the file
 
 5. Report to user:

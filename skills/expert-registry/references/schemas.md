@@ -42,7 +42,7 @@ The field is optional. Experts without `expert-role` are still
 eligible for activation; they simply do not appear in
 role-filtered panel lookups.
 
-## Global Config (`~/.claude/experts.yml`)
+## Global Config (`~/.claude/aida.yml`)
 
 Stores the user-level default expert activation list.
 
@@ -60,7 +60,7 @@ experts:
 - The file may contain other top-level keys; only `experts`
   is read and written by the registry.
 
-## Project Config (`.claude/experts.yml`)
+## Project Config (`.claude/aida-project-context.yml`)
 
 Stores project-level expert activation and named panels.
 

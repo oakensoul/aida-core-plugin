@@ -219,14 +219,12 @@ def execute(context: dict[str, Any], responses: dict[str, Any]) -> dict[str, Any
         existing_config = load_experts_config(
             global_path=global_path, project_path=project_path
         )
-        config_choice = context.get("config_path", "global")
-        save_path = project_path if config_choice == "project" else global_path
-
+        # Panels are project-only per spec -- always write to project config
         panels: dict = dict(existing_config.get("panels") or {})
         panels[panel_name] = members
 
         result = save_experts_config(
-            path=save_path,
+            path=project_path,
             active=existing_config.get("active", []),
             panels=panels,
         )
@@ -250,15 +248,14 @@ def execute(context: dict[str, Any], responses: dict[str, Any]) -> dict[str, Any
         existing_config = load_experts_config(
             global_path=global_path, project_path=project_path
         )
-        config_choice = context.get("config_path", "global")
-        save_path = project_path if config_choice == "project" else global_path
 
+        # Panels are project-only per spec -- always write to project config
         panels = dict(existing_config.get("panels") or {})
         removed = panel_name in panels
         panels.pop(panel_name, None)
 
         result = save_experts_config(
-            path=save_path,
+            path=project_path,
             active=existing_config.get("active", []),
             panels=panels,
         )

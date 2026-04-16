@@ -220,9 +220,33 @@ def save_experts_config(
 # ---------------------------------------------------------------------------
 
 
+_VALID_ROLES = frozenset({"core", "domain", "qa"})
+
+
 def filter_experts_by_role(agents: list[dict]) -> list[dict]:
-    """Return only agents whose frontmatter role is 'expert'."""
-    return [a for a in agents if a.get("role") == "expert"]
+    """Filter to agents with a valid ``expert-role`` field.
+
+    Agents without ``expert-role`` are silently excluded.
+    Agents with an invalid value are skipped with a warning logged.
+    """
+    import logging
+
+    logger = logging.getLogger(__name__)
+    experts: list[dict] = []
+    for agent in agents:
+        role = agent.get("expert-role") or agent.get("expert_role")
+        if role is None:
+            continue
+        if role not in _VALID_ROLES:
+            logger.warning(
+                "Skipping %s: invalid expert-role '%s', "
+                "expected core|domain|qa",
+                agent.get("name", "unknown"),
+                role,
+            )
+            continue
+        experts.append(agent)
+    return experts
 
 
 def resolve_active_experts(
