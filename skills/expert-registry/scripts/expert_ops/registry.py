@@ -117,18 +117,22 @@ def load_experts_config(
     global_path: Path,
     project_path: Path,
 ) -> dict[str, Any]:
-    """Load expert activation config using a layered strategy.
+    """Load expert activation config using a union merge strategy.
 
-    Priority: project config > global config.
+    Both global and project configs contribute to the active list.
+    When both are present the lists are merged (union, deduplicated,
+    global entries first).
 
-    The project config takes effect **only** when the ``experts.active`` key
-    is present (even when it is an empty list).  If the key is absent the
-    loader falls through to the global config.
+    Special cases:
+    - Project ``experts.active: []`` is an intentional opt-out that
+      suppresses the global list (zero experts enabled).
+    - When only one layer has ``experts.active``, that layer is used.
+    - Panels are project-only and never read from global config.
 
     Returns a dict with keys:
         active   (list[str])    - names of active experts
         panels   (dict)         - named panels mapping
-        source   (str | None)   - "project", "global", or None
+        source   (str | None)   - "merged", "project", "global", or None
         warnings (list[str])    - non-fatal issues encountered
     """
     warnings: list[str] = []
@@ -146,31 +150,56 @@ def load_experts_config(
         panels = _validate_panels(raw_panels, warnings) if raw_panels else {}
         return active, panels
 
-    # -- project config (checked first) -----------------------------------
+    # -- read both layers -------------------------------------------------
+    global_data = _read_yaml_safe(global_path, warnings)
     project_data = _read_yaml_safe(project_path, warnings)
-    if project_data is not None:
-        extracted = _extract(project_data, warnings)
-        if extracted is not None:
-            active, panels = extracted
+
+    global_extracted = (
+        _extract(global_data, warnings) if global_data is not None else None
+    )
+    project_extracted = (
+        _extract(project_data, warnings) if project_data is not None else None
+    )
+
+    global_active = global_extracted[0] if global_extracted else None
+    project_active = project_extracted[0] if project_extracted else None
+    # Panels are project-only
+    panels = project_extracted[1] if project_extracted else {}
+
+    # -- merge logic ------------------------------------------------------
+    if project_active is not None and global_active is not None:
+        # Project empty list = intentional opt-out (zero experts)
+        if len(project_active) == 0:
             return {
-                "active": active,
+                "active": [],
                 "panels": panels,
                 "source": "project",
                 "warnings": warnings,
             }
+        # Union: global first, then project additions (deduplicated)
+        merged = list(dict.fromkeys(global_active + project_active))
+        return {
+            "active": merged,
+            "panels": panels,
+            "source": "merged",
+            "warnings": warnings,
+        }
 
-    # -- global config (fallback) -----------------------------------------
-    global_data = _read_yaml_safe(global_path, warnings)
-    if global_data is not None:
-        extracted = _extract(global_data, warnings)
-        if extracted is not None:
-            active, panels = extracted
-            return {
-                "active": active,
-                "panels": panels,
-                "source": "global",
-                "warnings": warnings,
-            }
+    if project_active is not None:
+        return {
+            "active": project_active,
+            "panels": panels,
+            "source": "project",
+            "warnings": warnings,
+        }
+
+    if global_active is not None:
+        return {
+            "active": global_active,
+            "panels": {},
+            "source": "global",
+            "warnings": warnings,
+        }
 
     # -- neither config present -------------------------------------------
     return {
@@ -223,6 +252,8 @@ def save_experts_config(
 
 _VALID_ROLES = frozenset({"core", "domain", "qa"})
 
+logger = logging.getLogger(__name__)
+
 
 def filter_experts_by_role(agents: list[dict]) -> list[dict]:
     """Filter to agents with a valid ``expert-role`` field.
@@ -230,7 +261,6 @@ def filter_experts_by_role(agents: list[dict]) -> list[dict]:
     Agents without ``expert-role`` are silently excluded.
     Agents with an invalid value are skipped with a warning logged.
     """
-    logger = logging.getLogger(__name__)
     experts: list[dict] = []
     for agent in agents:
         role = agent.get("expert-role") or agent.get("expert_role")

@@ -80,8 +80,8 @@ For detailed walkthrough, see the [Getting Started Guide](docs/GETTING_STARTED.m
 | `/aida agent create`    | Create a custom agent                |
 | `/aida skill create`    | Create a custom skill                |
 | `/aida expert list`     | List available experts and status    |
-| `/aida expert configure`| Select active experts for a project  |
-| `/aida expert panels`   | Show named panel compositions        |
+| `/aida expert list configure`| Select active experts for a project |
+| `/aida expert panel list`| Show named panel compositions       |
 | `/aida feedback`        | Submit feedback via GitHub           |
 | `/aida bug`             | Report a bug                         |
 | `/aida feature-request` | Request a feature                    |

@@ -103,8 +103,8 @@ def get_questions(context: dict[str, Any]) -> dict[str, Any]:
     """Phase 1: Analyze context and return questions.
 
     Supported operations:
-        list      - Returns expert list with active status; no questions.
-        configure - Returns expert list + selection question.
+        list           - Returns expert list with active status; no questions.
+        list-configure - Returns expert list + selection question.
 
     Args:
         context: Operation context dict.
@@ -126,7 +126,7 @@ def get_questions(context: dict[str, Any]) -> dict[str, Any]:
             "warnings": info["warnings"],
         }
 
-    if operation == "configure":
+    if operation in ("list-configure", "configure"):
         info = _build_expert_list(global_path, project_path)
         expert_names = [e.get("name") for e in info["experts"] if e.get("name")]
         questions = []
@@ -170,9 +170,10 @@ def execute(context: dict[str, Any], responses: dict[str, Any]) -> dict[str, Any
     """Phase 2: Execute an expert-registry operation.
 
     Supported operations:
-        configure    - Save selected active experts to config.
-        panel-create - Create or update a named panel.
-        panel-remove - Remove a named panel.
+        list-configure - Save selected active experts to config.
+        panels         - List all named panels with stale detection.
+        panel-create   - Create or update a named panel.
+        panel-remove   - Remove a named panel.
 
     Args:
         context:   Operation context dict.
@@ -181,13 +182,13 @@ def execute(context: dict[str, Any], responses: dict[str, Any]) -> dict[str, Any
     Returns:
         Execution result dictionary with key ``success`` (bool).
     """
-    operation = context.get("operation", "configure")
+    operation = context.get("operation", "list-configure")
     global_path, project_path = _resolve_paths(context)
 
     # ------------------------------------------------------------------
-    # configure: save active expert selection
+    # list-configure: save active expert selection
     # ------------------------------------------------------------------
-    if operation == "configure":
+    if operation in ("list-configure", "configure"):
         active = responses.get("active", context.get("active", []))
         config_choice = responses.get("config_path", context.get("config_path", "global"))
         save_path = project_path if config_choice == "project" else global_path
@@ -209,6 +210,30 @@ def execute(context: dict[str, Any], responses: dict[str, Any]) -> dict[str, Any
         }
 
     # ------------------------------------------------------------------
+    # panels: list all named panels
+    # ------------------------------------------------------------------
+    if operation == "panels":
+        config = load_experts_config(
+            global_path=global_path, project_path=project_path
+        )
+        active_names = set(config.get("active", []))
+        panels_raw = config.get("panels") or {}
+        panel_list = []
+        for name, members in panels_raw.items():
+            stale = [m for m in members if m not in active_names]
+            panel_list.append({
+                "name": name,
+                "members": members,
+                "stale": stale,
+            })
+        return {
+            "success": True,
+            "panels": panel_list,
+            "source": config.get("source"),
+            "warnings": config.get("warnings", []),
+        }
+
+    # ------------------------------------------------------------------
     # panel-create: create or replace a named panel
     # ------------------------------------------------------------------
     if operation == "panel-create":
@@ -218,16 +243,19 @@ def execute(context: dict[str, Any], responses: dict[str, Any]) -> dict[str, Any
         if not panel_name:
             return {"success": False, "message": "panel_name is required for panel-create."}
 
-        existing_config = load_experts_config(
-            global_path=global_path, project_path=project_path
+        # Read project config only (not merged) to avoid writing global
+        # entries back into the project file.
+        project_only = load_experts_config(
+            global_path=Path("/dev/null"),
+            project_path=project_path,
         )
         # Panels are project-only per spec -- always write to project config
-        panels: dict = dict(existing_config.get("panels") or {})
+        panels: dict = dict(project_only.get("panels") or {})
         panels[panel_name] = members
 
         result = save_experts_config(
             path=project_path,
-            active=existing_config.get("active", []),
+            active=project_only.get("active", []),
             panels=panels,
         )
         return {
@@ -247,18 +275,21 @@ def execute(context: dict[str, Any], responses: dict[str, Any]) -> dict[str, Any
         if not panel_name:
             return {"success": False, "message": "panel_name is required for panel-remove."}
 
-        existing_config = load_experts_config(
-            global_path=global_path, project_path=project_path
+        # Read project config only (not merged) to avoid writing global
+        # entries back into the project file.
+        project_only = load_experts_config(
+            global_path=Path("/dev/null"),
+            project_path=project_path,
         )
 
         # Panels are project-only per spec -- always write to project config
-        panels = dict(existing_config.get("panels") or {})
+        panels = dict(project_only.get("panels") or {})
         removed = panel_name in panels
         panels.pop(panel_name, None)
 
         result = save_experts_config(
             path=project_path,
-            active=existing_config.get("active", []),
+            active=project_only.get("active", []),
             panels=panels,
         )
         return {

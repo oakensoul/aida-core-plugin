@@ -173,6 +173,63 @@ class TestExpertDiscoveryIntegration:
             assert len(experts) == 0
 
     @patch("utils.agents.get_home_dir")
+    def test_union_merge_through_full_pipeline(self, mock_home):
+        """Global + project experts are combined via union merge."""
+        with tempfile.TemporaryDirectory() as tmp:
+            project_root = Path(tmp) / "project"
+            agents_dir = project_root / ".claude" / "agents"
+
+            # Fake home with no agents (isolate from real home)
+            fake_home = Path(tmp) / "fakehome"
+            fake_home.mkdir()
+            mock_home.return_value = fake_home
+
+            _write_agent(
+                agents_dir,
+                "global-expert",
+                {
+                    "name": "global-expert",
+                    "description": "A global baseline expert",
+                    "version": "1.0.0",
+                    "tags": ["review"],
+                    "expert-role": "core",
+                },
+            )
+            _write_agent(
+                agents_dir,
+                "project-expert",
+                {
+                    "name": "project-expert",
+                    "description": "A project-specific expert",
+                    "version": "1.0.0",
+                    "tags": ["domain"],
+                    "expert-role": "domain",
+                },
+            )
+
+            # Global config activates one, project config the other
+            global_config = Path(tmp) / "global.yml"
+            save_experts_config(path=global_config, active=["global-expert"])
+
+            project_config = project_root / ".claude" / "aida-project-context.yml"
+            save_experts_config(path=project_config, active=["project-expert"])
+
+            # Full pipeline
+            agents = discover_agents(project_root=project_root)
+            experts = filter_experts_by_role(agents)
+            config = load_experts_config(
+                global_path=global_config,
+                project_path=project_config,
+            )
+            active, dangling = resolve_active_experts(experts, config)
+
+            names = {e["name"] for e in active}
+            assert "global-expert" in names
+            assert "project-expert" in names
+            assert config["source"] == "merged"
+            assert dangling == []
+
+    @patch("utils.agents.get_home_dir")
     def test_discovery_skips_user_and_plugin_dirs(self, mock_home):
         """With isolated tmp home, only project agents are found."""
         with tempfile.TemporaryDirectory() as tmp:

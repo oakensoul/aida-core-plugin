@@ -1018,7 +1018,7 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
             if has_experts and not has_expert_config:
                 print(
                     "\nExpert agents detected from installed plugins.\n"
-                    "Run `/aida expert configure` to select which "
+                    "Run `/aida expert list configure` to select which "
                     "experts are active for this project."
                 )
         except Exception:

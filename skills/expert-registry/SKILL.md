@@ -8,7 +8,7 @@ description: >-
   and plan grading.
 version: 0.1.0
 user-invocable: true
-argument-hint: "[list|configure|panels|panel create|panel remove]"
+argument-hint: "[list|list configure|panel list|panel create|panel remove]"
 tags:
   - core
   - management
@@ -29,8 +29,8 @@ into reusable named panels for structured workflows.
 This skill activates when:
 
 - User invokes `/aida expert list`
-- User invokes `/aida expert configure`
-- User invokes `/aida expert panels`
+- User invokes `/aida expert list configure`
+- User invokes `/aida expert panel list`
 - User invokes `/aida expert panel create <name>`
 - User invokes `/aida expert panel remove <name>`
 - Expert activation or panel management is needed
@@ -51,10 +51,10 @@ Returns each expert with:
 - `name` -- agent name from frontmatter
 - `active` -- whether the expert is currently activated
 - `expert-role` -- sub-role (`core`, `domain`, or `qa`)
-- `source` -- which config file is active (`project` or
-  `global`)
+- `source` -- config origin (`merged`, `project`, `global`,
+  or `null`)
 
-### Configure Experts
+### Configure Expert List
 
 Interactively select which experts are active and choose
 a save target (project or global scope).
@@ -66,7 +66,7 @@ Uses the two-phase API.
 ```bash
 python {base_directory}/scripts/manage.py \
   --get-questions \
-  --context='{"operation": "configure"}'
+  --context='{"operation": "list-configure"}'
 ```
 
 Returns:
@@ -79,14 +79,14 @@ Returns:
   },
   "questions": [
     {
-      "id": "expert_selection",
+      "id": "active",
       "type": "multi-select",
       "prompt": "Which experts should be active?",
       "choices": ["<dynamic list of available experts>"],
       "current": ["reviewer-agent"]
     },
     {
-      "id": "save_target",
+      "id": "config_path",
       "type": "choice",
       "prompt": "Save to project or global config?",
       "choices": ["project", "global"],
@@ -100,8 +100,8 @@ Returns:
 
 ```bash
 python {base_directory}/scripts/manage.py --execute \
-  --context='{"operation": "configure"}' \
-  --responses='{"expert_selection": ["reviewer-agent"], "save_target": "project"}'
+  --context='{"operation": "list-configure"}' \
+  --responses='{"active": ["reviewer-agent"], "config_path": "project"}'
 ```
 
 Writes the `experts.active` list to the chosen config file.
@@ -193,32 +193,34 @@ atomically. No-ops gracefully if the panel does not exist.
 | `project` | `.claude/aida-project-context.yml`  | Yes    |
 | `global`  | `~/.claude/aida.yml`                | No     |
 
-Project config takes priority when `experts.active` is
-present (even when empty). Falls through to global config
-only when the key is absent.
+Global and project configs are merged (union). Project
+`active: []` is an intentional opt-out that suppresses the
+global list. When only one layer has `experts.active`, that
+layer is used alone.
 
 ## Example Workflow
 
 ### Activating Experts (Full Flow)
 
 ```text
-User: /aida expert configure
+User: /aida expert list configure
 
-1. Parse: operation=configure
+1. Parse: operation=list-configure
 
 2. Phase 1 (Python):
-   python manage.py --get-questions --context='{"operation": "configure"}'
+   python manage.py --get-questions \
+     --context='{"operation": "list-configure"}'
    Returns:
    - inferred: current_active=["reviewer-agent"], source="project"
-   - questions: [expert_selection, save_target]
+   - questions: [active, config_path]
 
 3. Present choices to user and collect answers
 
 4. Phase 2 (Python):
    python manage.py --execute \
-     --context='{"operation": "configure"}' \
-     --responses='{"expert_selection": ["reviewer-agent", "qa-agent"],
-                   "save_target": "project"}'
+     --context='{"operation": "list-configure"}' \
+     --responses='{"active": ["reviewer-agent", "qa-agent"],
+                   "config_path": "project"}'
    - Writes experts.active to .claude/aida-project-context.yml
    - Preserves other keys in the file
 
@@ -231,7 +233,7 @@ User: /aida expert configure
 ### scripts/
 
 - **manage.py** -- Entry point for two-phase API
-- **operations/**
+- **expert_ops/**
   - **registry.py** -- Config I/O, active-expert resolution
   - **panels.py** -- Panel resolution and role filtering
 

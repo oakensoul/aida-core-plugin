@@ -52,8 +52,8 @@ class TestConfigLoading:
         assert result["panels"] == {}
         assert result["warnings"] == []
 
-    def test_project_overrides_global(self):
-        """Project active list fully replaces global, returns panels."""
+    def test_union_merge_global_and_project(self):
+        """Both layers present merges active lists (global first, deduplicated)."""
         with tempfile.TemporaryDirectory() as tmp:
             global_path = Path(tmp) / "global.yml"
             _write_yaml(global_path, {"experts": {"active": ["alice"]}})
@@ -74,13 +74,33 @@ class TestConfigLoading:
                 project_path=project_path,
             )
 
-        assert result["active"] == ["charlie"]
-        assert result["source"] == "project"
+        assert result["active"] == ["alice", "charlie"]
+        assert result["source"] == "merged"
         assert result["panels"] == {"review": ["charlie"]}
         assert result["warnings"] == []
 
-    def test_empty_active_list_means_zero_experts(self):
-        """Explicit empty list deactivates all, source='project'."""
+    def test_union_merge_deduplicates(self):
+        """Duplicate names across layers appear only once."""
+        with tempfile.TemporaryDirectory() as tmp:
+            global_path = Path(tmp) / "global.yml"
+            _write_yaml(global_path, {"experts": {"active": ["alice", "bob"]}})
+
+            project_path = Path(tmp) / "project.yml"
+            _write_yaml(
+                project_path,
+                {"experts": {"active": ["bob", "charlie"]}},
+            )
+
+            result = load_experts_config(
+                global_path=global_path,
+                project_path=project_path,
+            )
+
+        assert result["active"] == ["alice", "bob", "charlie"]
+        assert result["source"] == "merged"
+
+    def test_empty_active_list_suppresses_global(self):
+        """Explicit empty list in project opts out of global, zero experts."""
         with tempfile.TemporaryDirectory() as tmp:
             global_path = Path(tmp) / "global.yml"
             _write_yaml(global_path, {"experts": {"active": ["alice"]}})

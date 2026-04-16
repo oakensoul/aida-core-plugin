@@ -105,12 +105,18 @@ are grouped into named panels.
 
 ### Experts Semantics
 
+Global and project configs are merged using a union strategy.
+
 | Key | Behavior |
 | --- | -------- |
-| `experts` absent | Fall through to global config |
-| `experts.active` absent | Fall through to global config |
-| `experts.active: []` | Intentional deactivation — zero experts enabled |
+| `experts` absent | Use other layer only |
+| `experts.active` absent | Use other layer only |
+| Both layers present | Union merge (global first, then project additions, deduplicated) |
+| `experts.active: []` in project | Intentional opt-out — suppresses global, zero experts |
 | `experts.panels` | Project-only; not supported in global config |
+
+The `source` field in the result indicates which layers contributed:
+`"merged"`, `"project"`, `"global"`, or `null`.
 
 Panel entries are filtered to the resolved active experts at runtime. Any panel
 member not present in `active` is silently excluded.

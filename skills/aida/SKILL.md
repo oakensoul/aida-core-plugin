@@ -221,8 +221,8 @@ For `expert` commands:
 **Process:**
 
 1. Parse the command to extract:
-   - Operation: `list`, `configure`, `panels`, `panel create`,
-     `panel remove`
+   - Operation: `list`, `list configure`, `panel list`,
+     `panel create`, `panel remove`
    - Arguments: panel name (for create/remove)
 
 2. Invoke `expert-registry` skill with the parsed context
@@ -230,9 +230,9 @@ For `expert` commands:
 **Examples:**
 
 ```text
-/aida expert list                  → expert-registry skill
-/aida expert configure             → expert-registry skill
-/aida expert panels                → expert-registry skill
+/aida expert list                   → expert-registry skill
+/aida expert list configure        → expert-registry skill
+/aida expert panel list            → expert-registry skill
 /aida expert panel create review   → expert-registry skill
 /aida expert panel remove review   → expert-registry skill
 ```
@@ -350,8 +350,8 @@ When displaying help (for `help` command or no arguments), show:
 
 ### Expert Registry
 - `/aida expert list` - List available experts and activation status
-- `/aida expert configure` - Select active experts (project or global)
-- `/aida expert panels` - Show named panel compositions
+- `/aida expert list configure` - Select active experts (project or global)
+- `/aida expert panel list` - Show named panel compositions
 - `/aida expert panel create <name>` - Create a named expert panel
 - `/aida expert panel remove <name>` - Remove a named panel
 
