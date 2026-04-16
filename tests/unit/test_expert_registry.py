@@ -5,7 +5,6 @@ import tempfile
 from pathlib import Path
 
 import yaml
-import pytest
 
 # Add operations module to path
 sys.path.insert(
@@ -23,7 +22,7 @@ for _mod_name in list(sys.modules):
     if _mod_name == "operations" or _mod_name.startswith("operations."):
         del sys.modules[_mod_name]
 
-from operations.registry import load_experts_config, save_experts_config
+from operations.registry import load_experts_config, save_experts_config  # noqa: E402
 
 
 # ---------------------------------------------------------------------------

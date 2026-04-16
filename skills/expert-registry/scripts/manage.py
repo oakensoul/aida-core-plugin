@@ -34,7 +34,6 @@ from operations.registry import (  # noqa: E402
     resolve_active_experts,
     save_experts_config,
 )
-from operations.panels import resolve_panel, resolve_by_role  # noqa: E402
 
 # Discover agents if aida utils are available
 try:
