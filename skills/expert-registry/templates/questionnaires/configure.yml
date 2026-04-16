@@ -1,0 +1,24 @@
+---
+# configure.yml
+# Question template for the expert-registry configure flow.
+# Used by manage.py Phase 1 to structure the questions returned
+# to the skill. The skill presents these to the user and sends
+# collected answers back in Phase 2.
+---
+
+questions:
+  - id: expert_selection
+    type: multi-select
+    prompt: "Which experts should be active?"
+    # Choices are populated dynamically from discovered agents
+    # whose frontmatter declares role: expert.
+    choices: dynamic
+    current: []  # Filled at runtime from active config
+
+  - id: save_target
+    type: choice
+    prompt: "Save to project or global config?"
+    choices:
+      - project
+      - global
+    default: project
