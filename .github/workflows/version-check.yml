@@ -20,26 +20,36 @@ jobs:
           BASE_REF="${{ github.event.pull_request.base.ref }}"
           git fetch origin "${BASE_REF}" --depth=1
 
-          BASE_VERSION=$(git show "origin/${BASE_REF}:.claude-plugin/plugin.json" | jq -r '.version')
+          BASE_VERSION=$(git show "origin/${BASE_REF}:.claude-plugin/plugin.json" \
+            | jq -r '.version')
           HEAD_VERSION=$(jq -r '.version' .claude-plugin/plugin.json)
 
           echo "Base version: ${BASE_VERSION}"
           echo "Head version: ${HEAD_VERSION}"
 
           if [[ "${BASE_VERSION}" == "${HEAD_VERSION}" ]]; then
-            echo "::error file=.claude-plugin/plugin.json::Version not bumped. Every PR must update the version field (patch for fixes/docs/typos, minor for features, major for breaking changes)."
+            msg="Version not bumped. Every PR must update the version field"
+            msg="${msg} (patch for fixes/docs/typos, minor for features,"
+            msg="${msg} major for breaking changes)."
+            echo "::error file=.claude-plugin/plugin.json::${msg}"
             exit 1
           fi
 
-          HIGHER=$(printf '%s\n%s\n' "${BASE_VERSION}" "${HEAD_VERSION}" | sort -V | tail -n1)
+          HIGHER=$(printf '%s\n%s\n' "${BASE_VERSION}" "${HEAD_VERSION}" \
+            | sort -V | tail -n1)
           if [[ "${HIGHER}" != "${HEAD_VERSION}" ]]; then
-            echo "::error file=.claude-plugin/plugin.json::Version must increase (base ${BASE_VERSION} -> head ${HEAD_VERSION})."
+            msg="Version must increase (base ${BASE_VERSION}"
+            msg="${msg} -> head ${HEAD_VERSION})."
+            echo "::error file=.claude-plugin/plugin.json::${msg}"
             exit 1
           fi
 
           if ! grep -qE "^## \[${HEAD_VERSION}\] - " CHANGELOG.md; then
-            echo "::error file=CHANGELOG.md::Missing CHANGELOG entry for version ${HEAD_VERSION}. Add a '## [${HEAD_VERSION}] - YYYY-MM-DD' section summarizing this PR's changes."
+            msg="Missing CHANGELOG entry for version ${HEAD_VERSION}."
+            msg="${msg} Add a '## [${HEAD_VERSION}] - YYYY-MM-DD' section"
+            msg="${msg} summarizing this PR's changes."
+            echo "::error file=CHANGELOG.md::${msg}"
             exit 1
           fi
 
-          echo "OK: version bumped ${BASE_VERSION} -> ${HEAD_VERSION} with matching CHANGELOG entry."
+          echo "OK: ${BASE_VERSION} -> ${HEAD_VERSION} with CHANGELOG entry."
