@@ -10,6 +10,20 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-04-16
+
+### Fixed
+
+#### Replace pinned model versions with family aliases (#56)
+
+- Replaced version-pinned model identifiers (`claude-opus-4-6`,
+  `claude-sonnet-4-6`, `claude-haiku-4-5`) with family aliases (`opus`,
+  `sonnet`, `haiku`) across knowledge docs, reference schemas, and tests
+- Ensures model references stay valid as new Claude versions ship without
+  requiring downstream doc updates
+
+---
+
 ## [1.2.0] - 2026-03-18
 
 ### Added
@@ -418,6 +432,8 @@ See git history for details on versions prior to 0.2.0.
 
 ---
 
+[1.2.1]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.2.1
+[1.2.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.2.0
 [1.1.1]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.1.1
 [1.1.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.1.0
 [1.0.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.0.0
