@@ -32,6 +32,10 @@ project overrides in `aida-project-context.yml`.
   sensible defaults.
 - **Role tags on agents:** `core`, `domain`, `qa` enable skills to filter
   without knowing every expert by name.
+- **Two-phase only (not three-phase):** Unlike agent-manager's create
+  operation (which uses a third agent-generation step), expert-registry
+  operations are pure configuration reads and writes. Two phases
+  (gather/execute) are sufficient.
 
 ---
 
@@ -63,6 +67,17 @@ Valid roles:
 - `qa` -- Testing/QA specialists, included in review and validation panels
 
 Agents without `expert-role` are not eligible for panel dispatch.
+
+**Validation rules for `expert-role`:**
+
+- Must be one of: `core`, `domain`, `qa` (case-sensitive, lowercase only)
+- Invalid values (typos, wrong case like `Core`, unknown values like
+  `reviewer`) cause the agent to be skipped during expert discovery with
+  a warning: `"Skipping {name}: invalid expert-role '{value}',
+  expected core|domain|qa"`
+- This matches the existing pattern in agent discovery where agents with
+  invalid frontmatter are skipped with warnings (see
+  `test_missing_required_fields_skipped` in test suite)
 
 ### Global Config (`~/.claude/aida.yml`)
 
@@ -104,15 +119,38 @@ experts:
       - web-qa-agent
 ```
 
+### Config Semantics
+
+**`active` key absent vs empty list:**
+
+- **Key absent** (no `experts` section or no `active` key): Fall through
+  to next layer. If absent at project level, use global. If absent at
+  global level, no experts are active.
+- **`active: []` (explicit empty list):** Intentional deactivation of all
+  experts at this layer. At project level, this overrides global and
+  results in zero active experts. This is a deliberate opt-out.
+
+**Non-string values in `active` list:** Entries that are not strings
+(null, numbers, objects) are silently skipped with a warning logged.
+String entries that do not match any discovered expert are handled per
+the error contracts below.
+
 ### Resolution Order
 
 1. **Discovery:** Agent-manager discovers all agents from project > user >
    plugin sources.
-2. **Filter:** Expert-registry filters to agents with `expert-role` set.
-3. **Activation:** Merge global `active` list with project `active` list.
-   Project wins -- full replacement, not additive.
-4. **Panel lookup:** If a skill requests a named panel and it exists in
-   project config, use that list. Otherwise, fall back to all active experts.
+2. **Filter:** Expert-registry filters to agents with valid `expert-role`.
+3. **Activation:** Check project config first. If project has an `experts`
+   section with an `active` key (even if empty), use it -- full replacement
+   of global. Otherwise, use global `active` list. If neither exists, no
+   experts are active.
+4. **Dangling reference check:** Any name in `active` that does not match
+   a discovered expert is logged as a warning and excluded from the
+   resolved list. Same for names in `panels`.
+5. **Panel lookup:** If a skill requests a named panel and it exists in
+   project config, use that list (filtered to active experts only).
+   Otherwise, fall back to all active experts with a signal to the caller
+   indicating fallback occurred (see Panel Resolution Logic).
 
 ---
 
@@ -143,7 +181,7 @@ Routed via `/aida expert ...`:
 |---------|-------------|
 | `/aida expert list` | Show all discovered experts with plugin source, role, activation status, and config source (global/project) |
 | `/aida expert configure` | Interactive selection to toggle experts active/inactive, save to project or global config |
-| `/aida expert panels` | Show named panels and their composition |
+| `/aida expert panels` | Show named panels and their composition, flag stale entries |
 | `/aida expert panel create <name>` | Create a named panel by selecting from active experts |
 | `/aida expert panel remove <name>` | Remove a named panel |
 
@@ -154,7 +192,9 @@ plugins, reads current activation state from global + project config,
 returns the expert list with current status and any questions needed.
 
 **Phase 2** (`--execute`): Writes the updated activation state or panel
-config to the appropriate YAML file.
+config to the appropriate YAML file using atomic writes (write to temp
+file + rename). This prevents partial-write corruption of
+`aida-project-context.yml` or `~/.claude/aida.yml`.
 
 ---
 
@@ -188,11 +228,40 @@ Panels: code-review (4 experts), plan-grading (5 experts)
 **Source column logic:**
 
 - `global` -- Active via `~/.claude/aida.yml` (shown only when no
-  project-level `experts.active` list exists)
+  project-level `experts.active` key exists)
 - `project` -- Active via `aida-project-context.yml` (when a project
-  `experts.active` list exists, it fully replaces global -- all active
+  `experts.active` key exists, it fully replaces global -- all active
   experts show `project` as source)
 - `--` -- Not activated at either level
+
+### Panels Output Format
+
+When the user runs `/aida expert panels`:
+
+```
+Named Panels -- Project: my-nestjs-app
+
+code-review (4 experts):
+  security-expert, best-practices-reviewer, typescript-expert, web-qa-agent
+
+plan-grading (5 experts):
+  security-expert, best-practices-reviewer, nestjs-expert,
+  typescript-expert, web-qa-agent
+
+No issues found.
+```
+
+When stale entries exist:
+
+```
+plan-grading (4 of 5 experts active):
+  security-expert, best-practices-reviewer, nestjs-expert,
+  typescript-expert
+  WARNING: 1 stale entry (not active or not discovered):
+    - redis-expert
+  Run `/aida expert configure` to update, or
+  `/aida expert panel create plan-grading` to rebuild.
+```
 
 ---
 
@@ -217,36 +286,65 @@ Current activation shown. Type numbers to toggle.
   9. [ ] devops-agent             (domain, splash-engineering)
  10. [ ] claude-code-expert       (domain, aida-core)
 
-Toggle (e.g. "7 8" or "all domain"): 
+Toggle (e.g. "7 8" or "all domain"):
 ```
 
 2. User responds with numbers or role-based shortcuts
    (`all core`, `all domain`, `none domain`).
 3. Claude confirms the change and asks: **Save to project or global?**
-4. Phase 2 writes to the chosen config file.
+   (If user chooses global, panels are not affected -- panels are
+   project-only.)
+4. Phase 2 writes to the chosen config file atomically.
+5. On success: `"Expert configuration saved to {path}. {N} experts active."`
+   On write failure: `"Failed to save configuration to {path}: {error}"`
+
+**Edge case -- no experts discovered:** If no installed plugins provide
+agents with `expert-role`, the configure command reports:
+`"No experts found. Install a plugin that provides expert agents, then
+run /aida expert configure."`
+
+**Edge case -- panel create with no active experts:** The command reports:
+`"No active experts. Run /aida expert configure first to activate
+experts, then create a panel."`
 
 ---
 
 ## Panel Resolution Logic
 
 ```python
-def resolve_panel(panel_name: str | None = None) -> list[str]:
+@dataclass
+class PanelResult:
+    """Result of panel resolution."""
+    experts: list[str]
+    panel_found: bool
+    warnings: list[str]
+
+
+def resolve_panel(panel_name: str | None = None) -> PanelResult:
     """
     1. If panel_name given and exists in project config,
-       return that panel's experts.
+       return that panel's experts filtered to active list.
+       panel_found=True.
     2. If panel_name given but not defined,
-       fall back to all active experts.
+       return all active experts. panel_found=False.
+       Add warning: "Panel '{name}' not defined, using all
+       active experts."
     3. If no panel_name, return all active experts.
+       panel_found=True (no panel was requested).
 
-    In all cases, filter out experts not in the active list.
-    A named panel can only contain experts that are currently active.
+    Dangling references (names in panel not in active list or
+    not in discovery) are excluded and added to warnings.
     """
 
 
-def resolve_by_role(role: str) -> list[str]:
+def resolve_by_role(role: str) -> PanelResult:
     """
     Return all active experts matching the given role.
     Reads expert-role from agent frontmatter.
+
+    If role is not one of (core, domain, qa), returns empty
+    list with warning: "Unknown expert role '{role}',
+    expected core|domain|qa."
     """
 ```
 
@@ -254,18 +352,60 @@ Skills request panels like:
 
 ```python
 # In a code-review skill
-experts = resolve_panel("code-review")
-# Returns: ["security-expert", "best-practices-reviewer",
-#           "typescript-expert", "web-qa-agent"]
+result = resolve_panel("code-review")
+if not result.panel_found:
+    log.warning("code-review panel not configured")
+# result.experts: ["security-expert", "best-practices-reviewer",
+#                  "typescript-expert", "web-qa-agent"]
 
 # In a generic panel dispatch
-experts = resolve_panel()
-# Returns: all active experts
+result = resolve_panel()
+# result.experts: all active experts
 
 # Role-based filtering
-core = resolve_by_role("core")
-# Returns: ["best-practices-reviewer", "security-expert"]
+result = resolve_by_role("core")
+# result.experts: ["best-practices-reviewer", "security-expert"]
+
+# Unknown role returns empty with warning
+result = resolve_by_role("reviewer")
+# result.experts: []
+# result.warnings: ["Unknown expert role 'reviewer'..."]
 ```
+
+---
+
+## Error Contracts
+
+### Config File Errors
+
+| Scenario | Behavior |
+|----------|----------|
+| YAML parse error in global config | Skip global, warn: `"Malformed YAML in {path}, ignoring experts config"`. Fall through as if absent. |
+| YAML parse error in project config | Skip project experts section, warn: `"Malformed YAML in {path}, ignoring experts config"`. Fall through to global. |
+| `active` contains non-string values | Skip invalid entries with warning per entry. Process remaining valid strings. |
+| `panels` value is not a list | Skip that panel with warning: `"Panel '{name}' must be a list, skipping"`. |
+| Write failure during Phase 2 | Report error to user: `"Failed to save: {error}"`. Do not partially write. |
+
+### Discovery Errors
+
+| Scenario | Behavior |
+|----------|----------|
+| Expert name in `active` not found in discovery | Exclude from resolved list. Log warning: `"Expert '{name}' in config but not discovered (plugin uninstalled?)"`. Show in `expert list` output as a separate "Stale references" section. |
+| Expert name in panel not found in discovery | Same as above. Additionally flagged in `expert panels` output. |
+| No plugins installed / no agents discovered | All commands work but show empty results. `expert list` shows `"No experts found."` `resolve_panel()` returns empty list with no warnings. |
+| No agents have `expert-role` set | Same as no experts discovered. |
+| Invalid `expert-role` value on agent | Agent skipped during expert filtering with warning (see Data Model section). |
+
+### Resolution Errors
+
+| Scenario | Behavior |
+|----------|----------|
+| `resolve_panel("name")` where panel not defined | Return all active experts. `panel_found=False`. Warning in result. |
+| `resolve_by_role("unknown")` | Return empty list. Warning in result. |
+| Both global and project config absent | No experts active. `resolve_panel()` returns empty list, no warnings. |
+| Project config exists but no `experts` key | Fall through to global config. |
+| Project config has `experts` but no `active` key | Fall through to global config (key must be present to override). |
+| Project config has `experts.active: []` | Zero experts active (intentional override). |
 
 ---
 
@@ -276,19 +416,35 @@ core = resolve_by_role("core")
 New routing entry for `expert` commands, alongside existing `agent`,
 `skill`, `plugin` routes.
 
-### 2. Project Config Schema (`agents/aida/knowledge/config-schema.md`)
+Add to the Help Text section under "Extension Management":
 
-Add `experts` section:
-
-```yaml
-experts:
-  active: [list of expert agent names]
-  panels:
-    {panel-name}: [list of expert agent names]
+```markdown
+### Expert Registry
+- `/aida expert list` - List available experts and activation status
+- `/aida expert configure` - Select active experts (project or global)
+- `/aida expert panels` - Show named panel compositions
+- `/aida expert panel create <name>` - Create a named expert panel
+- `/aida expert panel remove <name>` - Remove a named panel
 ```
 
-Both `active` and `panels` are optional. If absent, global config is
-used as-is.
+### 2. Project Config Schema (`agents/aida/knowledge/config-schema.md`)
+
+Add `experts` section to schema documentation:
+
+```yaml
+experts:                          # optional
+  active:                         # optional; list of expert agent names
+    - security-expert
+    - best-practices-reviewer
+  panels:                         # optional; named panel compositions
+    code-review:
+      - security-expert
+      - best-practices-reviewer
+```
+
+Bump schema version from `0.2.0` to `0.3.0` to reflect the new section.
+Configs without the `experts` key are handled gracefully (fall through
+to global or no experts active).
 
 ### 3. Global Config Schema (`~/.claude/aida.yml`)
 
@@ -302,17 +458,47 @@ Add `expert-role` as optional field:
 expert-role: core|domain|qa
 ```
 
-### 5. Plugin aida-config.json
+### 5. Frontmatter JSON Schema (`.frontmatter-schema.json`)
+
+Add `expert-role` to the `agent` type's properties block:
+
+```json
+"expert-role": {
+  "type": "string",
+  "enum": ["core", "domain", "qa"],
+  "description": "Panel expert role for expert-registry dispatch"
+}
+```
+
+This enables IDE autocomplete and validation via the `validate` command.
+
+### 6. Scaffold Template (`skills/plugin-manager/templates/scaffold/shared/frontmatter-schema.json.jinja2`)
+
+Update the scaffold template to include the `expert-role` property in the
+`agent` type block, so newly scaffolded plugins get the field in their
+schema from day one.
+
+### 7. Plugin aida-config.json
 
 No changes. Plugins already declare agents in the `agents` array.
 Expert-registry discovers agents through existing agent-manager discovery
 and filters by `expert-role` in frontmatter.
 
-### 6. Configure Flow (`skills/aida/scripts/configure.py`)
+### 8. Configure Flow (`skills/aida/scripts/configure.py`)
 
-After project configuration completes, if installed plugins provide
-experts, the flow prompts: "Would you like to configure expert panels?
-Run `/aida expert configure`."
+After project configuration completes (`config_complete: true`), if
+any discovered agents have `expert-role` set and the project config
+has no `experts` section, display:
+
+```
+Expert agents detected from installed plugins.
+Run `/aida expert configure` to select which experts are active
+for this project.
+```
+
+**Trigger condition:** `config_complete is True` AND at least one
+discovered agent has `expert-role` AND project config has no
+`experts.active` key.
 
 ## What This Design Does NOT Do
 
