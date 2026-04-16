@@ -109,8 +109,19 @@ AIDA extends Claude Code with specialized capabilities organized into two types:
 - `/aida status` - Check installation status (user-invocable)
 - `/aida doctor` - Run diagnostics (user-invocable)
 - `/aida memento` - Manage session persistence (user-invocable)
+- `/aida expert list` - View available experts and activation status (user-invocable)
+- `/aida expert configure` - Select active experts for a project (user-invocable)
 - `user-context` - Your environment and preferences (auto-triggered)
 - `project-context` - Project-specific patterns and conventions (auto-triggered)
+
+### Manage Experts
+
+If installed plugins provide expert agents, activate them:
+
+```bash
+/aida expert list         # See available experts
+/aida expert configure    # Select which are active
+```
 
 ## Next Steps
 

@@ -10,6 +10,28 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-04-16
+
+### Added
+
+#### Expert Registry Skill
+
+- New `/aida expert` command family for managing expert agents
+- Expert activation at project and global scopes with layered
+  resolution (project overrides global)
+- Named panel compositions for grouped expert workflows
+  (code review, plan grading)
+- `expert-role` frontmatter field on agents (`core`, `domain`, `qa`)
+  for role-based filtering
+- Commands: `list`, `configure`, `panels`, `panel create`,
+  `panel remove`
+- Two-phase API following ADR-010 pattern
+- Project config schema bumped to v0.3.0 with `experts` section
+- Post-configuration nudge when expert agents are detected
+- 19 new unit tests (11 registry, 8 panels)
+
+---
+
 ## [1.2.0] - 2026-03-18
 
 ### Added
