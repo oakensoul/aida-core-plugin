@@ -27,7 +27,7 @@ activation) and `panels.py` (panel resolution).
 
 ### New Files
 
-```
+```text
 skills/expert-registry/
 ├── SKILL.md                              # Skill definition + command routing
 ├── scripts/
@@ -49,7 +49,7 @@ tests/unit/
 
 ### Modified Files
 
-```
+```text
 .frontmatter-schema.json                  # Add expert-role to agent type
 skills/aida/SKILL.md                      # Add expert routing + help text
 agents/aida/knowledge/config-schema.md    # Add experts section to schema
@@ -63,6 +63,7 @@ skills/plugin-manager/templates/scaffold/shared/frontmatter-schema.json.jinja2
 ## Task 1: Add `expert-role` to Frontmatter Schema
 
 **Files:**
+
 - Modify: `.frontmatter-schema.json:61-87` (agent type block)
 - Modify: `skills/agent-manager/references/schemas.md`
 - Modify: `skills/plugin-manager/templates/scaffold/shared/frontmatter-schema.json.jinja2`
@@ -123,6 +124,7 @@ git commit -m "feat(expert-registry): add expert-role to agent frontmatter schem
 ## Task 2: Update Project Config Schema Documentation
 
 **Files:**
+
 - Modify: `agents/aida/knowledge/config-schema.md`
 
 - [ ] **Step 1: Read the current config-schema.md**
@@ -146,6 +148,7 @@ experts:                          # optional
 ```
 
 Document the semantics:
+
 - `active` key absent: fall through to global config
 - `active: []` (empty list): intentional deactivation, zero experts
 - `panels` are project-only (not supported in global config)
@@ -167,6 +170,7 @@ git commit -m "feat(expert-registry): add experts section to project config sche
 ## Task 3: Create Registry Module -- Config I/O
 
 **Files:**
+
 - Create: `skills/expert-registry/scripts/_paths.py`
 - Create: `skills/expert-registry/scripts/operations/__init__.py`
 - Create: `skills/expert-registry/scripts/operations/registry.py`
@@ -730,6 +734,7 @@ git commit -m "feat(expert-registry): add registry module with config I/O and ac
 ## Task 4: Create Panels Module
 
 **Files:**
+
 - Create: `skills/expert-registry/scripts/operations/panels.py`
 - Test: `tests/unit/test_expert_panels.py`
 
@@ -991,6 +996,7 @@ git commit -m "feat(expert-registry): add panel resolution module"
 ## Task 5: Create `manage.py` Entry Point
 
 **Files:**
+
 - Create: `skills/expert-registry/scripts/manage.py`
 
 - [ ] **Step 1: Implement manage.py**
@@ -1272,6 +1278,7 @@ git commit -m "feat(expert-registry): add two-phase API entry point"
 ## Task 6: Create SKILL.md and Reference Docs
 
 **Files:**
+
 - Create: `skills/expert-registry/SKILL.md`
 - Create: `skills/expert-registry/references/schemas.md`
 
@@ -1331,7 +1338,7 @@ python {base_directory}/scripts/manage.py \
 
 Present the returned expert list as a formatted table:
 
-```
+```text
 Expert Registry -- Project: {project_name}
 
 Plugin: {plugin_name} ({source})
@@ -1400,6 +1407,8 @@ python {base_directory}/scripts/manage.py \
   --context='{"operation": "panel-remove"}' \
   --responses='{"panel_name": "..."}'
 ```
+
+```text
 ```
 
 - [ ] **Step 2: Create references/schemas.md**
@@ -1469,6 +1478,8 @@ experts:
 - `panels`: project-only, not supported in global config
 - Panel members filtered to active experts at resolution time
 - Dangling names (not discovered) logged as warnings
+
+```text
 ```
 
 - [ ] **Step 3: Create empty questionnaire template**
@@ -1515,6 +1526,7 @@ git commit -m "feat(expert-registry): add SKILL.md and reference docs"
 ## Task 7: Update AIDA Dispatcher
 
 **Files:**
+
 - Modify: `skills/aida/SKILL.md`
 
 - [ ] **Step 1: Read current SKILL.md routing sections**
@@ -1555,6 +1567,8 @@ For `expert` commands:
 /aida expert panel create review   → expert-registry skill
 /aida expert panel remove review   → expert-registry skill
 ```
+
+```text
 ```
 
 - [ ] **Step 3: Add help text entry**
@@ -1583,6 +1597,7 @@ git commit -m "feat(expert-registry): add expert routing to AIDA dispatcher"
 ## Task 8: Add Configure Flow Nudge
 
 **Files:**
+
 - Modify: `skills/aida/scripts/configure.py`
 
 - [ ] **Step 1: Read configure.py to find post-config completion point**

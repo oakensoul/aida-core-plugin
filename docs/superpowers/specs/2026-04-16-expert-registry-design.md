@@ -158,7 +158,7 @@ the error contracts below.
 
 ### Location
 
-```
+```text
 skills/expert-registry/
 ├── SKILL.md
 ├── scripts/
@@ -200,7 +200,7 @@ file + rename). This prevents partial-write corruption of
 
 ## List Output Format
 
-```
+```text
 Expert Registry -- Project: my-nestjs-app
 
 Plugin: splash-engineering (marketplace)
@@ -238,7 +238,7 @@ Panels: code-review (4 experts), plan-grading (5 experts)
 
 When the user runs `/aida expert panels`:
 
-```
+```text
 Named Panels -- Project: my-nestjs-app
 
 code-review (4 experts):
@@ -253,7 +253,7 @@ No issues found.
 
 When stale entries exist:
 
-```
+```text
 plan-grading (4 of 5 experts active):
   security-expert, best-practices-reviewer, nestjs-expert,
   typescript-expert
@@ -271,7 +271,7 @@ When the user runs `/aida expert configure`:
 
 1. Phase 1 discovers all experts and presents them numbered:
 
-```
+```text
 Select experts to activate for this project.
 Current activation shown. Type numbers to toggle.
 
@@ -289,13 +289,13 @@ Current activation shown. Type numbers to toggle.
 Toggle (e.g. "7 8" or "all domain"):
 ```
 
-2. User responds with numbers or role-based shortcuts
+1. User responds with numbers or role-based shortcuts
    (`all core`, `all domain`, `none domain`).
-3. Claude confirms the change and asks: **Save to project or global?**
+2. Claude confirms the change and asks: **Save to project or global?**
    (If user chooses global, panels are not affected -- panels are
    project-only.)
-4. Phase 2 writes to the chosen config file atomically.
-5. On success: `"Expert configuration saved to {path}. {N} experts active."`
+3. Phase 2 writes to the chosen config file atomically.
+4. On success: `"Expert configuration saved to {path}. {N} experts active."`
    On write failure: `"Failed to save configuration to {path}: {error}"`
 
 **Edge case -- no experts discovered:** If no installed plugins provide
@@ -490,7 +490,7 @@ After project configuration completes (`config_complete: true`), if
 any discovered agents have `expert-role` set and the project config
 has no `experts` section, display:
 
-```
+```text
 Expert agents detected from installed plugins.
 Run `/aida expert configure` to select which experts are active
 for this project.

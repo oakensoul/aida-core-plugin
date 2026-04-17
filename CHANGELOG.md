@@ -10,7 +10,7 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2026-04-16
+## [1.4.0] - 2026-04-16
 
 ### Added
 
@@ -465,7 +465,7 @@ See git history for details on versions prior to 0.2.0.
 
 ---
 
-[1.3.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.3.0
+[1.4.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.4.0
 [1.2.1]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.2.1
 [1.2.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.2.0
 [1.1.1]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.1.1
