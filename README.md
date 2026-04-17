@@ -38,6 +38,7 @@ or your user profile.
 - **Extension Creation** - Build agents and skills with guided templates
 - **Project Context** - Claude understands your codebase patterns and conventions
 - **Health Diagnostics** - Built-in troubleshooting with `/aida doctor`
+- **Expert Registry** - Manage expert agents and panel compositions
 - **GitHub Integration** - Easy bug reports and feature requests
 
 ## Quick Start
@@ -78,6 +79,9 @@ For detailed walkthrough, see the [Getting Started Guide](docs/GETTING_STARTED.m
 | `/aida memento`         | Save/restore session context         |
 | `/aida agent create`    | Create a custom agent                |
 | `/aida skill create`    | Create a custom skill                |
+| `/aida expert list`     | List available experts and status    |
+| `/aida expert list configure`| Select active experts for a project |
+| `/aida expert panel list`| Show named panel compositions       |
 | `/aida feedback`        | Submit feedback via GitHub           |
 | `/aida bug`             | Report a bug                         |
 | `/aida feature-request` | Request a feature                    |
@@ -125,8 +129,9 @@ See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed design.
 
 ## Roadmap
 
-### Current: v0.8.x - Upstream Alignment
+### Current: v1.3.x
 
+- Expert registry for panel activation and composition
 - Session persistence (mementos)
 - Smart configuration with auto-detection
 - Agent-based orchestration

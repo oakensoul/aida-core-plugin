@@ -151,6 +151,7 @@ def _read_agent_frontmatter(
             frontmatter.get("skills", [])
         ),
         "model": frontmatter.get("model"),
+        "expert-role": frontmatter.get("expert-role"),
     }
 
 

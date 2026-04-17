@@ -17,7 +17,7 @@ AIDA uses YAML configuration files to store project context and user preferences
 
 ```yaml
 # Version of the config schema
-version: "0.2.0"
+version: "0.3.0"
 
 # Whether configuration is complete
 config_complete: true|false
@@ -72,6 +72,16 @@ plugins:
   {plugin-name}:
     enabled: true|false
     {preference-key}: {value}
+
+# Expert Agent Configuration (optional)
+experts:                          # optional
+  active:                         # optional; list of expert agent names
+    - security-expert             # Names must match discovered agents
+    - best-practices-reviewer
+  panels:                         # optional; project-only, named panels
+    code-review:
+      - security-expert
+      - best-practices-reviewer
 ```
 
 ## Required Fields
@@ -80,7 +90,7 @@ These fields must be present:
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `version` | string | Schema version (e.g., "0.2.0") |
+| `version` | string | Schema version (e.g., "0.3.0") |
 | `config_complete` | boolean | Whether setup is finished |
 | `vcs.type` | string | Version control system |
 | `languages.primary` | string | Main language |
@@ -90,6 +100,26 @@ These fields must be present:
 All other fields are optional and will use defaults or null.
 The `plugins` section is populated automatically by `/aida config plugin`
 discovery and stores per-plugin preferences.
+The `experts` section configures which expert agents are active and how they
+are grouped into named panels.
+
+### Experts Semantics
+
+Global and project configs are merged using a union strategy.
+
+| Key | Behavior |
+| --- | -------- |
+| `experts` absent | Use other layer only |
+| `experts.active` absent | Use other layer only |
+| Both layers present | Union merge (global first, then project additions, deduplicated) |
+| `experts.active: []` in project | Intentional opt-out — suppresses global, zero experts |
+| `experts.panels` | Project-only; not supported in global config |
+
+The `source` field in the result indicates which layers contributed:
+`"merged"`, `"project"`, `"global"`, or `null`.
+
+Panel entries are filtered to the resolved active experts at runtime. Any panel
+member not present in `active` is silently excluded.
 
 ## Defaults
 
@@ -107,7 +137,7 @@ When not specified:
 ### Version
 
 - Must be semver format: `"X.Y.Z"`
-- Current schema version: `"0.2.0"`
+- Current schema version: `"0.3.0"`
 
 ### VCS Type
 
@@ -143,7 +173,7 @@ When reviewing configs, check for drift:
 ## Example Configuration
 
 ```yaml
-version: "0.2.0"
+version: "0.3.0"
 config_complete: true
 
 vcs:
@@ -190,4 +220,13 @@ plugins:
     enabled: true
     feature.enabled: true
     output.format: "JSON"
+
+experts:
+  active:
+    - security-expert
+    - best-practices-reviewer
+  panels:
+    code-review:
+      - security-expert
+      - best-practices-reviewer
 ```

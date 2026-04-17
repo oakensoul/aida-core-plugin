@@ -24,11 +24,12 @@ definitions.
 
 ## Optional Fields
 
-| Field    | Type   | Description               |
-| -------- | ------ | ------------------------- |
-| `model`  | string | Preferred Claude model    |
-| `color`  | string | UI display color          |
-| `skills` | array  | Skills this agent uses    |
+| Field          | Type   | Description                              |
+| -------------- | ------ | ---------------------------------------- |
+| `model`        | string | Preferred Claude model                   |
+| `color`        | string | UI display color                         |
+| `skills`       | array  | Skills this agent uses                   |
+| `expert-role`  | string | Panel expert role for expert-registry    |
 
 ## Example Frontmatter
 
