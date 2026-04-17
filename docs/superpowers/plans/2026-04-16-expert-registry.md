@@ -1,3 +1,8 @@
+---
+type: documentation
+title: "Expert Registry Implementation Plan"
+---
+
 # Expert Registry Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use

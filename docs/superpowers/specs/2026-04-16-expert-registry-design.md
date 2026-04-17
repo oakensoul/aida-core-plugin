@@ -1,3 +1,8 @@
+---
+type: documentation
+title: "Expert Registry Design Spec"
+---
+
 # Expert Registry Design Spec
 
 **Date:** 2026-04-16
