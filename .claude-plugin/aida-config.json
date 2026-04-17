@@ -54,5 +54,16 @@
       "suggested": "ask"
     }
   },
+  "skills": [
+    "aida",
+    "agent-manager",
+    "skill-manager",
+    "plugin-manager",
+    "hook-manager",
+    "claude-md-manager",
+    "memento",
+    "permissions",
+    "expert-registry"
+  ],
   "agents": ["aida", "claude-code-expert"]
 }

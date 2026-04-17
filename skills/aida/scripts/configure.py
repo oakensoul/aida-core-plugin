@@ -1002,6 +1002,28 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
         files_created.append(str(marker_path))
         logger.info(f"Created project marker: {marker_path}")
 
+        # Nudge user toward expert configuration if experts available
+        try:
+            from utils.agents import discover_agents
+            agents = discover_agents(project_root=project_root)
+            has_experts = any(
+                a.get("expert-role") or a.get("expert_role")
+                for a in agents
+            )
+            project_config = yaml.safe_load(
+                config_path.read_text()
+            ) or {}
+            has_expert_config = "experts" in project_config
+
+            if has_experts and not has_expert_config:
+                print(
+                    "\nExpert agents detected from installed plugins.\n"
+                    "Run `/aida expert list configure` to select which "
+                    "experts are active for this project."
+                )
+        except Exception:
+            logger.debug("Expert nudge check failed", exc_info=True)
+
         message = (
             "Project configuration complete! "
             "Created project-context skill in .claude/skills/\n"

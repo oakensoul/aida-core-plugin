@@ -210,6 +210,33 @@ For `hook` commands:
 /aida hook validate                  → hook-manager skill
 ```
 
+### Expert Registry Commands
+
+For `expert` commands:
+
+- **Invoke the `expert-registry` skill** to handle operations
+- Pass the full command arguments to the skill
+- The skill handles list, configure, panels, and panel operations
+
+**Process:**
+
+1. Parse the command to extract:
+   - Operation: `list`, `list configure`, `panel list`,
+     `panel create`, `panel remove`
+   - Arguments: panel name (for create/remove)
+
+2. Invoke `expert-registry` skill with the parsed context
+
+**Examples:**
+
+```text
+/aida expert list                   → expert-registry skill
+/aida expert list configure        → expert-registry skill
+/aida expert panel list            → expert-registry skill
+/aida expert panel create review   → expert-registry skill
+/aida expert panel remove review   → expert-registry skill
+```
+
 ### Memento Commands
 
 For `memento` commands:
@@ -320,6 +347,13 @@ When displaying help (for `help` command or no arguments), show:
 - `/aida skill [create|validate|version|list]` - Manage skills
 - `/aida plugin [scaffold|create|validate|version|list|update]` - Manage plugins
 - `/aida hook [list|add|remove|validate]` - Manage hooks (settings.json)
+
+### Expert Registry
+- `/aida expert list` - List available experts and activation status
+- `/aida expert list configure` - Select active experts (project or global)
+- `/aida expert panel list` - Show named panel compositions
+- `/aida expert panel create <name>` - Create a named expert panel
+- `/aida expert panel remove <name>` - Remove a named panel
 
 ### Session Persistence
 - `/aida memento create "description"` - Save current work context
