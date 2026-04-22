@@ -237,6 +237,30 @@ For `expert` commands:
 /aida expert panel remove review   → expert-registry skill
 ```
 
+### Marketplace Commands
+
+For `marketplace` commands:
+
+- **Invoke the `marketplace-sync` skill** to handle these operations
+- Pass the full command arguments to the skill
+- The skill handles sync (report), sync --apply (update), and status
+
+**Process:**
+
+1. Parse the command to extract:
+   - Operation: `sync`, `status`
+   - Flags: `--apply`, `--offline`
+
+2. Invoke `marketplace-sync` skill with the parsed context
+
+**Examples:**
+
+```text
+/aida marketplace sync            → marketplace-sync skill
+/aida marketplace sync --apply    → marketplace-sync skill
+/aida marketplace status          → marketplace-sync skill
+```
+
 ### Memento Commands
 
 For `memento` commands:
@@ -354,6 +378,11 @@ When displaying help (for `help` command or no arguments), show:
 - `/aida expert panel list` - Show named panel compositions
 - `/aida expert panel create <name>` - Create a named expert panel
 - `/aida expert panel remove <name>` - Remove a named panel
+
+### Marketplace
+- `/aida marketplace sync` - Report plugin versions and dependency status
+- `/aida marketplace sync --apply` - Update outdated plugins
+- `/aida marketplace status` - Quick summary of plugin drift
 
 ### Session Persistence
 - `/aida memento create "description"` - Save current work context
