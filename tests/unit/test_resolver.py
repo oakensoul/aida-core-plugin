@@ -110,7 +110,8 @@ class TestSimpleDependency:
         edges = result.graph.get("a", [])
         assert len(edges) == 1
         assert edges[0].satisfied is False
-        assert ("a", "b", ">=1.0.0") in result.conflicts
+        # Single requestor, so no conflict (just unsatisfied)
+        assert result.conflicts == []
 
 
 # ------------------------------------------------------------------
@@ -234,17 +235,33 @@ class TestTransitiveChain:
 
 
 class TestConflictDetection:
-    """Version constraint not satisfied should be a conflict."""
+    """Conflicts = mutually incompatible constraints from different plugins."""
 
-    def test_conflict_when_version_none(self) -> None:
-        """A depends on B >=2.0.0 but B has no version -> conflict."""
+    def test_unsatisfied_dep_is_not_a_conflict(self) -> None:
+        """A depends on B >=2.0.0 but B is 1.0.0 -> unsatisfied, not conflict."""
         plugins = [
             _plugin("a", "1.0.0", {"b": ">=2.0.0"}),
-            _plugin("b", None),
+            _plugin("b", "1.0.0"),
         ]
         result = build_graph(plugins)
+        # Only one requestor, so no conflict
+        assert result.conflicts == []
+        # But the edge should be unsatisfied
+        assert result.graph["a"][0].satisfied is False
+
+    def test_real_conflict_incompatible_constraints(self) -> None:
+        """A needs core >=2.0.0, B needs core ^1.0.0, core is 1.5.0."""
+        plugins = [
+            _plugin("core", "1.5.0"),
+            _plugin("a", "1.0.0", {"core": ">=2.0.0"}),
+            _plugin("b", "1.0.0", {"core": "^1.0.0"}),
+        ]
+        result = build_graph(plugins)
+        # B satisfied (1.5.0 in ^1.0.0), A unsatisfied (1.5.0 < 2.0.0)
+        # That's a conflict: two plugins disagree on core
         assert len(result.conflicts) == 1
-        assert result.conflicts[0] == ("a", "b", ">=2.0.0")
+        assert result.conflicts[0][0] == "core"  # dep name
+        assert result.conflicts[0][1] == "a"     # unsatisfied requestor
 
 
 # ------------------------------------------------------------------

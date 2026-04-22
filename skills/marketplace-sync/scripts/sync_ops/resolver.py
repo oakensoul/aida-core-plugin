@@ -142,13 +142,63 @@ def build_graph(
             )
             result.graph.setdefault(name, []).append(edge)
 
-            if not is_satisfied:
-                result.conflicts.append((name, dep_name, constraint))
-
             # Record the edge for topological sort.
             # dep_name -> name means "dep_name must be installed before name".
             adjacency[dep_name].append(name)
             in_degree[name] = in_degree.get(name, 0) + 1
+
+    # ------------------------------------------------------------------
+    # Conflict detection: find deps with mutually incompatible constraints
+    # ------------------------------------------------------------------
+    dep_constraints: Dict[str, List[Tuple[str, str]]] = defaultdict(list)
+    for name, _version, deps in plugins:
+        for dep_name, constraint in deps.items():
+            if dep_name in known and DEP_NAME_PATTERN.match(dep_name):
+                dep_constraints[dep_name].append((name, constraint))
+    for dep_name, requestors in dep_constraints.items():
+        if len(requestors) < 2:
+            continue
+        dep_version = known.get(dep_name)
+        if dep_version is None:
+            continue
+        satisfied_by = [
+            (req, c)
+            for req, c in requestors
+            if satisfies(dep_version, c)
+        ]
+        unsatisfied_by = [
+            (req, c)
+            for req, c in requestors
+            if not satisfies(dep_version, c)
+        ]
+        if satisfied_by and unsatisfied_by:
+            for req, c in unsatisfied_by:
+                result.conflicts.append((dep_name, req, c))
+
+    # ------------------------------------------------------------------
+    # Depth enforcement — check for chains exceeding MAX_DEPENDENCY_DEPTH
+    # ------------------------------------------------------------------
+    for name in known:
+        depth = 0
+        current = name
+        seen: set[str] = set()
+        while True:
+            deps_of_current = [
+                e.dependency
+                for e in result.graph.get(current, [])
+                if e.dependency in known
+            ]
+            if not deps_of_current or current in seen:
+                break
+            seen.add(current)
+            current = deps_of_current[0]
+            depth += 1
+            if depth > MAX_DEPENDENCY_DEPTH:
+                result.warnings.append(
+                    f"Dependency chain from '{name}' exceeds"
+                    f" max depth ({MAX_DEPENDENCY_DEPTH})"
+                )
+                break
 
     # ------------------------------------------------------------------
     # Kahn's algorithm for topological sort

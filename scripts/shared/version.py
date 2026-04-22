@@ -15,7 +15,7 @@ from packaging.version import Version, InvalidVersion
 
 MAX_CONSTRAINT_LENGTH = 64
 VALID_CONSTRAINT_CHARS = re.compile(r'^[0-9.^~>=< ]+$')
-STRICT_VERSION = re.compile(r'^\d+\.\d+\.\d+$')
+STRICT_VERSION = re.compile(r'^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$')
 PRERELEASE_VERSION = re.compile(r'^\d+\.\d+\.\d+[-+]')
 
 
@@ -96,7 +96,7 @@ class VersionRange:
     def _parse(self, constraint: str) -> None:
         """Expand the constraint string into lower/upper bounds."""
         if constraint.startswith('^'):
-            version_str = constraint[1:]
+            version_str = constraint[1:].strip()
             v = parse_version(version_str)
             self.lower = v
             major, minor, patch = v.major, v.minor, v.micro
@@ -108,7 +108,7 @@ class VersionRange:
                 self.upper = Version(f"0.0.{patch + 1}")
 
         elif constraint.startswith('~'):
-            version_str = constraint[1:]
+            version_str = constraint[1:].strip()
             v = parse_version(version_str)
             self.lower = v
             self.upper = Version(f"{v.major}.{v.minor + 1}.0")

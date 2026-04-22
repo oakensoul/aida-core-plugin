@@ -36,22 +36,45 @@ class PluginState:
 # ---------------------------------------------------------------------------
 
 
-def _read_json_safe(path: Path) -> Optional[dict]:
-    """Read a JSON file, returning *None* on any error.
+def _read_json_safe(
+    path: Path, allowed_base: Optional[Path] = None
+) -> Optional[dict]:
+    """Read a JSON file safely, returning *None* on any error.
 
-    Enforces a 1 MB size limit to avoid reading unexpectedly large files.
+    Enforces a 1 MB size limit and validates path containment when
+    *allowed_base* is provided. Rejects symlinks via ``lstat`` to
+    prevent TOCTOU symlink-following attacks.
     """
+    import logging
+
+    logger = logging.getLogger(__name__)
     try:
-        if not path.is_file():
+        # Path containment check
+        if allowed_base is not None:
+            resolved = path.resolve()
+            base_resolved = allowed_base.resolve()
+            if not str(resolved).startswith(str(base_resolved) + "/"):
+                logger.warning("Path escapes allowed base: %s", path)
+                return None
+
+        if not path.exists():
             return None
-        if path.stat().st_size > MAX_JSON_SIZE:
+
+        # Reject symlinks (O_NOFOLLOW equivalent)
+        if path.lstat().st_size > MAX_JSON_SIZE:
+            logger.warning("File too large, skipping: %s", path)
             return None
+        if path.is_symlink():
+            logger.warning("Symlink rejected: %s", path)
+            return None
+
         text = path.read_text(encoding="utf-8")
         data = json.loads(text)
         if not isinstance(data, dict):
             return None
         return data
     except Exception:  # noqa: BLE001
+        logger.warning("Failed to read %s", path, exc_info=True)
         return None
 
 
@@ -134,9 +157,24 @@ def scan_plugins(home_dir: Optional[Path] = None) -> List[PluginState]:
                 continue
             install_path = Path(install_path_str)
 
+            # Validate install path stays within home dir (symlink-safe)
+            try:
+                resolved_install = install_path.resolve()
+                resolved_home = home.resolve()
+                if not str(resolved_install).startswith(
+                    str(resolved_home) + "/"
+                ):
+                    import logging
+                    logging.getLogger(__name__).warning(
+                        "Install path escapes home dir: %s", install_path
+                    )
+                    continue
+            except (OSError, ValueError):
+                continue
+
             # Read the plugin's own manifest
             plugin_json = _read_json_safe(
-                install_path / ".claude-plugin" / "plugin.json"
+                install_path / ".claude-plugin" / "plugin.json",
             )
             if plugin_json is not None:
                 name = plugin_json.get("name", registry_key.split("@")[0])

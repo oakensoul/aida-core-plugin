@@ -44,6 +44,9 @@ class TestParseVersion:
         ("1.2.3+build", "build metadata"),
         ("1.2.3-rc.1", "pre-release with dot"),
         ("a" * 65, "exceeds max length"),
+        ("01.2.3", "leading zero in major"),
+        ("1.02.3", "leading zero in minor"),
+        ("1.2.03", "leading zero in patch"),
     ])
     def test_invalid_versions(self, version_str: str, reason: str) -> None:
         with pytest.raises(ValueError):

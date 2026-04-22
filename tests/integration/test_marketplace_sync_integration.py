@@ -238,12 +238,9 @@ class TestMarketplaceSyncIntegration:
             assert issue["constraint"] == "^2.0.0"
             assert issue["installed"] == "1.0.0"
 
-            # Resolution conflicts contain the issue
-            assert len(resolution.conflicts) >= 1
-            conflict_names = [
-                (c[0], c[1]) for c in resolution.conflicts
-            ]
-            assert ("eng", "core") in conflict_names
+            # Single requestor for core, so no conflict (just unsatisfied)
+            # Conflicts require mutually incompatible constraints
+            assert resolution.conflicts == []
 
     def test_transitive_three_levels(self):
         """base -> mid -> top chain — verify install order."""
