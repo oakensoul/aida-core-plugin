@@ -10,6 +10,19 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2026-04-24
+
+### Changed
+
+- Backfilled missing release tags and GitHub releases so the published
+  release history matches the changelog: tagged `v1.2.1` at the PR #58
+  merge commit and `v1.4.1` at the PR #62 merge commit, and published
+  GitHub releases for `v1.2.1`, `v1.4.0`, and `v1.4.1`
+- Added missing CHANGELOG reference links for 1.1.2–1.1.5, 1.4.1, and
+  1.4.2
+
+---
+
 ## [1.4.1] - 2026-04-24
 
 ### Changed
@@ -474,9 +487,15 @@ See git history for details on versions prior to 0.2.0.
 
 ---
 
+[1.4.2]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.4.2
+[1.4.1]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.4.1
 [1.4.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.4.0
 [1.2.1]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.2.1
 [1.2.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.2.0
+[1.1.5]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.1.5
+[1.1.4]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.1.4
+[1.1.3]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.1.3
+[1.1.2]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.1.2
 [1.1.1]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.1.1
 [1.1.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.1.0
 [1.0.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.0.0
