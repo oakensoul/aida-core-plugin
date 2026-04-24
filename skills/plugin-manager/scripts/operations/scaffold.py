@@ -141,7 +141,7 @@ def get_questions(
                 ),
                 "type": "choice",
                 "options": SUPPORTED_LICENSES,
-                "default": "MIT",
+                "default": "UNLICENSED",
             }
         )
 
@@ -321,7 +321,7 @@ def execute(context: dict[str, Any]) -> dict[str, Any]:
             "message": f"Unsupported language: {language}",
         }
 
-    license_id = context.get("license", "MIT")
+    license_id = context.get("license", "UNLICENSED")
     if license_id not in SUPPORTED_LICENSES:
         return {
             "success": False,
