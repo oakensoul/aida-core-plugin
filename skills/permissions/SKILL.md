@@ -42,6 +42,29 @@ the plugin root.
 
 ## Two-Phase API
 
+### Phase 0: Brainstorm
+
+Before gathering context, invoke the `brainstorm` skill to
+help the user think through their permission requirements.
+
+**Skip conditions** -- skip Phase 0 when:
+
+- The user is running in audit mode (`--audit`)
+- The user's request is already specific
+  (e.g., "allow all Bash commands")
+- The user explicitly says to skip brainstorming
+
+**Invoke:** Pass the user's description and
+`extension_type: "permissions"` to the `brainstorm` skill.
+
+**Result:** Use the brainstorm output to enrich Phase 1
+context:
+
+- `refined_description` clarifies what the user wants to
+  allow or restrict
+- `constraints` inform preset selection and category choices
+- `scope` determines which settings file to target
+
 ### Phase 1: `get_questions(context)`
 
 1. Scans installed plugins for `recommendedPermissions` in
