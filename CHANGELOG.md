@@ -15,7 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Scaffold default license is now `UNLICENSED` instead of `MIT`
-- Scaffolded `.gitignore` no longer auto-ignores `.claude/`
+- Scaffolded `.gitignore` no longer auto-ignores the entire
+  `.claude/` directory; only `.claude/settings.local.json` (the
+  one file Claude Code designates as local-only) is ignored
 
 ## [1.4.0] - 2026-04-16
 
