@@ -258,7 +258,7 @@ class TestCreateGitHubIssue(unittest.TestCase):
         """Test successful GitHub issue creation."""
         mock_run.return_value = MagicMock(
             returncode=0,
-            stdout='https://github.com/oakensoul/aida-marketplace/issues/123\n',
+            stdout='https://github.com/aida-core/aida-marketplace/issues/123\n',
             stderr=''
         )
 
@@ -277,7 +277,7 @@ class TestCreateGitHubIssue(unittest.TestCase):
         self.assertEqual(call_args[1], 'issue')
         self.assertEqual(call_args[2], 'create')
         self.assertIn('--repo', call_args)
-        self.assertIn('oakensoul/aida-marketplace', call_args)
+        self.assertIn('aida-core/aida-marketplace', call_args)
         self.assertIn('--title', call_args)
         self.assertIn('Test Issue', call_args)
         self.assertIn('--label', call_args)
@@ -348,7 +348,7 @@ class TestCreateGitHubIssue(unittest.TestCase):
         """Test that subprocess command has correct structure."""
         mock_run.return_value = MagicMock(
             returncode=0,
-            stdout='https://github.com/oakensoul/aida-marketplace/issues/1\n',
+            stdout='https://github.com/aida-core/aida-marketplace/issues/1\n',
             stderr=''
         )
 
@@ -367,7 +367,7 @@ class TestCreateGitHubIssue(unittest.TestCase):
         self.assertEqual(call_args[1], 'issue')
         self.assertEqual(call_args[2], 'create')
         self.assertIn('--repo', call_args)
-        self.assertIn('oakensoul/aida-marketplace', call_args)
+        self.assertIn('aida-core/aida-marketplace', call_args)
         self.assertIn('--title', call_args)
         self.assertIn('Test Title', call_args)
         self.assertIn('--body', call_args)
