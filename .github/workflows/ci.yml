@@ -76,3 +76,25 @@ jobs:
 
       - name: Run all linters
         run: make lint
+
+  check-attribution:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Block AI co-authorship trailers
+        run: |
+          MERGE_BASE=$(git merge-base "origin/${{ github.base_ref }}" HEAD)
+          PATTERN='^Co-Authored-By:.*\b(claude|anthropic|openai|chatgpt|copilot|gemini|ai\b)'
+          if git log "$MERGE_BASE..HEAD" --format='%B' | grep -iE "$PATTERN"; then
+            msg="Found AI co-authorship attribution. Remove Co-Authored-By"
+            msg="$msg trailers referencing AI tools (claude, anthropic, etc.)."
+            echo "::error::${msg}"
+            exit 1
+          fi
+          echo "No AI attribution found — clean."
