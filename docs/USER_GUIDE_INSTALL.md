@@ -93,13 +93,13 @@ git --version
 Open Claude Code and add the AIDA marketplace (one-time setup):
 
 ```bash
-/plugin marketplace add oakensoul/aida-marketplace
+/plugin marketplace add aida-core/aida-marketplace
 ```
 
 **Expected output:**
 
 ```text
-Adding marketplace oakensoul/aida-marketplace...
+Adding marketplace aida-core/aida-marketplace...
 ✓ Fetched marketplace registry
 ✓ Added marketplace "aida"
 
@@ -720,7 +720,7 @@ Understand how AIDA works:
 
 ### 5. Join the Community
 
-- **GitHub**: [aida-core-plugin](https://github.com/oakensoul/aida-core-plugin)
+- **GitHub**: [aida-core-plugin](https://github.com/aida-core/aida-core-plugin)
 - **Issues**: Report bugs and request features
 - **Discussions**: Share skills and get help
 

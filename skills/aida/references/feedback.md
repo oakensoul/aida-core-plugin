@@ -124,7 +124,7 @@ Where `{action}` is: `feedback`, `bug`, or `feature-request`
 {
   "success": true,
   "message": "Feedback submitted successfully",
-  "issue_url": "https://github.com/oakensoul/aida-marketplace/issues/123",
+  "issue_url": "https://github.com/aida-core/aida-marketplace/issues/123",
   "issue_number": 123
 }
 ```
@@ -137,7 +137,7 @@ Where `{action}` is: `feedback`, `bug`, or `feature-request`
 ✅ Feedback submitted successfully!
 
 Your feedback has been created as issue #123:
-https://github.com/oakensoul/aida-marketplace/issues/123
+https://github.com/aida-core/aida-marketplace/issues/123
 
 Thank you for helping improve AIDA!
 ```
@@ -156,7 +156,7 @@ Adjust message based on action:
 Error: {error message from script}
 
 You can try again or report this issue at:
-https://github.com/oakensoul/aida-marketplace/issues
+https://github.com/aida-core/aida-marketplace/issues
 ```
 
 ### Level 5: Error Handling

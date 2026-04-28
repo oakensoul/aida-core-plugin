@@ -735,7 +735,7 @@ Exit with appropriate code
 
 ```bash
 # Add AIDA marketplace (one-time)
-/plugin marketplace add oakensoul/aida-marketplace
+/plugin marketplace add aida-core/aida-marketplace
 
 # Install core plugin
 /plugin install core@aida

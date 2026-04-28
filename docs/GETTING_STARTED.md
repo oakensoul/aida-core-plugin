@@ -22,7 +22,7 @@ Before installing AIDA, ensure you have:
 ### Step 1: Add AIDA Marketplace
 
 ```bash
-/plugin marketplace add oakensoul/aida-marketplace
+/plugin marketplace add aida-core/aida-marketplace
 ```
 
 This is a one-time setup that adds the AIDA plugin registry to your Claude Code.
@@ -172,8 +172,8 @@ See real-world usage scenarios in [EXAMPLES.md](EXAMPLES.md).
 
 ### Community
 
-- [GitHub Issues](https://github.com/oakensoul/aida-core-plugin/issues)
-- [GitHub Discussions](https://github.com/oakensoul/aida-core-plugin/discussions)
+- [GitHub Issues](https://github.com/aida-core/aida-core-plugin/issues)
+- [GitHub Discussions](https://github.com/aida-core/aida-core-plugin/discussions)
 
 ---
 
