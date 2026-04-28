@@ -46,7 +46,7 @@ or your user profile.
 ### Step 1: Add Marketplace
 
 ```bash
-/plugin marketplace add oakensoul/aida-marketplace
+/plugin marketplace add aida-core/aida-marketplace
 ```
 
 ### Step 2: Install
@@ -71,20 +71,20 @@ For detailed walkthrough, see the [Getting Started Guide](docs/GETTING_STARTED.m
 
 ## Commands
 
-| Command                 | Description                          |
-| ----------------------- | ------------------------------------ |
-| `/aida config`          | Configure AIDA (global or project)   |
-| `/aida status`          | Check installation and configuration |
-| `/aida doctor`          | Run health diagnostics               |
-| `/aida memento`         | Save/restore session context         |
-| `/aida agent create`    | Create a custom agent                |
-| `/aida skill create`    | Create a custom skill                |
-| `/aida expert list`     | List available experts and status    |
-| `/aida expert list configure`| Select active experts for a project |
-| `/aida expert panel list`| Show named panel compositions       |
-| `/aida feedback`        | Submit feedback via GitHub           |
-| `/aida bug`             | Report a bug                         |
-| `/aida feature-request` | Request a feature                    |
+| Command                       | Description                          |
+| ----------------------------- | ------------------------------------ |
+| `/aida config`                | Configure AIDA (global or project)   |
+| `/aida status`                | Check installation and configuration |
+| `/aida doctor`                | Run health diagnostics               |
+| `/aida memento`               | Save/restore session context         |
+| `/aida agent create`          | Create a custom agent                |
+| `/aida skill create`          | Create a custom skill                |
+| `/aida expert list`           | List available experts and status    |
+| `/aida expert list configure` | Select active experts for a project  |
+| `/aida expert panel list`     | Show named panel compositions        |
+| `/aida feedback`              | Submit feedback via GitHub           |
+| `/aida bug`                   | Report a bug                         |
+| `/aida feature-request`       | Request a feature                    |
 
 ## Documentation
 
@@ -160,8 +160,8 @@ See [DEVELOPMENT.md](docs/DEVELOPMENT.md) for contributor guidelines.
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/oakensoul/aida-core-plugin/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/oakensoul/aida-core-plugin/discussions)
+- **Issues**: [GitHub Issues](https://github.com/aida-core/aida-core-plugin/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/aida-core/aida-core-plugin/discussions)
 - **Diagnostics**: `/aida doctor`
 
 ## License
