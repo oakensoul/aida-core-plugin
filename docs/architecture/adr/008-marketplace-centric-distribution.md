@@ -38,7 +38,7 @@ Use a **Marketplace-Centric** distribution model where:
 
 ```bash
 # One-time: Add the AIDA marketplace
-/plugin marketplace add oakensoul/aida-marketplace
+/plugin marketplace add aida-core/aida-marketplace
 
 # Install plugins by short name
 /plugin install core@aida
@@ -48,10 +48,10 @@ Use a **Marketplace-Centric** distribution model where:
 
 | Component                    | Name                           |
 | ---------------------------- | ------------------------------ |
-| Marketplace repo             | `oakensoul/aida-marketplace`   |
+| Marketplace repo             | `aida-core/aida-marketplace`   |
 | Marketplace name             | `aida`                         |
 | Core plugin (in marketplace) | `core`                         |
-| Core plugin repo             | `oakensoul/aida-core-plugin`   |
+| Core plugin repo             | `aida-core/aida-core-plugin`   |
 | Install command              | `/plugin install core@aida`    |
 
 ## Rationale
@@ -66,7 +66,7 @@ Use a **Marketplace-Centric** distribution model where:
 
 #### 2. Simplified Installation
 
-- Short, memorable names: `core@aida` vs `oakensoul/aida-core-plugin`
+- Short, memorable names: `core@aida` vs `aida-core/aida-core-plugin`
 - Consistent pattern for all plugins
 - No need to remember GitHub paths
 
@@ -100,7 +100,7 @@ Use a **Marketplace-Centric** distribution model where:
 
 **Against:**
 
-- Verbose installation: `/plugin install oakensoul/aida-core-plugin`
+- Verbose installation: `/plugin install aida-core/aida-core-plugin`
 - No central discovery
 - Version management per-repo
 - Issues scattered across repos
@@ -192,7 +192,7 @@ aida-marketplace/
       "name": "core",
       "source": {
         "type": "github",
-        "repo": "oakensoul/aida-core-plugin"
+        "repo": "aida-core/aida-core-plugin"
       },
       "description": "Core AIDA functionality",
       "version": "0.5.0",
@@ -212,7 +212,7 @@ Each plugin repo must have:
 
 ### Feedback Flow
 
-All user feedback goes to `oakensoul/aida-marketplace`:
+All user feedback goes to `aida-core/aida-marketplace`:
 
 - Bug reports
 - Feature requests

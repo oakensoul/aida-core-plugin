@@ -89,7 +89,7 @@ config_complete: false  # true when all required fields filled
 
 # Basic Info (auto-detected)
 project_name: "feature-53-create-aida-dispatcher-command"
-project_root: "/Users/oakensoul/Developer/..."
+project_root: "/Users/alice/Developer/..."
 
 # Version Control (auto-detected)
 vcs:

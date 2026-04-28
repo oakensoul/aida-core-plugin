@@ -44,7 +44,7 @@ gh --version
 
 ```bash
 # Clone the aida-core-plugin repository
-git clone git@github.com:oakensoul/aida-core-plugin.git
+git clone git@github.com:aida-core/aida-core-plugin.git
 cd aida-core-plugin
 ```
 
@@ -726,4 +726,4 @@ See monorepo `scripts/publish.sh` for publishing to separate repositories.
 
 ---
 
-**Ready to contribute?** Check out [good first issues](https://github.com/oakensoul/aida-core-plugin/labels/good-first-issue)
+**Ready to contribute?** Check out [good first issues](https://github.com/aida-core/aida-core-plugin/labels/good-first-issue)
