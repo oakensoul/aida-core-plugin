@@ -10,6 +10,27 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.6] - 2026-04-28
+
+### Added
+
+- CI workflow `check-attribution` that scans PR commit messages for
+  `Co-Authored-By` trailers referencing AI tools (Claude, Anthropic,
+  OpenAI, ChatGPT, Copilot, Gemini, generic `ai`) and fails the build
+  if any are found. AGPL/copyright concern: AI co-authorship trailers
+  create copyright ownership ambiguity. Closes #54
+
+### Changed
+
+- Rewrote commit `4c80c92` (the v1.4.2 backfill commit) to remove a
+  pre-existing `Co-Authored-By: Claude` trailer; force-updated `main`
+  and re-pointed tags v1.4.2/v1.4.3/v1.4.4/v1.4.5 at their new SHAs.
+  GitHub releases follow the moved tags. Old SHAs remain reachable as
+  orphans for anyone with stale clones — `git fetch && git reset --hard
+  origin/main` will catch them up
+
+---
+
 ## [1.4.5] - 2026-04-28
 
 ### Changed
@@ -548,6 +569,7 @@ See git history for details on versions prior to 0.2.0.
 
 ---
 
+[1.4.6]: https://github.com/aida-core/aida-core-plugin/releases/tag/v1.4.6
 [1.4.5]: https://github.com/aida-core/aida-core-plugin/releases/tag/v1.4.5
 [1.4.4]: https://github.com/aida-core/aida-core-plugin/releases/tag/v1.4.4
 [1.4.3]: https://github.com/aida-core/aida-core-plugin/releases/tag/v1.4.3
