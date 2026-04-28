@@ -46,7 +46,7 @@ or your user profile.
 ### Step 1: Add Marketplace
 
 ```bash
-/plugin marketplace add oakensoul/aida-marketplace
+/plugin marketplace add aida-core/aida-marketplace
 ```
 
 ### Step 2: Install
@@ -160,8 +160,8 @@ See [DEVELOPMENT.md](docs/DEVELOPMENT.md) for contributor guidelines.
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/oakensoul/aida-core-plugin/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/oakensoul/aida-core-plugin/discussions)
+- **Issues**: [GitHub Issues](https://github.com/aida-core/aida-core-plugin/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/aida-core/aida-core-plugin/discussions)
 - **Diagnostics**: `/aida doctor`
 
 ## License

@@ -130,7 +130,7 @@ def create_bug_report(
     """Create GitHub issue via gh CLI"""
     cmd = [
         "gh", "issue", "create",
-        "--repo", "oakensoul/aida-core-plugin",
+        "--repo", "aida-core/aida-core-plugin",
         "--title", title,
         "--body", body,
         "--label", ",".join(labels)
@@ -269,7 +269,7 @@ To report this bug, please:
 3. Run: /aida bug
 
 Or manually create an issue:
-https://github.com/oakensoul/aida-core-plugin/issues/new
+https://github.com/aida-core/aida-core-plugin/issues/new
 ```
 
 ## Future Considerations
