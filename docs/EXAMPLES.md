@@ -232,7 +232,7 @@ cd ~/my-monorepo
 
 # AIDA creates GitHub issue
 # Output: ✓ Bug report submitted!
-#         Issue: https://github.com/oakensoul/aida-core-plugin/issues/123
+#         Issue: https://github.com/aida-core/aida-core-plugin/issues/123
 ```
 
 **Result**: Bug reported with all necessary context included automatically.

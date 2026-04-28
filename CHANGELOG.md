@@ -10,6 +10,23 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.4] - 2026-04-28
+
+### Changed
+
+- User-facing docs updated to reflect the org rename from `oakensoul/`
+  to `aida-core/`: `README.md`, `docs/GETTING_STARTED.md`,
+  `docs/USER_GUIDE_INSTALL.md`, `docs/DEVELOPMENT.md`,
+  `docs/EXAMPLES.md`, ADRs 006 and 008,
+  `docs/architecture/c4/container-diagram.md`, and the `feedback.md`
+  skill reference. Also normalizes a stale `/Users/oakensoul/...` path
+  example in `config-driven-approach.md`
+- Historical CHANGELOG link footnotes and `.issues/`/`.github/issues/`
+  archives intentionally left untouched (covered by GitHub redirects;
+  preserves accurate historical record)
+
+---
+
 ## [1.4.3] - 2026-04-28
 
 ### Changed
@@ -502,6 +519,7 @@ See git history for details on versions prior to 0.2.0.
 
 ---
 
+[1.4.4]: https://github.com/aida-core/aida-core-plugin/releases/tag/v1.4.4
 [1.4.3]: https://github.com/aida-core/aida-core-plugin/releases/tag/v1.4.3
 [1.4.2]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.4.2
 [1.4.1]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.4.1
