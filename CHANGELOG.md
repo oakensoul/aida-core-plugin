@@ -10,6 +10,35 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.5] - 2026-04-28
+
+### Changed
+
+- `/aida config` now writes the project context as **two files**: the
+  committable `.claude/aida-project-context.yml` (project-level facts:
+  vcs.type, languages, tools, preferences, etc.) and the gitignored
+  `.claude/aida-project-context.local.yml` (user/environment overlay:
+  `project_root`, `vcs.remote_url`, `last_updated`, `config_complete`).
+  Fixes #65 — previously the single file mixed both, making it
+  impractical to commit
+- Phase 2 of `/aida config` appends `.claude/aida-project-context.local.yml`
+  to the project's `.gitignore` (if one exists and the entry is missing).
+  No `.gitignore` is created — that decision stays with the project
+- New `utils.project_context` module (`load_project_context`,
+  `write_project_context`, `split_context`, `merge_context`,
+  `ensure_gitignore_entry`) for consumers that need to read the merged
+  view
+
+### Migration
+
+- Legacy single-file projects continue to read correctly via
+  `load_project_context()`. The split happens automatically on the next
+  `/aida config` run; no manual migration is required
+- Existing committed `aida-project-context.yml` files with stale paths
+  from another contributor will be cleaned up on next config run
+
+---
+
 ## [1.4.4] - 2026-04-28
 
 ### Changed
@@ -519,6 +548,7 @@ See git history for details on versions prior to 0.2.0.
 
 ---
 
+[1.4.5]: https://github.com/aida-core/aida-core-plugin/releases/tag/v1.4.5
 [1.4.4]: https://github.com/aida-core/aida-core-plugin/releases/tag/v1.4.4
 [1.4.3]: https://github.com/aida-core/aida-core-plugin/releases/tag/v1.4.3
 [1.4.2]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.4.2

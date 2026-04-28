@@ -48,7 +48,6 @@ import _paths  # noqa: F401
 from utils import (
     get_claude_dir,
     ensure_directory,
-    write_yaml,
     load_questionnaire,
     detect_languages,
     detect_tools,
@@ -56,6 +55,9 @@ from utils import (
     detect_testing_approach,
     render_skill_directory,
     safe_json_load,
+    load_project_context,
+    write_project_context,
+    ensure_gitignore_entry,
     FileOperationError,
     ConfigurationError,
     InstallationError,
@@ -578,11 +580,12 @@ def get_questions(context: Dict[str, Any]) -> Dict[str, Any]:
     # Detect all project information (comprehensive)
     project_config = detect_project_info(project_root)
 
-    # Save to .claude/aida-project-context.yml
-    config_path = project_root / ".claude" / PROJECT_CONTEXT_FILE
+    # Save to .claude/aida-project-context.yml + aida-project-context.local.yml
+    # (split: project-level facts in the committed file, user-specific
+    # data in the gitignored .local overlay — see issue #65)
     try:
-        write_yaml(config_path, project_config)
-        logger.info(f"Saved project configuration to {config_path}")
+        project_path, _ = write_project_context(project_root, project_config)
+        logger.info(f"Saved project configuration to {project_path}")
     except (OSError, PermissionError) as e:
         logger.warning(f"Could not save project config: {e}")
         # Continue anyway - not critical for this phase
@@ -794,15 +797,17 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
         project_root = Path.cwd()
         config_path = project_root / ".claude" / PROJECT_CONTEXT_FILE
 
-        # Load existing YAML config (should exist from Phase 1)
+        # Load existing YAML config (should exist from Phase 1).
+        # load_project_context merges aida-project-context.yml with the
+        # gitignored .local overlay so we operate on a single dict,
+        # then re-split on write.
         if not config_path.exists():
             raise FileOperationError(
                 f"Project config not found: {config_path}",
                 "Run 'python configure.py --get-questions' first to detect project facts"
             )
 
-        with open(config_path) as f:
-            config = yaml.safe_load(f)
+        config = load_project_context(project_root)
 
         # Update preferences with user responses
         for key, value in responses.items():
@@ -855,10 +860,20 @@ def configure(responses: Dict[str, Any], inferred: Dict[str, Any] = None) -> Dic
         config["config_complete"] = True
         config["last_updated"] = datetime.now(timezone.utc).isoformat()
 
-        # Save updated config
-        write_yaml(config_path, config)
-        files_created.append(str(config_path))
-        logger.info(f"Updated {config_path}")
+        # Save updated config — split into committed + .local overlay.
+        project_path, local_path = write_project_context(project_root, config)
+        files_created.append(str(project_path))
+        files_created.append(str(local_path))
+        logger.info(f"Updated {project_path} and {local_path}")
+
+        # Add the .local file to .gitignore so contributors don't accidentally
+        # commit each other's paths/timestamps. No-op if the entry is already
+        # present or if the project has no .gitignore.
+        try:
+            if ensure_gitignore_entry(project_root):
+                logger.info("Added aida-project-context.local.yml to .gitignore")
+        except (OSError, PermissionError) as e:
+            logger.warning(f"Could not update .gitignore: {e}")
 
         # Map YAML config to template variables (all strings for Jinja2)
         template_vars = {
