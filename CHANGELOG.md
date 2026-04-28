@@ -10,6 +10,21 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.3] - 2026-04-28
+
+### Changed
+
+- Updated internal references from `oakensoul/` to `aida-core/` after
+  the GitHub org transfer on 2026-04-28: `plugin.json` `repository`
+  field, `gh api` calls in `upgrade.py`, `FEEDBACK_REPO` and
+  user-visible prompts in `feedback.py`, the scaffolded plugin README
+  template, and corresponding test assertions
+- User-facing docs and historical changelog/issue archives are
+  unchanged (covered by GitHub redirects); a separate docs PR will
+  follow
+
+---
+
 ## [1.4.2] - 2026-04-24
 
 ### Changed
@@ -487,6 +502,7 @@ See git history for details on versions prior to 0.2.0.
 
 ---
 
+[1.4.3]: https://github.com/aida-core/aida-core-plugin/releases/tag/v1.4.3
 [1.4.2]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.4.2
 [1.4.1]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.4.1
 [1.4.0]: https://github.com/oakensoul/aida-core-plugin/releases/tag/v1.4.0

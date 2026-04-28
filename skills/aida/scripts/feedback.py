@@ -37,7 +37,7 @@ MAX_INPUT_LENGTH = 5000  # Maximum characters for feedback/description
 MIN_INPUT_LENGTH = 10    # Minimum characters to prevent spam
 MIN_SUBMISSION_INTERVAL = 60  # Minimum seconds between submissions
 RATE_LIMIT_FILE = Path.home() / ".claude" / ".aida_feedback_last"
-FEEDBACK_REPO = "oakensoul/aida-marketplace"  # GitHub repository for feedback issues
+FEEDBACK_REPO = "aida-core/aida-marketplace"  # GitHub repository for feedback issues
 
 # Allowed GitHub label characters (alphanumeric, hyphen, space, colon, slash)
 ALLOWED_LABEL_PATTERN = re.compile(r'^[a-zA-Z0-9 \-:\/]+$')
@@ -619,7 +619,7 @@ def submit_feedback() -> int:
     print("Submit Feedback")
     print("="*60 + "\n")
 
-    print("This will create a public GitHub issue in oakensoul/aida-marketplace.")
+    print("This will create a public GitHub issue in aida-core/aida-marketplace.")
     print("Your feedback will be visible to everyone.\n")
 
     confirm = input("Continue? (y/n): ").strip().lower()
@@ -684,7 +684,7 @@ def submit_bug() -> int:
     print("Submit Bug Report")
     print("="*60 + "\n")
 
-    print("This will create a public GitHub issue in oakensoul/aida-marketplace.")
+    print("This will create a public GitHub issue in aida-core/aida-marketplace.")
     print("The issue will include your system information (OS, Python version).\n")
 
     confirm = input("Continue? (y/n): ").strip().lower()
@@ -758,7 +758,7 @@ def submit_feature_request() -> int:
     print("Submit Feature Request")
     print("="*60 + "\n")
 
-    print("This will create a public GitHub issue in oakensoul/aida-marketplace.")
+    print("This will create a public GitHub issue in aida-core/aida-marketplace.")
     print("Your feature request will be visible to everyone.\n")
 
     confirm = input("Continue? (y/n): ").strip().lower()
