@@ -97,6 +97,17 @@ from .template_renderer import (
     get_output_filename,
 )
 
+# Project context (split / merge of aida-project-context.yml and .local.yml)
+from .project_context import (
+    PROJECT_CONTEXT_FILE,
+    PROJECT_CONTEXT_LOCAL_FILE,
+    split_context,
+    merge_context,
+    load_project_context,
+    write_project_context,
+    ensure_gitignore_entry,
+)
+
 # Error classes
 from .errors import (
     AidaError,
@@ -169,6 +180,14 @@ __all__ = [
     "is_binary_file",
     "is_template_file",
     "get_output_filename",
+    # Project context split/merge
+    "PROJECT_CONTEXT_FILE",
+    "PROJECT_CONTEXT_LOCAL_FILE",
+    "split_context",
+    "merge_context",
+    "load_project_context",
+    "write_project_context",
+    "ensure_gitignore_entry",
     # Error classes
     "AidaError",
     "VersionError",
