@@ -42,7 +42,7 @@ def get_latest_version() -> Tuple[Optional[str], Optional[str]]:
     """
     try:
         result = subprocess.run(
-            ["gh", "api", "repos/oakensoul/aida-core-plugin/releases/latest"],
+            ["gh", "api", "repos/aida-core/aida-core-plugin/releases/latest"],
             capture_output=True,
             text=True,
             timeout=10
@@ -108,7 +108,7 @@ def get_release_notes(version: str) -> Tuple[Optional[str], Optional[str]]:
         tag = version if version.startswith('v') else f'v{version}'
 
         result = subprocess.run(
-            ["gh", "api", f"repos/oakensoul/aida-core-plugin/releases/tags/{tag}"],
+            ["gh", "api", f"repos/aida-core/aida-core-plugin/releases/tags/{tag}"],
             capture_output=True,
             text=True,
             timeout=10
@@ -194,13 +194,13 @@ def main() -> int:
                 "success": False,
                 "error": error,
                 "current_version": current,
-                "message": "Unable to check for updates. Please check manually at: https://github.com/oakensoul/aida-core-plugin/releases"
+                "message": "Unable to check for updates. Please check manually at: https://github.com/aida-core/aida-core-plugin/releases"
             })
         else:
             print(f"✗ Error checking for updates: {error}")
             print()
             print("Please check manually at:")
-            print("https://github.com/oakensoul/aida-core-plugin/releases")
+            print("https://github.com/aida-core/aida-core-plugin/releases")
         return 1
 
     if not json_mode:
