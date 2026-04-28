@@ -196,7 +196,11 @@ Context JSON:
 ##### What happens in Phase 1
 
 1. Detects all project facts (VCS, files, languages, tools)
-2. **Saves to `.claude/aida-project-context.yml`** with nulls for unknown preferences
+2. **Saves to two files:**
+   - `.claude/aida-project-context.yml` — committed; project-level facts
+     (vcs.type, languages, tools, preferences, etc.)
+   - `.claude/aida-project-context.local.yml` — gitignored; user/environment
+     overlay (project_root, vcs.remote_url, last_updated, config_complete)
 3. Identifies null preference fields
 4. Returns only 0-3 questions for those gaps
 
@@ -210,18 +214,32 @@ Returns:
 }
 ```
 
-##### YAML Config Created (`.claude/aida-project-context.yml`)
+##### YAML Config Created — committed (`.claude/aida-project-context.yml`)
 
 ```yaml
 version: 0.2.0
-config_complete: false
-vcs: {type: git, uses_worktrees: true, ...}
+project_name: my-project
+vcs: {type: git, has_vcs: true, uses_worktrees: true, is_github: true, ...}
 files: {has_readme: true, has_license: true, ...}
 languages: {primary: Python, all: [...]}
 tools: {detected: [Git], ...}
 inferred: {project_type: Unknown, team_collaboration: Solo, ...}
 preferences: {branching_model: null, issue_tracking: "GitHub Issues", ...}
 ```
+
+##### Local Overlay — gitignored (`.claude/aida-project-context.local.yml`)
+
+```yaml
+project_root: /Users/alice/Developer/my-project
+config_complete: false
+last_updated: '2026-04-28T...'
+vcs:
+  remote_url: git@github.com:alice/my-project.git
+```
+
+Consumers always read via `load_project_context()`, which merges both
+files (local overrides project). The split keeps the committed file
+identical across contributors so it can live in version control.
 
 ##### Phase 2: Update YAML & Render Skill
 
@@ -234,12 +252,16 @@ Collect user responses with `AskUserQuestion`, then:
 
 ##### What happens in Phase 2
 
-1. Loads `.claude/aida-project-context.yml`
+1. Loads merged config from `.claude/aida-project-context.yml` plus the
+   gitignored `.local.yml` overlay (legacy single-file projects still
+   load transparently)
 2. Updates preferences with user responses
 3. Marks `config_complete: true`
-4. Saves updated YAML
-5. Maps YAML → template variables
-6. Renders `.claude/skills/project-context/SKILL.md`
+4. Saves updated config — splits into committed + `.local` files
+5. Appends `.claude/aida-project-context.local.yml` to project
+   `.gitignore` if it has one and the entry is missing
+6. Maps merged config → template variables
+7. Renders `.claude/skills/project-context/SKILL.md`
 
 Returns:
 
