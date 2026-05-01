@@ -69,44 +69,63 @@ def _create_skill(tmp_path, **overrides):
     sys.path[0], and (c) invalidate importlib's finder cache so
     Python doesn't reuse the previously-resolved plugin-manager
     location on import.
+
+    Restores both ``sys.path`` and the cached ``operations.*``
+    modules afterward so this helper is self-contained — later
+    tests in the same session see the state they expect.
     """
     import importlib
 
-    for mod_name in list(sys.modules):
-        if (
-            mod_name == "operations"
-            or mod_name.startswith("operations.")
-            or mod_name == "_paths"
-        ):
+    saved_path = list(sys.path)
+    saved_modules = {
+        k: v for k, v in sys.modules.items()
+        if k == "operations"
+        or k.startswith("operations.")
+        or k == "_paths"
+    }
+
+    try:
+        for mod_name in list(saved_modules):
             del sys.modules[mod_name]
 
-    skill_scripts = str(
-        _project_root / "skills" / "skill-manager" / "scripts"
-    )
-    if skill_scripts in sys.path:
-        sys.path.remove(skill_scripts)
-    sys.path.insert(0, skill_scripts)
-    importlib.invalidate_caches()
-
-    from operations.extensions import execute_create as skill_create
-
-    base = tmp_path / ".claude"
-    with patch(
-        "shared.extension_utils.get_location_path",
-        return_value=base,
-    ):
-        result = skill_create(
-            name=overrides.get("name", "test-skill"),
-            description=overrides.get(
-                "description", "A skill used to test SPDX emission"
-            ),
-            version=overrides.get("version", "0.1.0"),
-            tags=overrides.get("tags", ["core"]),
-            location="project",
-            templates_dir=_SKILL_TEMPLATES,
+        skill_scripts = str(
+            _project_root / "skills" / "skill-manager" / "scripts"
         )
-    assert result["success"], result.get("message")
-    return Path(result["path"]).read_text()
+        if skill_scripts in sys.path:
+            sys.path.remove(skill_scripts)
+        sys.path.insert(0, skill_scripts)
+        importlib.invalidate_caches()
+
+        from operations.extensions import execute_create as skill_create
+
+        base = tmp_path / ".claude"
+        with patch(
+            "shared.extension_utils.get_location_path",
+            return_value=base,
+        ):
+            result = skill_create(
+                name=overrides.get("name", "test-skill"),
+                description=overrides.get(
+                    "description", "A skill used to test SPDX emission"
+                ),
+                version=overrides.get("version", "0.1.0"),
+                tags=overrides.get("tags", ["core"]),
+                location="project",
+                templates_dir=_SKILL_TEMPLATES,
+            )
+        assert result["success"], result.get("message")
+        return Path(result["path"]).read_text()
+    finally:
+        sys.path[:] = saved_path
+        for mod_name in [
+            k for k in sys.modules
+            if k == "operations"
+            or k.startswith("operations.")
+            or k == "_paths"
+        ]:
+            del sys.modules[mod_name]
+        sys.modules.update(saved_modules)
+        importlib.invalidate_caches()
 
 
 class TestAgentCreateEmitsSpdx:
