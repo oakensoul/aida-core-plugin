@@ -75,9 +75,13 @@ def build_template_variables(
     # plugins is "The {Display Name} Authors" so the generated
     # `AUTHORS` file is the authoritative roster — file headers
     # stay stable as that file changes. Caller can override.
+    # `license_id` historically defaulted to "MIT" in this codebase
+    # (the get_questions default), so we preserve that here rather
+    # than picking up shared.spdx's MPL-2.0 default. Both this and
+    # spdx_context resolve to the same value below.
     spdx_context = resolve_spdx_context({
         "year": year,
-        "license_id": context.get("license_id"),
+        "license_id": context.get("license_id") or "MIT",
         "copyright_holder": (
             context.get("copyright_holder")
             or f"The {plugin_display_name} Authors"
@@ -92,7 +96,7 @@ def build_template_variables(
         "version": context.get("version", "0.1.0"),
         "author_name": context.get("author_name", ""),
         "author_email": context.get("author_email", ""),
-        "license_id": context.get("license_id", "MIT"),
+        "license_id": spdx_context["license_id"],
         "license_text": license_text,
         "year": year,
         "copyright_holder": spdx_context["copyright_holder"],

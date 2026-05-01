@@ -21,22 +21,27 @@ Templates use the pre-formatted blocks (``spdx_md``, ``spdx_hash``,
 
 from __future__ import annotations
 
+import json
+import os
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
-# License IDs we recognize as SPDX identifiers (subset of what
-# plugin-manager scaffolds). UNLICENSED is handled specially —
-# proprietary all-rights-reserved files still carry the copyright
-# line but skip SPDX-License-Identifier (no SPDX id for proprietary).
-KNOWN_SPDX_LICENSES = frozenset({
-    "MIT",
-    "Apache-2.0",
-    "ISC",
-    "GPL-3.0",
-    "AGPL-3.0",
-    "MPL-2.0",
-    "BSD-2-Clause",
-    "BSD-3-Clause",
+# Placeholders that look like a license but are NOT valid SPDX
+# identifiers — for these, we still emit SPDX-FileCopyrightText
+# (attribution is machine-readable) but suppress
+# SPDX-License-Identifier. Everything else is passed through to the
+# header verbatim, on the theory that an obscure-but-real SPDX id
+# (`GPL-3.0-only`, `Unlicense`, `0BSD`, ...) should not be silently
+# dropped just because we forgot to add it to an allowlist; if the
+# caller mistypes, `reuse lint` will surface it loudly.
+NON_SPDX_PLACEHOLDERS: frozenset[str] = frozenset({
+    "UNLICENSED",
+    "Proprietary",
+    "PROPRIETARY",
+    "None",
+    "TBD",
+    "TODO",
 })
 
 DEFAULT_COPYRIGHT_HOLDER = "The AIDA Core Authors"
@@ -44,7 +49,57 @@ DEFAULT_LICENSE_ID = "MPL-2.0"
 
 
 def current_year() -> str:
+    """Year for SPDX-FileCopyrightText headers.
+
+    Honors ``SOURCE_DATE_EPOCH`` for reproducible builds (Nix,
+    Reproducible Builds project). Otherwise uses today's UTC year.
+    """
+    epoch = os.environ.get("SOURCE_DATE_EPOCH")
+    if epoch:
+        try:
+            return str(
+                datetime.fromtimestamp(int(epoch), tz=timezone.utc).year
+            )
+        except (ValueError, OverflowError, OSError):
+            pass
     return str(datetime.now(timezone.utc).year)
+
+
+def has_spdx_license_id(license_id: str) -> bool:
+    """Return True if ``license_id`` should be emitted in headers."""
+    return bool(license_id) and license_id not in NON_SPDX_PLACEHOLDERS
+
+
+def detect_spdx_from_plugin_path(
+    plugin_path: str | Path | None,
+) -> dict[str, str]:
+    """Best-effort SPDX context derived from a target plugin's metadata.
+
+    Reads ``<plugin_path>/.claude-plugin/plugin.json``; if present,
+    derives ``copyright_holder`` from the plugin's display name
+    (``"The {Display Name} Authors"``) and ``license_id`` from the
+    ``license`` field. Returns only the keys it can fill — caller
+    merges into a wider context.
+    """
+    out: dict[str, str] = {}
+    if not plugin_path:
+        return out
+    plugin_json = Path(plugin_path) / ".claude-plugin" / "plugin.json"
+    if not plugin_json.is_file():
+        return out
+    try:
+        data = json.loads(plugin_json.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return out
+    if isinstance(data, dict):
+        name = data.get("name")
+        if isinstance(name, str) and name:
+            display = name.replace("-", " ").replace("_", " ").title()
+            out["copyright_holder"] = f"The {display} Authors"
+        license_id = data.get("license")
+        if isinstance(license_id, str) and license_id:
+            out["license_id"] = license_id
+    return out
 
 
 def resolve_spdx_context(context: dict[str, Any]) -> dict[str, str]:
@@ -85,12 +140,12 @@ def render_spdx_blocks(spdx: dict[str, str]) -> dict[str, str]:
     year = spdx["year"]
     holder = spdx["copyright_holder"]
     license_id = spdx["license_id"]
-    has_spdx_license = license_id in KNOWN_SPDX_LICENSES
+    emit_license_line = has_spdx_license_id(license_id)
 
     def _block(prefix: str, suffix: str) -> str:
         # REUSE-IgnoreStart
         lines = [f"{prefix}SPDX-FileCopyrightText: {year} {holder}{suffix}"]
-        if has_spdx_license:
+        if emit_license_line:
             lines.append(
                 f"{prefix}SPDX-License-Identifier: {license_id}{suffix}"
             )

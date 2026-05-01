@@ -44,16 +44,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `shared/extension_utils.execute_extension_create` now seeds
-  Jinja2 template variables with SPDX context (`year`,
-  `copyright_holder`, `license_id`, `spdx_md`, `spdx_hash`,
-  `spdx_slash`). Caller can override any of these via
-  `extra_vars`. Default holder is `The AIDA Core Authors` and
-  default license is `MPL-2.0` to match this repo
-- `plugin-manager`'s `build_template_variables` exposes the same
-  SPDX helpers under template variables so scaffold templates
-  splice in `{{ spdx_md }}` / `{{ spdx_hash }}` / `{{ spdx_slash }}`
+- `shared/extension_utils.execute_extension_create` seeds Jinja2
+  template variables with SPDX context (`year`, `copyright_holder`,
+  `license_id`, `spdx_md`, `spdx_hash`, `spdx_slash`). When a
+  caller targets a plugin (`location="plugin"` with `plugin_path`),
+  the helper auto-detects the holder from
+  `<plugin_path>/.claude-plugin/plugin.json` (`name` -> `"The
+  {Display Name} Authors"`, `license` -> `license_id`), so an agent
+  added to a downstream plugin gets that plugin's attribution, not
+  aida-core's. `extra_vars` from the caller still wins
+- `plugin-manager`'s `build_template_variables` exposes SPDX
+  helpers as template variables so scaffold templates splice in
+  `{{ spdx_md }}` / `{{ spdx_hash }}` / `{{ spdx_slash }}`
   rather than building lines themselves
+- `shared.spdx` accepts any non-placeholder string as a valid
+  SPDX-License-Identifier (deny-list rather than allowlist), so
+  obscure-but-real ids like `GPL-3.0-only`, `Unlicense`, `0BSD`,
+  `LGPL-3.0-or-later` flow through. Placeholders that suppress
+  the License-Identifier line: `UNLICENSED`, `Proprietary`,
+  `PROPRIETARY`, `None`, `TBD`, `TODO`, empty string
+- `current_year()` honors `SOURCE_DATE_EPOCH` for reproducible
+  builds (Nix, Reproducible Builds project)
+- Knowledge index (`agents/<name>/knowledge/index.md`) is now
+  rendered from `agent/knowledge-index.md.jinja2` instead of an
+  inline f-string, so its SPDX header format stays in lock-step
+  with everything else
+- Scaffolded `ci.yml` (Python + TypeScript) emits the YAML
+  document-start `---` marker after the SPDX header, and uses
+  Jinja-literal `${{ '{{' }}…{{ '}}' }}` for GitHub Actions
+  expressions instead of `{% raw %}…{% endraw %}` (which got
+  eaten by `trim_blocks` and concatenated lines)
 
 ### Out of scope
 
@@ -61,6 +81,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   flows are unchanged in this PR — that's the next PR on #73.
   Plugins scaffolded with `include_skill_stub=True` will not yet
   have an SPDX-headered `SKILL.md`
+
+---
+
+## [1.4.8] - 2026-04-30
 
 ### Added
 

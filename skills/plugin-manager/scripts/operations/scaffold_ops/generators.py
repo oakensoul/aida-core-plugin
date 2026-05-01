@@ -260,19 +260,18 @@ def render_stub_agent(
     agent_file = agent_dir / f"{name}.md"
     agent_file.write_text(content)
 
-    # Create knowledge directory with index
+    # Create knowledge directory with a templated index. Rendered
+    # via render_template (not an f-string) so the SPDX header
+    # format stays in lock-step with the rest of the scaffolding.
     knowledge_dir = agent_dir / "knowledge"
     knowledge_dir.mkdir(parents=True, exist_ok=True)
 
-    index_file = knowledge_dir / "index.md"
-    index_content = (
-        f"---\ntype: reference\n"
-        f"title: {name} Knowledge Index\n---\n\n"
-        f"{spdx_blocks['spdx_md']}\n"
-        f"# {name.replace('-', ' ').title()} Knowledge\n\n"
-        "Add knowledge documents here.\n"
+    index_content = render_template(
+        extension_templates_dir,
+        "agent/knowledge-index.md.jinja2",
+        variables,
     )
-    index_file.write_text(index_content)
+    (knowledge_dir / "index.md").write_text(index_content)
 
     return [
         f"agents/{name}/{name}.md",
