@@ -1,0 +1,16 @@
+# AUTHORS
+
+This file lists substantive contributors to aida-core-plugin.
+
+The collective copyright holder is "The AIDA Core Authors" (as referenced in
+SPDX `SPDX-FileCopyrightText` headers throughout the repo). The roster below
+is the authoritative list of who that collective is.
+
+Substantive contributors are added on first merged PR. Order is by first
+contribution.
+
+## Contributors
+
+- Rob Johnson <github@oakensoul.com> (@oakensoul) — maintainer
+- Eugene Levit <eug.levit@gmail.com>
+- Mark D'Antonio <104436415+markdiantonio@users.noreply.github.com> (@markdiantonio)

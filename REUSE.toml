@@ -11,9 +11,11 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 The AIDA Core Authors"
 SPDX-License-Identifier = "MPL-2.0"
 
-# Top-level config files without inline headers.
+# Top-level config files and AUTHORS roster — AUTHORS' contents
+# already provide attribution (it lists the contributors), so
+# inline SPDX would be redundant.
 [[annotations]]
-path = [".gitignore", "**/.gitignore", "**/.gitkeep"]
+path = ["AUTHORS", ".gitignore", "**/.gitignore", "**/.gitkeep"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 The AIDA Core Authors"
 SPDX-License-Identifier = "MPL-2.0"
