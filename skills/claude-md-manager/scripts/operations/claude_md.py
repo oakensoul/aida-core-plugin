@@ -14,6 +14,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from shared.spdx import spdx_template_variables
+
 from .utils import (
     get_project_root,
     parse_frontmatter,
@@ -840,6 +842,9 @@ def execute_create(
         "conventions": context.get("conventions", ""),
         "constraints": context.get("constraints", ""),
     }
+    # Seed SPDX template vars (year, copyright_holder, license_id,
+    # plus pre-formatted spdx_md / spdx_hash / spdx_slash blocks).
+    template_vars.update(spdx_template_variables(context))
 
     # Select template
     template_name = TEMPLATES.get(

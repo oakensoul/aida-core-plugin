@@ -13,6 +13,47 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-04-30
+
+### Added
+
+- `skill-manager`'s `SKILL.md` template now emits an SPDX header
+  after the YAML frontmatter, using the same `{{ spdx_md }}`
+  variable as `agent-manager`. New skills are reuse-compliant
+  by default
+- `claude-md-manager`'s project / user / plugin CLAUDE.md
+  templates now emit an SPDX header. `execute_create` plumbs
+  SPDX context through `spdx_template_variables` so callers can
+  override `copyright_holder` / `license_id` / `year`
+- `plugin-manager`'s `render_stub_skill` accepts an
+  `spdx_context` argument and seeds the skill stub variables
+  with it — so `aida plugin scaffold --include-skill-stub` now
+  produces a fully reuse-compliant plugin (skill stub included).
+  End-to-end smoke test: `reuse lint` is green on a Python
+  scaffold with both agent and skill stubs (18/18 files)
+
+### Fixed
+
+- Test helper `_create_skill` in `test_extension_spdx.py` now
+  saves and restores `sys.path` plus the cached `operations.*` /
+  `_paths` modules around the skill-manager import dance. Without
+  this, the helper silently propagated the swapped sys.path[0] to
+  every later test in the same session — passing today only because
+  no later test cared
+- (Folded in from the prior 1.5.0 entry, made explicit here)
+  `## [1.4.8]` heading was missing from the CHANGELOG when 1.5.0
+  was added, conflating the two versions and tripping markdownlint
+  MD024. The split is now in place
+
+### Notes
+
+- `hook-manager` doesn't render hand-authored files (it edits
+  `settings.json`), so it has no template to update — closes the
+  scaffolding portion of #73
+- Refs #73
+
+---
+
 ## [1.5.0] - 2026-04-30
 
 ### Added

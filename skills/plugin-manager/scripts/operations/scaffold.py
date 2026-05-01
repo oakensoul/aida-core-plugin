@@ -471,6 +471,7 @@ def execute(context: dict[str, Any]) -> dict[str, Any]:
                 language,
                 SKILL_TEMPLATES_DIR,
                 timestamp=variables["timestamp"],
+                spdx_context=spdx_for_stubs,
             )
             all_files.extend(stub_files)
 
