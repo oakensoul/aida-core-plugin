@@ -7,6 +7,8 @@ Functions for creating directory structures, rendering templates,
 and initializing git repositories for new plugin projects.
 """
 
+from __future__ import annotations
+
 import subprocess
 from pathlib import Path
 from typing import Any
