@@ -1,0 +1,41 @@
+version = 1
+SPDX-PackageName = "aida-core-plugin"
+SPDX-PackageSupplier = "oakensoul <github@oakensoul.com>"
+SPDX-PackageDownloadLocation = "https://github.com/aida-core/aida-core-plugin"
+SPDX-PackageComment = "Copyright is held by 'The AIDA Core Authors'; the roster lives in the AUTHORS file at the repo root. This file licenses paths that cannot carry inline SPDX headers (no comment syntax) or that should not carry one (scaffolding templates, integration test fixtures simulating downstream projects). Files that can carry inline headers should — see scripts/add_spdx_headers.py."
+
+# JSON has no comment syntax, so it cannot carry an inline SPDX header.
+[[annotations]]
+path = ["**.json", "**/**.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 The AIDA Core Authors"
+SPDX-License-Identifier = "MPL-2.0"
+
+# Top-level config files without inline headers.
+[[annotations]]
+path = [".gitignore", "**/.gitignore", "**/.gitkeep"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 The AIDA Core Authors"
+SPDX-License-Identifier = "MPL-2.0"
+
+# Scaffolding templates. These are hand-authored MPL-2.0 source files,
+# but their content is rendered into downstream artifacts; the
+# scaffolding tools inject per-file headers into the rendered output
+# (see plugin-manager / agent-manager / etc.). Keeping headers out of
+# the template body avoids accidental double-headers and lets the
+# renderer set the year and copyright holder per generated artifact.
+[[annotations]]
+path = "skills/**/templates/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 The AIDA Core Authors"
+SPDX-License-Identifier = "MPL-2.0"
+
+# Integration test fixtures simulating downstream user projects. These
+# files are intentionally minimal stand-ins (package.json, sample
+# sources, READMEs) and are not the project's own copyrightable
+# content, but REUSE still needs an attribution.
+[[annotations]]
+path = "tests/integration/**/sample-project/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 The AIDA Core Authors"
+SPDX-License-Identifier = "MPL-2.0"

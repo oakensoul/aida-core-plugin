@@ -11,6 +11,9 @@ github_url: "https://github.com/oakensoul/aida-core-plugin/issues/27"
 assignee: "@me"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Issue #27: Plugin upgrade - /aida plugin update
 
 **Status**: In Progress

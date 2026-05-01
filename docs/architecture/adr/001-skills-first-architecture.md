@@ -7,6 +7,9 @@ deciders:
   - "@oakensoul"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # ADR-001: Skills-First Architecture
 
 ## Context

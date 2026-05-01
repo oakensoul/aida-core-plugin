@@ -3,6 +3,9 @@ type: documentation
 title: "Expert Registry Design Spec"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Expert Registry Design Spec
 
 **Date:** 2026-04-16

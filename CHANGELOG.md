@@ -3,12 +3,50 @@ type: changelog
 title: "AIDA Core Plugin Changelog"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Changelog
 
 All notable changes to AIDA Core Plugin.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.4.8] - 2026-04-30
+
+### Added
+
+- SPDX copyright/license headers on every hand-authored source file
+  (markdown, Python, YAML, shell, Makefiles, Dockerfiles,
+  requirements files): copyright "The AIDA Core Authors" / license
+  MPL-2.0. Inserted via the new `scripts/add_spdx_headers.py`
+  (idempotent, dry-run by default), which respects skip categories
+  from
+  [.github/CONTRIBUTING.md#licensing](https://github.com/aida-core/.github/blob/main/CONTRIBUTING.md#licensing):
+  JSON, lockfiles, fixtures, scaffolding templates, and `LICENSE`
+  itself. Refs #72, #73
+- `REUSE.toml` at the repo root licensing the skip categories that
+  cannot carry inline headers (JSON, dotfiles, scaffolding templates,
+  integration test fixtures). Copyright is attributed to "The AIDA
+  Core Authors" with the contributor roster in `AUTHORS`
+- `LICENSES/MPL-2.0.txt` (REUSE-required canonical license text;
+  `LICENSE` at repo root remains for GitHub display)
+- `lint-reuse` Makefile target running `reuse lint`; wired into
+  `make lint` so the existing CI lint job becomes the blocking gate
+  for REUSE compliance. Project is REUSE 3.3 compliant
+- `reuse>=4.0` dev dependency
+
+### Notes
+
+- Scaffolding tools (`plugin-manager`, `agent-manager`,
+  `skill-manager`, `claude-md-manager`, `hook-manager`) do **not**
+  emit SPDX headers in generated artifacts yet — that's the next PR
+  on #73. Templates themselves are intentionally header-free
+  (`REUSE.toml` covers them) so the renderer controls the year and
+  copyright holder per generated artifact
+
+---
 
 ## [1.4.6] - 2026-04-28
 

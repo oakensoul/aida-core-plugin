@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Claude Code Documentation Research Findings
 
 Research conducted: 2026-02-24

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """License text templates for plugin scaffolding.
 
 Stores full license bodies keyed by SPDX identifier with

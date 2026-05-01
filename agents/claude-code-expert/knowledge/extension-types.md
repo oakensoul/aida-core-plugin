@@ -6,6 +6,9 @@ description: How to choose between agents, skills, plugins, and hooks
 version: "1.0.0"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Extension Types
 
 Claude Code supports multiple extension types, each designed for different

@@ -4,6 +4,9 @@ title: AIDA Configuration Schema
 description: Schema and validation rules for aida-project-context.yml
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Configuration Schema
 
 AIDA uses YAML configuration files to store project context and user preferences.

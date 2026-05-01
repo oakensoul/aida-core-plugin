@@ -4,6 +4,9 @@ title: "Installation Guide"
 audience: users
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # AIDA Installation Guide
 
 Complete walkthrough for installing and setting up AIDA Core Plugin

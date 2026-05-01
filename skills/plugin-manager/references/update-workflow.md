@@ -7,6 +7,9 @@ description: >-
   tracking, and backup recovery
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Plugin Update Workflow
 
 Detailed reference for the plugin-manager update process.

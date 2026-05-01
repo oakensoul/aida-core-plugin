@@ -6,6 +6,9 @@ description: Comprehensive guide to creating, structuring, and distributing Clau
 version: "1.0.0"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Plugin Development
 
 Plugins are the unit of distribution for Claude Code extensions. They package

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Plugin patcher for the update operation.
 
 Applies approved patches to a plugin directory with backup

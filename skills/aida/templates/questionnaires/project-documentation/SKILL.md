@@ -11,6 +11,9 @@ tags:
   - reference
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Project Documentation Skill
 
 This skill provides an organized index of project documentation, making it easy to find relevant docs without

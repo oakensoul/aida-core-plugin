@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """AIDA Utilities - Foundation module for AIDA installation scripts.
 
 This package provides common utilities for version checking, path resolution,

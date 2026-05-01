@@ -3,6 +3,9 @@ type: reference
 title: "Team Prompt for Issue #4: Plugin Config Discovery & Permissions Management"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Team Prompt for Issue #4: Plugin Config Discovery & Permissions Management
 
 ## How to Use

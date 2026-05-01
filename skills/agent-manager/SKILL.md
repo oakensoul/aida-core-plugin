@@ -13,6 +13,9 @@ tags:
   - agents
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Agent Manager
 
 Focused management interface for Claude Code agent (subagent)

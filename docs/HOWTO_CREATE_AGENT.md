@@ -5,6 +5,9 @@ description: "Step-by-step guide to creating custom Claude Code agents"
 audience: users
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # How to Create an Agent
 
 Agents are expert personas that Claude can become. Use them when you need specialized

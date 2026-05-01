@@ -4,6 +4,9 @@ title: "Project Configuration Facts"
 description: "All facts AIDA needs for project configuration, categorized by detection method"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Project Configuration Facts
 
 This document defines all facts AIDA needs for project configuration, categorized by detection method.

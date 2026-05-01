@@ -4,6 +4,9 @@ title: AIDA Troubleshooting Guide
 description: Common issues, root causes, and fixes for AIDA
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Troubleshooting Guide
 
 Common AIDA issues and how to resolve them.

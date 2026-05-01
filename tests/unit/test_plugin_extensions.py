@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Unit tests for plugin-manager extension CRUD operations.
 
 This test suite covers the plugin-manager extensions.py module,

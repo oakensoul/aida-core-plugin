@@ -8,6 +8,9 @@ description: >-
 version: 0.1.0
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Claude MD Workflow
 
 This document describes the workflow for managing

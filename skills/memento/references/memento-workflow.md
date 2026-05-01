@@ -4,6 +4,9 @@ title: Memento Workflow
 description: Step-by-step process for creating and managing mementos
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Memento Workflow
 
 This document describes the workflow for creating, updating, and managing

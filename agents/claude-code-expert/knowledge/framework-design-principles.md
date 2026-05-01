@@ -6,6 +6,9 @@ description: Architecture, quality standards, and design principles for Claude C
 version: "1.0.0"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Claude Code Extension Design Principles
 
 <!--

@@ -5,6 +5,9 @@ description: "Step-by-step guide to creating custom Claude Code skills"
 audience: users
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # How to Create a Skill
 
 Skills provide execution capabilities - scripts, templates, and reference materials that

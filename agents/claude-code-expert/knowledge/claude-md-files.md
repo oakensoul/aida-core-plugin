@@ -6,6 +6,9 @@ description: Understanding Claude Code memory files for persistent context and i
 version: "1.0.0"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # CLAUDE.md Memory Files
 
 CLAUDE.md files are **memory files** - persistent context that Claude loads at

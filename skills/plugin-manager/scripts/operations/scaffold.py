@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Plugin Scaffolding Operations - Two-Phase API
 
 Scaffolds a complete Claude Code plugin project as a new local git

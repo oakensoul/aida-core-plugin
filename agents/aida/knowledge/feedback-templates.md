@@ -4,6 +4,9 @@ title: Feedback Templates
 description: Templates for bug reports, feature requests, and feedback
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Feedback Templates
 
 How to structure issues for the AIDA repository.

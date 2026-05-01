@@ -4,6 +4,9 @@ title: Skill Create Workflow
 description: Step-by-step process for creating Claude Code skill definitions
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Skill Create Workflow
 
 This document describes the workflow for creating new Claude Code

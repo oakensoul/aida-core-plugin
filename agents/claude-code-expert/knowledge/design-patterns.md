@@ -6,6 +6,9 @@ description: Best practices and common patterns for Claude Code extensions
 version: "1.0.0"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Design Patterns
 
 This document covers best practices and common patterns for designing

@@ -3,6 +3,9 @@ type: reference
 title: "Team Prompt: Issue #3 - Move Memento Storage to User-Level"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Team Prompt: Issue #3 - Move Memento Storage to User-Level
 
 ## How to Use

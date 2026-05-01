@@ -6,6 +6,9 @@ date: 2026-02-24
 status: complete
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # User Perspective Analysis: Decomposing claude-code-management
 
 Evaluation of the proposed decomposition from the standpoint of real AIDA users

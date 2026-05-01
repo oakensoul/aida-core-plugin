@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Memento Management Script - Two-Phase API
 
 This script provides a two-phase API for managing mementos - persistent context

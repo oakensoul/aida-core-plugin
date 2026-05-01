@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Custom exception classes for AIDA.
 
 This module provides AIDA-specific exception classes for consistent error

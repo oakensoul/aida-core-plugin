@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Plugin discovery and configuration utilities.
 
 Scans installed plugins for configuration sections and generates

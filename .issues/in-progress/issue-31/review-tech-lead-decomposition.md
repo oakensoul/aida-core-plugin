@@ -15,6 +15,9 @@ severity_breakdown:
   test_gap: 3
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Tech Lead Code Review: Decomposition of claude-code-management
 
 ## Review Scope

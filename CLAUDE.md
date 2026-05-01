@@ -3,6 +3,9 @@ type: readme
 title: AIDA Core Plugin
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # AIDA Core Plugin
 
 Claude Code plugin providing smart configuration, GitHub integration, and context

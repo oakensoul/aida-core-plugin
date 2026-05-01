@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Template rendering utilities using Jinja2.
 
 This module provides template rendering functionality for AIDA skill generation,

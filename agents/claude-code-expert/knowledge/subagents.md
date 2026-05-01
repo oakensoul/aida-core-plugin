@@ -6,6 +6,9 @@ description: Comprehensive reference for creating and configuring subagents in C
 version: "1.0.0"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Claude Code Subagents
 
 Subagents are **specialized AI assistants** that handle specific types of tasks.

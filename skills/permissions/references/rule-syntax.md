@@ -4,6 +4,9 @@ title: Rule Syntax
 description: Permission rule format and wildcard documentation
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Permission Rule Syntax
 
 Claude Code permissions use a `Tool(command:args)` format to

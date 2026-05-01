@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 .PHONY: help build build-base build-all clean clean-all shell-% up down test-% test-all
 
 # Test result directory

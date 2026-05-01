@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """File operation utilities for AIDA.
 
 This module provides safe file operations with proper error handling,

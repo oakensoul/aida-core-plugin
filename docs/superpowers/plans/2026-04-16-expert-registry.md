@@ -3,6 +3,9 @@ type: documentation
 title: "Expert Registry Implementation Plan"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Expert Registry Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use

@@ -6,6 +6,9 @@ description: Catalog of knowledge documents for the claude-code-expert agent
 version: "1.0.0"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Knowledge Index
 
 This directory contains reference documentation for the claude-code-expert

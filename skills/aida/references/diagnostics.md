@@ -4,6 +4,9 @@ title: "Diagnostics Actions"
 description: "Handles /aida status, /aida doctor, and /aida upgrade commands"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Diagnostics Actions
 
 Handles `/aida status`, `/aida doctor`, and `/aida upgrade` commands.

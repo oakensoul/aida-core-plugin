@@ -6,6 +6,9 @@ description: >-
   composition in global and project config files.
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Expert Registry Schemas
 
 Reference for the data shapes used by the expert registry:

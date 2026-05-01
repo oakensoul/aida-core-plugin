@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Integration test for AIDA managed virtual environment bootstrap.
 
 Tests the real venv creation and dependency installation flow using

@@ -11,6 +11,9 @@ started: "2026-02-15"
 assignee: "@me"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Issue #3: Move memento storage from project-level to user-level
 
 **Status**: Completed (PR #10)

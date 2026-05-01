@@ -4,6 +4,9 @@ title: "Feedback Actions"
 description: "Handles /aida feedback, /aida bug, and /aida feature-request commands"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Feedback Actions
 
 Handles `/aida feedback`, `/aida bug`, and `/aida feature-request` commands.

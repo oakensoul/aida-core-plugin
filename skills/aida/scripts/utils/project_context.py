@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Split/merge helpers for the project-context YAML files.
 
 The project context lives in two files under `.claude/`:

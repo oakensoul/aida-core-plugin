@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Data models for the plugin update operation.
 
 Defines enums for file categories, merge strategies, and

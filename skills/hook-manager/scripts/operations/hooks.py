@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Hook operations for Claude Code hook management.
 
 Handles lifecycle hooks configured in settings.json files:

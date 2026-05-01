@@ -13,6 +13,9 @@ actual_effort: "3h"
 pr: 11
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Issue #4: Plugin configuration discovery and permissions management
 
 **Status**: Done

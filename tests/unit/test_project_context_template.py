@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Unit tests for the project-context SKILL.md.jinja2 template.
 
 Verifies that the rendered template produces clean markdown output

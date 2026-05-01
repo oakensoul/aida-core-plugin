@@ -7,6 +7,9 @@ description: >-
 version: 0.1.0
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # CLAUDE.md Best Practices
 
 This guide provides best practices for creating effective

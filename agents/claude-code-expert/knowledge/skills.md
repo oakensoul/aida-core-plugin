@@ -6,6 +6,9 @@ description: Comprehensive reference for creating and configuring skills in Clau
 version: "1.0.0"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Claude Code Skills
 
 Skills are **process definitions with execution capabilities** that extend what

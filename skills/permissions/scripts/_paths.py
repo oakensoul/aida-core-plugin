@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Path configuration for permissions scripts.
 
 Sets up sys.path so that shared utilities can be imported

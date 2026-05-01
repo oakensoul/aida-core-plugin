@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Path utilities for claude-md-manager scripts.
 
 Sets up paths so that operations can import from scripts/shared/.
