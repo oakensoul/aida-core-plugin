@@ -535,5 +535,53 @@ class TestPartialFailureResponse(unittest.TestCase):
             self.assertIsInstance(result["files_created"], list)
 
 
+class TestExecuteLicensesDirectory(unittest.TestCase):
+    """Test that LICENSES/<id>.txt is emitted for SPDX licenses but skipped for UNLICENSED."""
+
+    @patch.object(_scaffold_mod, "initialize_git", return_value=True)
+    @patch.object(_scaffold_mod, "create_initial_commit", return_value=True)
+    def test_writes_licenses_dir_for_spdx_license(self, mock_commit, mock_git):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = str(Path(tmp) / "spdx-plugin")
+            result = execute({
+                "plugin_name": "spdx-plugin",
+                "description": "An SPDX-licensed plugin for testing",
+                "license": "MIT",
+                "language": "python",
+                "target_directory": target,
+                "author_name": "Test",
+                "author_email": "test@test.com",
+            })
+            self.assertTrue(result["success"], result.get("message"))
+            target_path = Path(result["path"])
+            self.assertTrue(
+                (target_path / "LICENSES" / "MIT.txt").exists(),
+                "LICENSES/MIT.txt should exist for an MIT-licensed scaffold",
+            )
+
+    @patch.object(_scaffold_mod, "initialize_git", return_value=True)
+    @patch.object(_scaffold_mod, "create_initial_commit", return_value=True)
+    def test_skips_licenses_dir_for_unlicensed(self, mock_commit, mock_git):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = str(Path(tmp) / "proprietary-plugin")
+            result = execute({
+                "plugin_name": "proprietary-plugin",
+                "description": "A proprietary plugin for testing",
+                "license": "UNLICENSED",
+                "language": "python",
+                "target_directory": target,
+                "author_name": "Test",
+                "author_email": "test@test.com",
+            })
+            self.assertTrue(result["success"], result.get("message"))
+            target_path = Path(result["path"])
+            self.assertFalse(
+                (target_path / "LICENSES").exists(),
+                "LICENSES/ should not be emitted for UNLICENSED scaffolds",
+            )
+            # LICENSE at root still exists for GitHub display
+            self.assertTrue((target_path / "LICENSE").exists())
+
+
 if __name__ == "__main__":
     unittest.main()
