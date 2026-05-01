@@ -28,6 +28,10 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
+from shared.spdx import (
+    detect_spdx_from_plugin_path,
+    spdx_template_variables,
+)
 from shared.utils import (
     bump_version,
     detect_project_context,
@@ -396,6 +400,19 @@ def execute_extension_create(
         "tags": tags,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
+    # SPDX context resolution order, lowest priority first:
+    #   1. defaults from shared.spdx (aida-core's MPL-2.0 / collective)
+    #   2. detected from the target plugin's plugin.json — this is the
+    #      leverage point: when a downstream plugin author runs
+    #      `agent create --location plugin --plugin-path ~/their-plugin`,
+    #      the agent file picks up THEIR copyright + license, not aida-core's
+    #   3. caller-provided extra_vars
+    spdx_seed: dict[str, Any] = {}
+    if location == "plugin" and plugin_path:
+        spdx_seed.update(detect_spdx_from_plugin_path(plugin_path))
+    if extra_vars:
+        spdx_seed.update(extra_vars)
+    template_vars.update(spdx_template_variables(spdx_seed))
     if extra_vars:
         template_vars.update(extra_vars)
 

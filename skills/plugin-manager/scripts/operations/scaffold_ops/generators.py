@@ -7,10 +7,13 @@ Functions for creating directory structures, rendering templates,
 and initializing git repositories for new plugin projects.
 """
 
+from __future__ import annotations
+
 import subprocess
 from pathlib import Path
 from typing import Any
 
+from shared.spdx import render_spdx_blocks, resolve_spdx_context
 from shared.utils import render_template
 
 
@@ -88,7 +91,16 @@ def render_shared_files(
         "shared/frontmatter-schema.json.jinja2": (
             ".frontmatter-schema.json"
         ),
+        # Authoritative roster behind the collective copyright
+        # holder used in SPDX headers throughout the plugin.
+        "shared/authors.jinja2": "AUTHORS",
     }
+    # REUSE.toml only makes sense when the project has a real
+    # SPDX license — UNLICENSED (proprietary, all-rights-reserved)
+    # is not a valid SPDX identifier, so a REUSE.toml referencing
+    # it would just produce noise.
+    if variables.get("license_id") != "UNLICENSED":
+        shared_templates["shared/reuse-toml.jinja2"] = "REUSE.toml"
 
     created = []
     for template_name, output_path in (
@@ -202,6 +214,7 @@ def render_stub_agent(
     description: str,
     extension_templates_dir: Path,
     timestamp: str = "",
+    spdx_context: dict[str, str] | None = None,
 ) -> list[str]:
     """Render an agent stub using extension templates.
 
@@ -212,6 +225,9 @@ def render_stub_agent(
         extension_templates_dir: Path to agent extension
             templates directory
         timestamp: ISO 8601 timestamp
+        spdx_context: ``{year, copyright_holder, license_id}``
+            used to render SPDX headers in generated files. If
+            absent, defaults are computed via ``resolve_spdx_context``.
 
     Returns:
         List of created file paths (relative to target)
@@ -221,12 +237,17 @@ def render_stub_agent(
 
         timestamp = datetime.now(timezone.utc).isoformat()
 
+    spdx = resolve_spdx_context(spdx_context or {})
+    spdx_blocks = render_spdx_blocks(spdx)
+
     variables = {
         "name": name,
         "description": description,
         "version": "0.1.0",
         "tags": ["custom"],
         "timestamp": timestamp,
+        **spdx,
+        **spdx_blocks,
     }
 
     content = render_template(
@@ -241,18 +262,18 @@ def render_stub_agent(
     agent_file = agent_dir / f"{name}.md"
     agent_file.write_text(content)
 
-    # Create knowledge directory with index
+    # Create knowledge directory with a templated index. Rendered
+    # via render_template (not an f-string) so the SPDX header
+    # format stays in lock-step with the rest of the scaffolding.
     knowledge_dir = agent_dir / "knowledge"
     knowledge_dir.mkdir(parents=True, exist_ok=True)
 
-    index_file = knowledge_dir / "index.md"
-    index_content = (
-        f"---\ntype: reference\n"
-        f"title: {name} Knowledge Index\n---\n\n"
-        f"# {name.replace('-', ' ').title()} Knowledge\n\n"
-        "Add knowledge documents here.\n"
+    index_content = render_template(
+        extension_templates_dir,
+        "agent/knowledge-index.md.jinja2",
+        variables,
     )
-    index_file.write_text(index_content)
+    (knowledge_dir / "index.md").write_text(index_content)
 
     return [
         f"agents/{name}/{name}.md",

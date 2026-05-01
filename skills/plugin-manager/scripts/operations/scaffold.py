@@ -432,12 +432,26 @@ def execute(context: dict[str, Any]) -> dict[str, Any]:
             )
         )
 
-        # Write LICENSE file
+        # Write LICENSE + REUSE-required LICENSES/<id>.txt copy.
+        # LICENSE stays at repo root for GitHub display; the
+        # LICENSES directory is what `reuse lint` looks at.
         license_path = target / "LICENSE"
         license_path.write_text(license_text)
         all_files.append("LICENSE")
+        if license_id != "UNLICENSED":
+            licenses_dir = target / "LICENSES"
+            licenses_dir.mkdir(exist_ok=True)
+            (licenses_dir / f"{license_id}.txt").write_text(
+                license_text
+            )
+            all_files.append(f"LICENSES/{license_id}.txt")
 
         # Optional stubs
+        spdx_for_stubs = {
+            "year": variables["year"],
+            "copyright_holder": variables["copyright_holder"],
+            "license_id": variables["license_id"],
+        }
         if context.get("include_agent_stub"):
             stub_files = render_stub_agent(
                 target,
@@ -445,6 +459,7 @@ def execute(context: dict[str, Any]) -> dict[str, Any]:
                 variables["agent_stub_description"],
                 AGENT_TEMPLATES_DIR,
                 timestamp=variables["timestamp"],
+                spdx_context=spdx_for_stubs,
             )
             all_files.extend(stub_files)
 

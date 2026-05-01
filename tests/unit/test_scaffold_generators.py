@@ -96,6 +96,27 @@ class TestCreateDirectoryStructure(unittest.TestCase):
 
 class TestRenderSharedFiles(unittest.TestCase):
     """Test shared file rendering."""
+    # REUSE-IgnoreStart — assertions reference literal SPDX strings.
+
+    def _build_variables(self, **overrides):
+        from operations.shared import build_template_variables
+        context = {
+            "plugin_name": "test-plugin",
+            "description": "A test plugin for testing",
+            "version": "0.1.0",
+            "author_name": "Test Author",
+            "author_email": "test@example.com",
+            "license_id": "MIT",
+            "language": "python",
+            "python_version": "3.11",
+            "node_version": "20",
+            "keywords": "test",
+            "repository_url": "",
+            "include_agent_stub": False,
+            "include_skill_stub": False,
+        }
+        context.update(overrides)
+        return build_template_variables(context, "MIT License text here")
 
     def test_produces_expected_files(self):
         """Should render all shared template files."""
@@ -103,29 +124,9 @@ class TestRenderSharedFiles(unittest.TestCase):
             target = Path(tmp)
             target.mkdir(exist_ok=True)
 
-            variables = {
-                "plugin_name": "test-plugin",
-                "plugin_display_name": "Test Plugin",
-                "description": "A test plugin for testing",
-                "version": "0.1.0",
-                "author_name": "Test Author",
-                "author_email": "test@example.com",
-                "license_id": "MIT",
-                "license_text": "MIT License text here",
-                "year": "2026",
-                "language": "python",
-                "script_extension": ".py",
-                "python_version": "3.11",
-                "node_version": "20",
-                "keywords": ["test"],
-                "repository_url": "",
-                "include_agent_stub": False,
-                "include_skill_stub": False,
-                "timestamp": "2026-01-01T00:00:00+00:00",
-                "generator_version": "0.9.0",
-            }
-
-            created = render_shared_files(target, variables, TEMPLATES_DIR)
+            created = render_shared_files(
+                target, self._build_variables(), TEMPLATES_DIR
+            )
 
             expected_files = [
                 ".claude-plugin/plugin.json",
@@ -136,11 +137,89 @@ class TestRenderSharedFiles(unittest.TestCase):
                 ".markdownlint.json",
                 ".yamllint.yml",
                 ".frontmatter-schema.json",
+                "AUTHORS",
+                "REUSE.toml",
             ]
 
             for f in expected_files:
                 self.assertIn(f, created, f"Missing file: {f}")
                 self.assertTrue((target / f).exists(), f"File not created: {f}")
+
+    def test_emits_spdx_headers_in_markdown(self):
+        """Markdown files (README, CLAUDE.md) carry SPDX headers."""
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            render_shared_files(
+                target, self._build_variables(), TEMPLATES_DIR
+            )
+            for fname in ("README.md", "CLAUDE.md"):
+                content = (target / fname).read_text()
+                self.assertIn(
+                    "SPDX-FileCopyrightText: 2026", content,
+                    f"{fname} missing copyright header",
+                )
+                self.assertIn(
+                    "SPDX-License-Identifier: MIT", content,
+                    f"{fname} missing license header",
+                )
+
+    def test_emits_spdx_headers_in_yaml(self):
+        """yamllint config carries an SPDX header in hash style."""
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            render_shared_files(
+                target, self._build_variables(), TEMPLATES_DIR
+            )
+            content = (target / ".yamllint.yml").read_text()
+            self.assertIn("# SPDX-FileCopyrightText:", content)
+            self.assertIn("# SPDX-License-Identifier: MIT", content)
+
+    def test_authors_file_lists_initial_author(self):
+        """Generated AUTHORS file names the scaffolding author."""
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            render_shared_files(
+                target, self._build_variables(), TEMPLATES_DIR
+            )
+            content = (target / "AUTHORS").read_text()
+            self.assertIn("Test Author", content)
+            self.assertIn("test@example.com", content)
+
+    def test_reuse_toml_skips_json(self):
+        """REUSE.toml lists JSON in the skip-with-attribution annotations."""
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            render_shared_files(
+                target, self._build_variables(), TEMPLATES_DIR
+            )
+            content = (target / "REUSE.toml").read_text()
+            self.assertIn("**.json", content)
+            self.assertIn("MIT", content)
+
+    def test_unlicensed_skips_spdx_license_line(self):
+        """For UNLICENSED, copyright-text appears but license-id is suppressed."""
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            variables = self._build_variables(license_id="UNLICENSED")
+            render_shared_files(target, variables, TEMPLATES_DIR)
+            content = (target / "README.md").read_text()
+            self.assertIn("SPDX-FileCopyrightText:", content)
+            # UNLICENSED is not an SPDX identifier; skip the line.
+            self.assertNotIn(
+                "SPDX-License-Identifier: UNLICENSED", content,
+            )
+
+    def test_unlicensed_skips_reuse_toml(self):
+        """UNLICENSED has no SPDX id, so REUSE.toml would just emit noise."""
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            variables = self._build_variables(license_id="UNLICENSED")
+            created = render_shared_files(
+                target, variables, TEMPLATES_DIR
+            )
+            self.assertNotIn("REUSE.toml", created)
+            self.assertFalse((target / "REUSE.toml").exists())
+    # REUSE-IgnoreEnd
 
 
 class TestAssembleGitignore(unittest.TestCase):
