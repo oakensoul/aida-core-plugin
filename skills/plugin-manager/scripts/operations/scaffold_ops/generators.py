@@ -287,6 +287,7 @@ def render_stub_skill(
     language: str,
     extension_templates_dir: Path,
     timestamp: str = "",
+    spdx_context: dict[str, str] | None = None,
 ) -> list[str]:
     """Render a skill stub using extension templates.
 
@@ -298,6 +299,9 @@ def render_stub_skill(
         extension_templates_dir: Path to skill extension
             templates directory
         timestamp: ISO 8601 timestamp
+        spdx_context: ``{year, copyright_holder, license_id}``
+            used to render SPDX headers in generated files. If
+            absent, defaults are computed via ``resolve_spdx_context``.
 
     Returns:
         List of created file paths (relative to target)
@@ -311,6 +315,9 @@ def render_stub_skill(
         ".py" if language == "python" else ".ts"
     )
 
+    spdx = resolve_spdx_context(spdx_context or {})
+    spdx_blocks = render_spdx_blocks(spdx)
+
     variables = {
         "name": name,
         "description": description,
@@ -318,6 +325,8 @@ def render_stub_skill(
         "tags": ["custom"],
         "timestamp": timestamp,
         "script_extension": script_extension,
+        **spdx,
+        **spdx_blocks,
     }
 
     content = render_template(
