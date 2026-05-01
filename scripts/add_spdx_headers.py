@@ -17,11 +17,10 @@ Run from repo root::
 from __future__ import annotations
 
 import argparse
-import fnmatch
 import subprocess
 import sys
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 COPYRIGHT_HOLDER = "The AIDA Core Authors"
 LICENSE_ID = "MPL-2.0"
@@ -30,26 +29,23 @@ YEAR = "2026"
 # Substrings that indicate a header is already present.
 SENTINEL = "SPDX-License-Identifier"
 
-# fnmatch patterns evaluated against POSIX-style relative paths.
-# Files matching any of these are NOT touched. dep5 covers the licensing.
-SKIP_PATTERNS: tuple[str, ...] = (
-    # Skip list documented in CONTRIBUTING.md#licensing
+# Skip rules per CONTRIBUTING.md#licensing. We match by explicit
+# basename / suffix / path-prefix checks rather than glob patterns
+# because fnmatch's `*` matches `/` (so `*.json` and `**/*.json`
+# behave identically) and PurePath.match only learned proper `**`
+# semantics in Python 3.13. Explicit logic is cheaper than a custom
+# globber and clearer than relying on either quirk.
+_SKIP_BASENAMES: frozenset[str] = frozenset({
     "LICENSE",
     "AUTHORS",
     ".gitignore",
-    "**/.gitignore",
-    "**/.gitkeep",
-    # JSON has no comment syntax
-    "*.json",
-    "**/*.json",
-    "*.json.template",
-    "**/*.json.template",
-    # Test fixtures (sample-project trees simulate user repos)
-    "tests/fixtures/**",
-    "tests/integration/*/sample-project/**",
-    # Scaffolding templates — covered by dep5 so renderers control output
-    "**/*.jinja2",
-    "**/*.template",
+    ".gitkeep",
+})
+_SKIP_SUFFIXES: tuple[str, ...] = (
+    ".json",            # No comment syntax
+    ".json.template",   # JSON template — same constraint
+    ".jinja2",          # Scaffolding templates; REUSE.toml covers
+    ".template",        # Scaffolding templates; REUSE.toml covers
 )
 
 
@@ -67,7 +63,8 @@ HTML = CommentStyle(line_prefix="<!-- ", line_suffix=" -->")
 def comment_style_for(path: Path) -> CommentStyle | None:
     """Return the comment style for a path, or None if it should be skipped.
 
-    Caller must already have applied SKIP_PATTERNS.
+    Caller must already have applied ``should_skip`` to honor the
+    repo's skip list.
     """
     name = path.name
     suffix = path.suffix.lower()
@@ -86,7 +83,36 @@ def comment_style_for(path: Path) -> CommentStyle | None:
 
 
 def should_skip(rel_path: str) -> bool:
-    return any(fnmatch.fnmatch(rel_path, pat) for pat in SKIP_PATTERNS)
+    """Return True if this tracked file should not get an inline SPDX header.
+
+    REUSE.toml is responsible for licensing the skipped paths.
+    """
+    p = PurePosixPath(rel_path)
+    name = p.name
+
+    if name in _SKIP_BASENAMES:
+        return True
+    if any(name.endswith(suffix) for suffix in _SKIP_SUFFIXES):
+        return True
+
+    parts = p.parts
+    # LICENSES/<id>.txt — REUSE-required canonical license texts
+    if len(parts) >= 1 and parts[0] == "LICENSES":
+        return True
+    # tests/fixtures/** — fixture trees
+    if len(parts) >= 2 and parts[0] == "tests" and parts[1] == "fixtures":
+        return True
+    # tests/integration/<lang>/sample-project/** — fixtures simulating
+    # downstream user projects
+    if (
+        len(parts) >= 4
+        and parts[0] == "tests"
+        and parts[1] == "integration"
+        and parts[3] == "sample-project"
+    ):
+        return True
+
+    return False
 
 
 def render_header(style: CommentStyle) -> list[str]:

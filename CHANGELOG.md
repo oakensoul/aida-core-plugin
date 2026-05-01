@@ -119,6 +119,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.7] - 2026-04-30
+
+### Added
+
+- `AUTHORS` file at repo root listing substantive contributors. Per
+  the org-wide convention in
+  [.github/CONTRIBUTING.md](https://github.com/aida-core/.github/blob/main/CONTRIBUTING.md#licensing),
+  SPDX `SPDX-FileCopyrightText` headers attribute copyright to "The
+  AIDA Core Authors" — this file is the authoritative roster of who
+  that collective is. Substantive contributors are added on first
+  merged PR. Unblocks #72 and the org `.github-private` AUTHORS audit
+
+---
+
 ## [1.4.6] - 2026-04-28
 
 ### Added
