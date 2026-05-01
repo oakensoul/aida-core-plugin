@@ -6,7 +6,7 @@ SPDX-PackageComment = "Copyright is held by 'The AIDA Core Authors'; the roster 
 
 # JSON has no comment syntax, so it cannot carry an inline SPDX header.
 [[annotations]]
-path = ["**.json", "**/**.json"]
+path = "**.json"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 The AIDA Core Authors"
 SPDX-License-Identifier = "MPL-2.0"
