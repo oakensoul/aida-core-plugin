@@ -10,6 +10,8 @@ and update operations.
 from datetime import datetime, timezone
 from typing import Any
 
+from shared.spdx import render_spdx_blocks, resolve_spdx_context
+
 from .constants import GENERATOR_VERSION
 
 
@@ -69,6 +71,20 @@ def build_template_variables(
             list(keywords_raw) if keywords_raw else []
         )
 
+    # Compute SPDX context. Default copyright holder for scaffolded
+    # plugins is "The {Display Name} Authors" so the generated
+    # `AUTHORS` file is the authoritative roster — file headers
+    # stay stable as that file changes. Caller can override.
+    spdx_context = resolve_spdx_context({
+        "year": year,
+        "license_id": context.get("license_id"),
+        "copyright_holder": (
+            context.get("copyright_holder")
+            or f"The {plugin_display_name} Authors"
+        ),
+    })
+    spdx_blocks = render_spdx_blocks(spdx_context)
+
     return {
         "plugin_name": plugin_name,
         "plugin_display_name": plugin_display_name,
@@ -79,6 +95,8 @@ def build_template_variables(
         "license_id": context.get("license_id", "MIT"),
         "license_text": license_text,
         "year": year,
+        "copyright_holder": spdx_context["copyright_holder"],
+        **spdx_blocks,
         "language": language,
         "script_extension": script_extension,
         "python_version": _normalize_python_version(

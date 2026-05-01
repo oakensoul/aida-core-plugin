@@ -28,6 +28,7 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
+from shared.spdx import spdx_template_variables
 from shared.utils import (
     bump_version,
     detect_project_context,
@@ -396,6 +397,7 @@ def execute_extension_create(
         "tags": tags,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
+    template_vars.update(spdx_template_variables(extra_vars or {}))
     if extra_vars:
         template_vars.update(extra_vars)
 

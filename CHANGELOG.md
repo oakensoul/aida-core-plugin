@@ -13,7 +13,54 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.4.8] - 2026-04-30
+## [1.5.0] - 2026-04-30
+
+### Added
+
+- `scripts/shared/spdx.py` — shared helpers (`resolve_spdx_context`,
+  `render_spdx_blocks`, `spdx_template_variables`) used by all
+  scaffolding paths to compute the year, copyright holder, license
+  id, and pre-formatted comment blocks for Markdown / hash-style /
+  slash-style files. Single source of truth so scaffolded artifacts
+  carry consistent SPDX headers
+- `agent-manager` agent.md template and `plugin-manager`
+  scaffolding now emit SPDX `SPDX-FileCopyrightText` and
+  `SPDX-License-Identifier` headers in every generated artifact:
+  README, CLAUDE.md, AUTHORS, pyproject.toml / package.json
+  configs, ci.yml, vitest/eslint/index TS configs, conftest.py,
+  Makefile header, yamllint config, agent stubs, and knowledge
+  index. Plugins scaffolded after this change are REUSE compliant
+  out of the box. Refs #73
+- `plugin-manager` scaffolding additionally emits `AUTHORS`,
+  `REUSE.toml` (skip categories for JSON / lockfiles / dotfiles),
+  and `LICENSES/<id>.txt` (REUSE-required canonical license text)
+  for new plugins. Default copyright holder is
+  `The {Plugin Display Name} Authors` so file headers stay stable
+  as the AUTHORS roster changes
+- For UNLICENSED scaffolds, copyright text is still attributed but
+  the `SPDX-License-Identifier` line is suppressed (UNLICENSED is
+  not a valid SPDX identifier) and `REUSE.toml` is skipped — REUSE
+  compliance is not applicable to proprietary projects
+
+### Changed
+
+- `shared/extension_utils.execute_extension_create` now seeds
+  Jinja2 template variables with SPDX context (`year`,
+  `copyright_holder`, `license_id`, `spdx_md`, `spdx_hash`,
+  `spdx_slash`). Caller can override any of these via
+  `extra_vars`. Default holder is `The AIDA Core Authors` and
+  default license is `MPL-2.0` to match this repo
+- `plugin-manager`'s `build_template_variables` exposes the same
+  SPDX helpers under template variables so scaffold templates
+  splice in `{{ spdx_md }}` / `{{ spdx_hash }}` / `{{ spdx_slash }}`
+  rather than building lines themselves
+
+### Out of scope
+
+- `skill-manager`, `claude-md-manager`, and `hook-manager` create
+  flows are unchanged in this PR — that's the next PR on #73.
+  Plugins scaffolded with `include_skill_stub=True` will not yet
+  have an SPDX-headered `SKILL.md`
 
 ### Added
 
