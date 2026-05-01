@@ -6,6 +6,9 @@ description: >-
   agent definitions
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Agent Frontmatter Schema
 
 This document provides a complete reference for YAML

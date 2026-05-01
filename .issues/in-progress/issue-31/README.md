@@ -11,6 +11,9 @@ github_url: "https://github.com/oakensoul/aida-core-plugin/issues/31"
 assignee: "@me"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Issue #31: Decompose claude-code-management into entity-focused manager skills
 
 **Status**: In Progress

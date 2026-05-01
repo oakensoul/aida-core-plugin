@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 # AIDA Core Plugin Makefile
 # Run `make help` for available targets
 
@@ -6,7 +9,7 @@ PLUGIN_NAME := aida-core
 VENV := $(HOME)/.aida/venv
 VENV_BIN := $(VENV)/bin
 
-.PHONY: help dev-mode-enable dev-mode-disable dev-mode test lint lint-py lint-yaml lint-md lint-frontmatter lint-fix install clean \
+.PHONY: help dev-mode-enable dev-mode-disable dev-mode test lint lint-py lint-yaml lint-md lint-frontmatter lint-reuse lint-fix install clean \
         docker-build docker-build-base docker-build-all docker-shell-% docker-clean docker-clean-all \
         docker-test-% docker-test-all
 
@@ -60,7 +63,7 @@ docker-clean-all: ## Remove containers, volumes, and images
 	cd tests/integration && docker-compose down -v --rmi all
 
 # Linting
-lint: lint-py lint-yaml lint-md lint-frontmatter ## Run all linters (Python, YAML, Markdown, Frontmatter)
+lint: lint-py lint-yaml lint-md lint-frontmatter lint-reuse ## Run all linters (Python, YAML, Markdown, Frontmatter, REUSE)
 
 lint-py: ## Run ruff linter on Python files
 	$(VENV_BIN)/ruff check skills/ tests/ scripts/
@@ -73,6 +76,9 @@ lint-md: ## Run markdownlint on Markdown files
 
 lint-frontmatter: ## Validate frontmatter in SKILL.md files
 	$(VENV_BIN)/python3 scripts/validate_frontmatter.py
+
+lint-reuse: ## Verify REUSE / SPDX compliance (every file has copyright + license info)
+	$(VENV_BIN)/reuse lint
 
 lint-fix: ## Run ruff linter with auto-fix
 	$(VENV_BIN)/ruff check skills/ tests/ scripts/ --fix

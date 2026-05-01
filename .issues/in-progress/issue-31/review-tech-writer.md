@@ -8,6 +8,9 @@ status: "published"
 audience: "developers"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Technical Writer Review: Claude Code Expert Knowledge Files
 
 **Reviewer:** Technical Writer Agent

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Tests for expert-registry registry module (config I/O)."""
 
 import sys

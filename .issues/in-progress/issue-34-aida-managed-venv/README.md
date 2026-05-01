@@ -8,6 +8,9 @@ estimated_effort: 5
 github_url: "https://github.com/oakensoul/aida-core-plugin/issues/34"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Issue #34: AIDA-managed virtual environment for Python dependencies
 
 **Status**: In Progress

@@ -9,6 +9,9 @@ actual_effort: 2
 estimated_effort: 2
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Issue #13: Move config and recommendedPermissions from plugin.json to aida-config.json
 
 **Status**: Completed

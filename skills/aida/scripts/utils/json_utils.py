@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """JSON utilities for AIDA with security validation.
 
 This module provides safe JSON operations with size and depth validation

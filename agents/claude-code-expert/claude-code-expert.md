@@ -10,6 +10,9 @@ tags:
 model: sonnet
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Claude Code Expert
 
 You are an expert consultant on Claude Code extensions. You receive complete context

@@ -7,6 +7,9 @@ scope: functional validation of the 5 decomposed manager skills
 verdict: ready for PR with minor findings
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # End-User Validation: Decomposed Manager Skills
 
 Validation of the decomposition of the monolithic `claude-code-management`

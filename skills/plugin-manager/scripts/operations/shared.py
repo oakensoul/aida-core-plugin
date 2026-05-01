@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Shared helpers for plugin-manager operations.
 
 Provides template variable construction used by both scaffold

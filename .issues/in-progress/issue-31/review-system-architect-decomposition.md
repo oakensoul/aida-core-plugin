@@ -8,6 +8,9 @@ status: complete
 files-reviewed: 62
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # System Architect Review: Decomposition of claude-code-management
 
 ## Executive Summary

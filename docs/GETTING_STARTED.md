@@ -5,6 +5,9 @@ description: "Quick onboarding guide for new AIDA users"
 audience: users
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Getting Started with AIDA
 
 Go from zero to productive in under 10 minutes.

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """CLAUDE.md Manager - Two-Phase API Entry Point.
 
 Manages CLAUDE.md configuration files across project, user, and

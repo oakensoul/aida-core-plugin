@@ -10,6 +10,9 @@ author: claude-code-expert
 date: 2026-02-24
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Extension Framework Review: Issue #31
 
 ## Summary

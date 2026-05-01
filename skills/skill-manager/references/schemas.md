@@ -4,6 +4,9 @@ title: Skill Frontmatter Schema
 description: Reference for YAML frontmatter fields in Claude Code skill definitions
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Skill Frontmatter Schema
 
 This document provides a complete reference for YAML frontmatter

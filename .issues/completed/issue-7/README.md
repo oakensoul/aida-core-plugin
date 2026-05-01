@@ -7,6 +7,9 @@ created: "2026-02-15"
 completed: "2026-02-16"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Issue #7: Launch preparedness: documentation, marketing, and code quality review
 
 **Status**: OPEN

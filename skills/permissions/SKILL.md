@@ -12,6 +12,9 @@ tags:
   - configuration
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Permissions Skill
 
 Manages Claude Code permissions interactively by scanning installed

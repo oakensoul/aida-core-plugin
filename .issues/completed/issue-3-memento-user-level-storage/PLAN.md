@@ -3,6 +3,9 @@ type: reference
 title: "Plan: Move Memento Storage to User-Level (Issue #3)"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Plan: Move Memento Storage to User-Level (Issue #3)
 
 ## Context

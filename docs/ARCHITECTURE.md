@@ -5,6 +5,9 @@ description: "System architecture and design decisions for AIDA"
 audience: developers
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # AIDA Core Plugin - Architecture
 
 ## System architecture and design decisions for AIDA

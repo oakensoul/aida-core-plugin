@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Integration tests for plugin update end-to-end flow."""
 
 from __future__ import annotations

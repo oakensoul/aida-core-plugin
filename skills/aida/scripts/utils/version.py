@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Python version checking utilities for AIDA.
 
 This module provides functions to verify that the Python version meets

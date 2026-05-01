@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 FROM aida-test-base:latest
 
 WORKDIR /home/tester/projects/nodejs-test-project

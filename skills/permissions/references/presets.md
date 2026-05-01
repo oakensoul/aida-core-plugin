@@ -4,6 +4,9 @@ title: Permission Presets
 description: Pre-configured permission profiles for common use cases
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Permission Presets
 
 Presets provide quick permission configuration for common

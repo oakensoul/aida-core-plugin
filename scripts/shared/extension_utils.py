@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Shared extension utilities for manager skills.
 
 Provides parameterized functions that agent-manager, skill-manager,

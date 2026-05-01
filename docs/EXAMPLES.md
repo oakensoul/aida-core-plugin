@@ -5,6 +5,9 @@ description: "Real-world examples of using AIDA skills in different scenarios"
 audience: users
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # AIDA Examples
 
 Real-world examples of using AIDA skills in different scenarios.

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Shared parsing utilities for the update operation.
 
 Extracted from scanner.py and patcher.py to eliminate

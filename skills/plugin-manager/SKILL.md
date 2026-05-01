@@ -14,6 +14,9 @@ tags:
   - scaffolding
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Plugin Manager
 
 Unified plugin management skill that combines two capabilities:

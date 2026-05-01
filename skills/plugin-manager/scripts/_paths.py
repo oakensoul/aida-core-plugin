@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Path setup for plugin-manager scripts.
 
 Configures sys.path so that operations/ and scripts/shared/

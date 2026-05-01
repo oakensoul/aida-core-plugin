@@ -11,6 +11,9 @@ tags:
   - metadata
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Project Context Skill
 
 This skill provides comprehensive context about the current project, including its state, architecture, recent decisions,

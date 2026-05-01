@@ -9,6 +9,9 @@ date: 2026-02-24
 status: complete
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Tech Lead Review: Knowledge Base Updates
 
 **Scope:** 7 knowledge files for the `claude-code-expert` agent

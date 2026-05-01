@@ -4,6 +4,9 @@ title: Skill Validate Workflow
 description: Process for validating Claude Code skill definitions against schema rules
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Skill Validate Workflow
 
 This document describes the workflow for validating existing

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Unit tests for AIDA utils module.
 
 This test suite covers all functionality in the utils package including

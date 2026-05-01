@@ -4,6 +4,9 @@ title: "Config-Driven Configuration Approach"
 description: "Detect facts, save to config file with nulls, ask about gaps, and update"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Config-Driven Configuration Approach
 
 ## Overview

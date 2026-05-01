@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Shared utilities for CLAUDE.md management operations.
 
 Re-exports from scripts/shared/utils.py so that operation modules

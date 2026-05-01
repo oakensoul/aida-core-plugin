@@ -9,6 +9,9 @@ actual_effort: 4
 estimated_effort: 4
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Issue #19: Merge Commands into Skills - align with Anthropic's upstream changes
 
 **Status**: COMPLETED

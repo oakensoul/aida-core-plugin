@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Skill management operations for Claude Code.
 
 Handles create, validate, version, and list operations for skills.

@@ -17,6 +17,9 @@ test_suite: 688 passed, 0 failures
 lint: all checks passed (ruff, yamllint, markdownlint, frontmatter)
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Final Tech Lead Code Review: Backlog Items Addressed
 
 ## Review Scope

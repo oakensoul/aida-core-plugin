@@ -10,6 +10,9 @@ started: "2026-02-15"
 assignee: "@me"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Issue #5: Add project-level permissions for team workflows
 
 **Status**: In Progress

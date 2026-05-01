@@ -4,6 +4,9 @@ title: AIDA Expert Knowledge Index
 description: Catalog of knowledge documents for the aida agent
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Knowledge Index
 
 This directory contains reference documentation for the AIDA expert agent.

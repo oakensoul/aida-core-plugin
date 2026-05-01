@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Unit tests for agent discovery and CLAUDE.md routing generation.
 
 This test suite covers agent discovery from project, user, and

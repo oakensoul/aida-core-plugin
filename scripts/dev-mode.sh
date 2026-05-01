@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 # Switch Claude Code to use local development version
 
 PLUGIN_PATH="$(cd "$(dirname "$0")/.." && pwd)"

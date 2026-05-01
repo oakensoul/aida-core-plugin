@@ -16,6 +16,9 @@ sources:
   - research-user-perspective.md (shell-systems-ux-designer)
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Issue #31 Research Briefing
 
 ## Part 1: Executive Summary

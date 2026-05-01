@@ -11,6 +11,9 @@ date: 2026-02-24
 issue: "31"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Claude Code Expert Review: Decomposition of claude-code-management
 
 **Reviewer:** claude-code-expert (Extension Architecture)

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Integration test: discover_agents -> filter_experts_by_role -> resolve_active_experts.
 
 Exercises the full pipeline with real agent .md files on disk to verify

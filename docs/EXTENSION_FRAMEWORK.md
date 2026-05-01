@@ -4,6 +4,9 @@ title: Claude Code Extension Design Principles
 description: Architecture and quality standards for Claude Code extensions
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Claude Code Extension Design Principles
 
 This document defines the architecture and quality standards for Claude Code extensions.

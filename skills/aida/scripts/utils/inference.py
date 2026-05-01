@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Project context inference utilities for AIDA.
 
 This module provides functionality to analyze project files and infer

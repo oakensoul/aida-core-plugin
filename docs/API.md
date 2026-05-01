@@ -5,6 +5,9 @@ description: "Complete API documentation for AIDA Python utilities module"
 audience: developers
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # AIDA Core Plugin - API Reference
 
 ## Complete API documentation for AIDA Python utilities module

@@ -4,6 +4,9 @@ title: "Configuration Guide"
 audience: users
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # AIDA Configuration Guide
 
 Complete walkthrough for configuring AIDA for your projects

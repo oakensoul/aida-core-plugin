@@ -4,6 +4,9 @@ title: "C4 Container Diagram - AIDA Core Plugin"
 diagram-type: c4-container
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # C4 Container Diagram - AIDA Core Plugin
 
 **Container Level**: Internal structure of AIDA and its major components

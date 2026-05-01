@@ -4,6 +4,9 @@ title: "AIDA Core Plugin"
 description: "Foundation plugin for AIDA"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # AIDA Core Plugin
 
 > The foundation for building your custom Claude Code experience.

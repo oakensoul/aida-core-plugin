@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Validate YAML frontmatter in markdown files against a JSON schema.
 
 All markdown files must have frontmatter with a 'type' field that determines

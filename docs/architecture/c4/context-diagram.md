@@ -4,6 +4,9 @@ title: "C4 Context Diagram - AIDA Core Plugin"
 diagram-type: c4-context
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # C4 Context Diagram - AIDA Core Plugin
 
 **System Context**: How AIDA fits into the larger ecosystem

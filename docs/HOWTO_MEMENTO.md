@@ -5,6 +5,9 @@ description: "Step-by-step guide to saving and restoring session context"
 audience: users
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # How to Use Mementos
 
 Mementos are context snapshots that help you resume work after `/clear`, `/compact`,

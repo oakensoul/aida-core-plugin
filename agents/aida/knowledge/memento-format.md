@@ -4,6 +4,9 @@ title: Memento Format
 description: Structure and best practices for AIDA mementos
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Memento Format
 
 Mementos capture session context for later resumption. A good memento lets you

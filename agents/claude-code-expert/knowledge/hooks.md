@@ -6,6 +6,9 @@ description: Understanding hooks for deterministic control in Claude Code
 version: "1.0.0"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Claude Code Hooks
 
 Hooks are **user-defined handlers** that execute at specific points in Claude

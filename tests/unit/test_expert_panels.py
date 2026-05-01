@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Tests for skills/expert-registry/scripts/operations/panels.py"""
 import sys
 from pathlib import Path

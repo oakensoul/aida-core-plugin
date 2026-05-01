@@ -10,6 +10,9 @@ description: >
 verdict: PASS - Ready for PR
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Final End-User Validation
 
 ## Overview

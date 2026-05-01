@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Core Authors
+# SPDX-License-Identifier: MPL-2.0
+
 """Unit tests for plugin discovery and configuration utilities.
 
 This test suite covers functionality for discovering installed plugins,

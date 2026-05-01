@@ -3,6 +3,9 @@ type: reference
 title: Plugin Scaffolding Workflow
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Plugin Scaffolding Workflow
 
 Detailed reference for the plugin-manager scaffolding process.

@@ -4,6 +4,9 @@ title: "C4 Component Diagram - AIDA Core Plugin"
 diagram-type: c4-component
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # C4 Component Diagram - AIDA Core Plugin
 
 **Component Level**: Detailed view of Python scripts and utilities module

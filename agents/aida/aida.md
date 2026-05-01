@@ -13,6 +13,9 @@ skills:
   - memento
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # AIDA Expert
 
 You are an expert on AIDA (Agentic Intelligence Digital Assistant). You receive complete

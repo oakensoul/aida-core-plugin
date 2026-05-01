@@ -6,6 +6,9 @@ description: Understanding settings.json configuration for Claude Code behavior
 version: "1.0.0"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Claude Code Settings
 
 Claude Code uses `settings.json` files to configure behavior, permissions, and

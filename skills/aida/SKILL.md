@@ -13,6 +13,9 @@ allowed-tools: "*"
 argument-hint: "[command] [subcommand] [options]"
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # AIDA Dispatch
 
 Routes `/aida` commands to appropriate action handlers, managing AIDA's configuration,

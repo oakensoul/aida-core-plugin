@@ -5,6 +5,9 @@ description: "Step-by-step guide to using Claude Code hooks for automation"
 audience: users
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # How to Use Hooks
 
 Hooks are shell commands that run automatically at specific points in Claude Code's

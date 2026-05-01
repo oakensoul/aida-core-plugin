@@ -9,6 +9,9 @@ pr: 15
 actual_effort: 2
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Core Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Issue #12: Auto-generate agent routing directives in CLAUDE.md during config
 
 **Status**: COMPLETED
