@@ -13,6 +13,22 @@ All notable changes to AIDA Core Plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Plugins can register their own `/aida` commands.** A `commands`
+  block in `.claude-plugin/aida-config.json` maps an action name to a
+  skill, so a plugin no longer needs a hardcoded route in the dispatch
+  skill. `/aida prodoc generate` routes to the `prodoc` skill.
+- `skills/aida/scripts/commands.py` -- `--list` enumerates registered
+  commands, `--resolve <name>` maps one to its handling skill
+- `/aida help` appends a Plugin Commands section when any are registered
+- Reserved-name protection: a plugin cannot claim `config`, `status`,
+  `doctor`, or any other built-in action
+- Conflicting names resolve first-wins; malformed `commands` blocks are
+  skipped with a warning instead of breaking dispatch
+
 ## [1.5.35] - 2026-06-13
 
 ### Fixed
