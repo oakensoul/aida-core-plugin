@@ -13,6 +13,7 @@ import errno
 import glob
 import logging
 import os
+import re
 from pathlib import Path
 
 from .errors import ConfigurationError
@@ -25,6 +26,37 @@ logger = logging.getLogger(__name__)
 _MAX_FILE_SIZE = 1024 * 1024
 
 VALID_PREFERENCE_TYPES = {"boolean", "choice", "string"}
+
+# Command and operation names must be kebab-case. Plugin-supplied
+# strings are untrusted: they feed dispatch routing decisions, so
+# anything outside this shape is rejected rather than sanitized.
+_NAME_PATTERN = re.compile(r"^[a-z][a-z0-9-]{1,49}$")
+
+# Actions the /aida dispatch owns. A plugin may never claim one of
+# these -- otherwise installing a plugin could silently take over
+# `/aida config` or `/aida doctor`.
+RESERVED_COMMAND_NAMES = frozenset(
+    {
+        "about",
+        "agent",
+        "bug",
+        "claude",
+        "config",
+        "doctor",
+        "expert",
+        "feature-request",
+        "feedback",
+        "help",
+        "hook",
+        "knowledge",
+        "memento",
+        "permissions",
+        "plugin",
+        "skill",
+        "status",
+        "upgrade",
+    }
+)
 
 PREFERENCE_TYPE_MAP = {
     "boolean": "boolean",
@@ -234,6 +266,11 @@ def discover_installed_plugins() -> list[dict]:
                         else {}
                     ),
                     "dependencies": dependencies,
+                    "commands": (
+                        aida_config.get("commands", [])
+                        if aida_config
+                        else []
+                    ),
                     "recommendedPermissions": (
                         aida_config.get(
                             "recommendedPermissions", {}
@@ -265,6 +302,169 @@ def get_plugins_with_config(plugins: list[dict]) -> list[dict]:
         Filtered list of plugins with config sections.
     """
     return [p for p in plugins if p.get("config")]
+
+
+def get_plugins_with_commands(plugins: list[dict]) -> list[dict]:
+    """Filter plugins that declare a non-empty commands list.
+
+    Args:
+        plugins: List of plugin dicts from discover_installed_plugins.
+
+    Returns:
+        Filtered list of plugins that register commands.
+    """
+    return [p for p in plugins if p.get("commands")]
+
+
+def validate_plugin_commands(
+    commands: object, plugin_name: str
+) -> None:
+    """Validate a plugin's commands block.
+
+    Args:
+        commands: The ``commands`` value from aida-config.json.
+        plugin_name: Plugin name for error messages.
+
+    Raises:
+        ConfigurationError: If the commands block is invalid.
+    """
+    if not isinstance(commands, list):
+        raise ConfigurationError(
+            f"Plugin '{plugin_name}' 'commands' must be a list"
+        )
+
+    for i, command in enumerate(commands):
+        if not isinstance(command, dict):
+            raise ConfigurationError(
+                f"Plugin '{plugin_name}' command [{i}] "
+                "must be an object"
+            )
+
+        for req in ("name", "skill", "description"):
+            if req not in command:
+                raise ConfigurationError(
+                    f"Plugin '{plugin_name}' command [{i}] "
+                    f"missing required field: {req}"
+                )
+            if not isinstance(command[req], str):
+                raise ConfigurationError(
+                    f"Plugin '{plugin_name}' command [{i}] "
+                    f"'{req}' must be a string"
+                )
+
+        name = command["name"]
+        if not _NAME_PATTERN.match(name):
+            raise ConfigurationError(
+                f"Plugin '{plugin_name}' command [{i}] name "
+                f"'{name}' must be kebab-case (2-50 chars, "
+                "starting with a lowercase letter)"
+            )
+
+        if name in RESERVED_COMMAND_NAMES:
+            raise ConfigurationError(
+                f"Plugin '{plugin_name}' command [{i}] name "
+                f"'{name}' is reserved by the /aida dispatch"
+            )
+
+        if not _NAME_PATTERN.match(command["skill"]):
+            raise ConfigurationError(
+                f"Plugin '{plugin_name}' command [{i}] skill "
+                f"'{command['skill']}' must be kebab-case"
+            )
+
+        operations = command.get("operations", [])
+        if not isinstance(operations, list):
+            raise ConfigurationError(
+                f"Plugin '{plugin_name}' command [{i}] "
+                "'operations' must be a list"
+            )
+        for op in operations:
+            if not isinstance(op, str) or not _NAME_PATTERN.match(op):
+                raise ConfigurationError(
+                    f"Plugin '{plugin_name}' command [{i}] "
+                    f"operation '{op}' must be kebab-case"
+                )
+
+
+def collect_plugin_commands(plugins: list[dict]) -> list[dict]:
+    """Build the routing table of valid plugin-provided commands.
+
+    Plugins declaring an invalid commands block are skipped with a
+    warning rather than breaking dispatch for everyone else. When two
+    plugins claim the same command name the first wins, since silently
+    swapping which plugin handles a command would be worse than
+    ignoring the latecomer.
+
+    Args:
+        plugins: List of plugin dicts from discover_installed_plugins.
+
+    Returns:
+        List of route dicts with keys: name, skill, description,
+        operations, plugin.
+    """
+    routes: list[dict] = []
+    claimed: dict[str, str] = {}
+
+    for plugin in get_plugins_with_commands(plugins):
+        plugin_name = plugin.get("name", "unknown")
+        try:
+            validate_plugin_commands(
+                plugin["commands"], plugin_name
+            )
+        except ConfigurationError:
+            logger.warning(
+                "Skipping plugin with invalid commands: %s",
+                plugin_name,
+                exc_info=True,
+            )
+            continue
+
+        for command in plugin["commands"]:
+            name = command["name"]
+            if name in claimed:
+                logger.warning(
+                    "Command '%s' from plugin '%s' ignored: "
+                    "already provided by '%s'",
+                    name,
+                    plugin_name,
+                    claimed[name],
+                )
+                continue
+            claimed[name] = plugin_name
+            routes.append(
+                {
+                    "name": name,
+                    "skill": command["skill"],
+                    "description": command["description"],
+                    "operations": list(
+                        command.get("operations", [])
+                    ),
+                    "plugin": plugin_name,
+                }
+            )
+
+    return sorted(routes, key=lambda r: r["name"])
+
+
+def resolve_plugin_command(
+    name: str, plugins: list[dict]
+) -> dict | None:
+    """Look up the plugin route handling a command name.
+
+    Args:
+        name: Command name from the user's ``/aida <name> ...``.
+        plugins: List of plugin dicts from discover_installed_plugins.
+
+    Returns:
+        The matching route dict, or ``None`` when no plugin claims
+        the name (including every reserved built-in).
+    """
+    if name in RESERVED_COMMAND_NAMES:
+        return None
+    for route in collect_plugin_commands(plugins):
+        if route["name"] == name:
+            return route
+    return None
 
 
 def validate_plugin_config(config: dict, plugin_name: str) -> None:

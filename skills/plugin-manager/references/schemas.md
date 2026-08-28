@@ -138,6 +138,65 @@ All preference types accept an optional `required` boolean
 field (defaults to `false`) indicating whether the preference
 must be configured before the plugin is usable.
 
+### Commands Section
+
+Plugins can register their own `/aida` actions. The dispatch skill
+resolves an unrecognized action against installed plugins and hands
+off to the named skill:
+
+```json
+{
+  "commands": [
+    {
+      "name": "prodoc",
+      "skill": "prodoc",
+      "description": "Generate repository documentation",
+      "operations": ["generate", "update", "validate"]
+    }
+  ]
+}
+```
+
+`/aida prodoc generate` then routes to the `prodoc` skill.
+
+#### Command Fields
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `name` | string | Yes | Action name following `/aida` |
+| `skill` | string | Yes | Skill to invoke |
+| `description` | string | Yes | One-line help text |
+| `operations` | array | No | Subcommands, for help display |
+
+`name`, `skill`, and each entry of `operations` must be kebab-case:
+2-50 characters, starting with a lowercase letter.
+
+#### Reserved Names
+
+Built-in dispatch actions cannot be claimed by a plugin:
+
+```text
+about     agent      bug        claude    config
+doctor    expert     feedback   feature-request
+help      hook       knowledge  memento   permissions
+plugin    skill      status     upgrade
+```
+
+A plugin declaring a reserved name has its entire `commands` block
+rejected, so installing a plugin can never take over `/aida config`
+or any other built-in.
+
+#### Conflict and Error Handling
+
+| Situation | Behavior |
+| --- | --- |
+| Reserved name | Block rejected, warning logged |
+| Malformed block | Block rejected, warning logged |
+| Two plugins claim a name | First wins, second ignored with warning |
+
+An invalid block never breaks dispatch for other plugins -- it is
+skipped and the rest continue to resolve.
+
 ### Recommended Permissions Section
 
 Plugins can declare Claude Code permission recommendations:

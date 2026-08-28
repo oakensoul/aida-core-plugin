@@ -364,6 +364,55 @@ For `claude` commands:
 /aida claude list                    → claude-md-manager skill
 ```
 
+### Plugin-Provided Commands
+
+Installed plugins can register their own `/aida` actions. **This is the
+fallback: use it only when the action matches none of the built-in
+commands above.** Built-in routing always wins.
+
+**Process:**
+
+1. Resolve the action against installed plugins:
+
+   ```bash
+   python {base_directory}/scripts/commands.py --resolve <action>
+   ```
+
+2. On `{"found": true, ...}`, **invoke the skill named in the `skill`
+   field**, passing the remaining arguments unchanged.
+
+3. On `{"found": false, ...}`, the action is unknown. Show the returned
+   message, list `available` when non-empty, and point the user at
+   `/aida help`. Do not guess at a built-in command.
+
+**Examples:**
+
+```text
+/aida prodoc generate    → resolve 'prodoc' → prodoc skill (generate)
+/aida prodoc update      → resolve 'prodoc' → prodoc skill (update)
+/aida notacommand        → not found → show error + /aida help
+```
+
+Plugins declare commands in `.claude-plugin/aida-config.json`:
+
+```json
+{
+  "commands": [
+    {
+      "name": "prodoc",
+      "skill": "prodoc",
+      "description": "Generate repository documentation",
+      "operations": ["generate", "update", "validate"]
+    }
+  ]
+}
+```
+
+Reserved names (`config`, `status`, `doctor`, `agent`, `plugin`, ...)
+are rejected during discovery, so installing a plugin can never take
+over a built-in action. A plugin with a malformed `commands` block is
+skipped with a warning rather than breaking dispatch.
+
 ## Path Resolution
 
 **Base Directory:** Provided when skill loads via `<command-message>` tags containing the skill base directory.
@@ -378,6 +427,7 @@ For `claude` commands:
 {base_directory}/scripts/configure.py
 {base_directory}/scripts/install.py
 {base_directory}/scripts/feedback.py
+{base_directory}/scripts/commands.py
 ```
 
 **Reference Loading:** Reference files are located in `references/` subdirectory:
@@ -390,7 +440,19 @@ For `claude` commands:
 
 ## Help Text
 
-When displaying help (for `help` command or no arguments), show:
+When displaying help (for `help` command or no arguments), first check
+for plugin-registered commands:
+
+```bash
+python {base_directory}/scripts/commands.py --list
+```
+
+If `count` is greater than zero, append a `### Plugin Commands` section to
+the help text below, rendering one line per result as
+`` `/aida <name> [<op>|<op>]` - <description> ``. Omit the section entirely
+when no plugins register commands.
+
+Then show:
 
 ```markdown
 ## Available AIDA Commands
@@ -484,6 +546,7 @@ Executable Python scripts for AIDA operations:
 - **configure.py** - Interactive project configuration
 - **install.py** - Global installation setup
 - **feedback.py** - Submit feedback, bugs, and feature requests
+- **commands.py** - Discover and resolve plugin-provided /aida commands
 - **utils/** - Shared utilities (paths, files, version, questionnaire, etc.)
 
 ### references/
